@@ -198,6 +198,6 @@
 
     <div class="section center">
         <a class="btn waves-effect waves-light" href="http://matchhistory.na.leagueoflegends.com/en/#match-details/{{ $game->platform_id }}/{{ $game->game_id }}" target="_blank"><i class="mdi-action-assessment left"></i> Full Match Details</a>
-        <a class="btn waves-effect waves-light red" href="#"><i class="mdi-av-videocam left"></i> Watch Replay</a>
+        <a class="btn waves-effect waves-light red" href="{{ route('replay', [ LeagueHelper::getRegionByPlatformId($game->platform_id), $game->game_id ]) }}"><i class="mdi-av-videocam left"></i> Watch Replay</a>
     </div>
 @endsection
