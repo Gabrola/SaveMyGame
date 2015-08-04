@@ -1,0 +1,45 @@
+.summoner-icon {
+  @extend .circle;
+
+  width: 70px;
+  margin-right: 20px;
+}
+
+.summoner-name {
+  justify-content: center;
+}
+
+.match_info {
+  cursor: pointer;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  padding: 10px;
+  font-weight: bold;
+  color: #101010;
+  text-shadow: 1px 1px 4px #fff;
+  border: 1px solid #434442;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  max-width: 994px;
+  margin: 7px auto;
+}
+
+.winning {
+  background-color: rgba(0,255,0,0.7);
+}
+
+.losing {
+  background-color: rgba(255,0,0,0.7);
+}
+
+.match_info_part {
+  text-align: center;
+  padding: 5px 10px;
+}
+
+.match_info_part span[class^='lol-'] {
+  float: left;
+}

@@ -1,0 +1,28 @@
+[class^="lol-champion-"],
+[class^="lol-item-"],
+[class^="lol-summoner-"] {
+  width: 48px;
+  height: 48px;
+  display: block;
+  margin: 2px;
+}
+
+[class^="lol-small-champion-"],
+[class^="lol-small-item-"],
+[class^="lol-small-summoner-"] {
+  width: 36px;
+  height: 36px;
+  display: block;
+  margin: 2px;
+}
+
+[class^="lol-tiny-champion-"],
+[class^="lol-tiny-item-"],
+[class^="lol-tiny-summoner-"] {
+  width: 24px;
+  height: 24px;
+  display: block;
+  margin: 2px;
+}
+
+@import "sprites-generated";

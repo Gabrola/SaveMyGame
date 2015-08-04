@@ -1,0 +1,7 @@
+{
+  "name": "savemygame",
+  "dependencies": {
+    "jquery": "~2.1.4",
+    "materialize": "~0.97.0"
+  }
+}

@@ -1,0 +1,86 @@
+.game-entry {
+  display: flex;
+}
+
+.game-entry:not(:last-child) {
+  margin-bottom: 15px;
+}
+
+.game-entry.left-entry {
+  justify-content: flex-start;
+}
+
+.game-entry.right-entry {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.game-gold, .game-cs, .game-kda, .game-champion {
+  @extend .valign-wrapper;
+}
+
+.game-gold, .game-cs, .game-kda, .game-items, .game-spells, .game-champion {
+  margin: 0 7px;
+  float: left;
+  box-sizing: border-box;
+}
+
+.game-champion {
+  position: relative;
+
+  .game-champion-level {
+    position: absolute;
+    bottom: 3px;
+    left: 3px;
+    color: #fff;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    font-size: 13px;
+  }
+}
+
+.left-entry .game-champion {
+  margin-left: 0;
+}
+
+.right-entry .game-champion {
+  margin-right: 0;
+}
+
+.game-cs {
+  width: 55px;
+}
+
+.game-gold {
+  width: 67px;
+}
+
+.game-kda {
+  width: 125px;
+}
+
+.game-gold > span, .game-cs > span, .game-kda > span, .game-champion > span {
+  @extend .valign;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.game-gold > span span, .game-cs > span span, .game-kda > span span {
+  font-size: 12px;
+}
+
+.bans-left, .bans-right {
+  margin-bottom: 0;
+}
+
+.bans-left {
+  padding-left: 60px !important;
+}
+
+.bans-right {
+  padding-right: 60px !important;;
+}
+
+.bans-value {
+  height: 24px;
+  margin: 2px;
+}
