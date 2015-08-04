@@ -78,9 +78,12 @@ class CheckSummoners extends Command
 
                         $process = new Process($command, base_path());
                         $process->run();
+                        \Log::info($process->getErrorOutput());
+                        \Log::info($process->getExitCode());
+                        \Log::info($process->getExitCodeText());
                     }
                     catch(\Exception $e) {
-                        //\Log::error($e->getMessage());
+                        \Log::error($e->getMessage());
                     }
                 }
             }
