@@ -21,6 +21,7 @@ class CreateGamesTable extends Migration
             $table->smallInteger('start_game_chunk_id')->unsigned();
             $table->smallInteger('end_game_chunk_id')->unsigned();
             $table->smallInteger('interest_score')->unsigned();
+            $table->text('start_stats');
             $table->text('end_stats');
             $table->enum('status', ['not_downloaded', 'downloading', 'downloaded', 'failed']);
             $table->timestamps();
