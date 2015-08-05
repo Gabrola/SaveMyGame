@@ -8,9 +8,11 @@
             else
                 $(this)
                     .addClass('tooltipped')
-                    .attr('data-tooltip', $(this).attr('title'));
+                    .attr('data-tooltip', $(this).attr('title'))
+                    .removeAttr('title');
 
         }).promise().done(function(){
+            $('.material-tooltip').remove();
             $('.tooltipped').tooltip({delay: 0});
         });
     }
@@ -19,6 +21,7 @@
 
         $('.button-collapse').sideNav();
         $(".dropdown-button").dropdown({ belowOrigin: true, constrain_width: false });
+        $('.modal-trigger').leanModal();
 
         updateTooltips();
 
@@ -85,6 +88,30 @@
                 }
             });
         });
+
+        var $copyCommand = $('#copyCommand');
+
+        $copyCommand.on('click', function(event){
+            event.preventDefault();
+        });
+
+        ZeroClipboard.config( { swfPath: $copyCommand.data('zclip-path') } );
+        var clip = new ZeroClipboard($copyCommand);
+
+        clip.on("ready", function() {
+            $('#global-zeroclipboard-html-bridge').attr('title', 'Copy Command');
+            updateTooltips();
+
+            this.on("copy", function(event){
+                var clipboard = event.clipboardData;
+                clipboard.setData("text/plain", $('#commandText').val());
+            });
+
+            this.on("aftercopy", function(event) {
+                Materialize.toast('Command copied!', 2500);
+            });
+        });
+
 
     }); // end of document ready
 })(jQuery); // end of jQuery name space

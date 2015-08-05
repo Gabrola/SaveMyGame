@@ -17,10 +17,12 @@ elixir(function(mix) {
     mix.scripts([
         '../bower/jquery/dist/jquery.js',
         '../bower/materialize/dist/js/materialize.js',
+        '../bower/zeroclipboard/dist/ZeroClipboard.js',
         'app.js'
     ]);
 
     mix.version(["css/app.css", "js/all.js"]);
 
     mix.copy('resources/assets/bower/materialize/font', 'public/build/font');
+    mix.copy('resources/assets/bower/zeroclipboard/dist/ZeroClipboard.swf', 'public/build/js/ZeroClipboard.swf');
 });

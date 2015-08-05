@@ -12115,6 +12115,9 @@ label[for="summoner_name"] {
   -ms-flex: 1;
   flex: 1; }
 
+#toast-container {
+  z-index: 1003; }
+
 .summoner-icon {
   width: 70px;
   margin-right: 20px; }
@@ -12207,7 +12210,7 @@ label[for="summoner_name"] {
   width: 67px; }
 
 .game-kda {
-  width: 125px; }
+  width: 130px; }
 
 .game-gold > span, .game-cs > span, .game-kda > span, .game-champion > span {
   text-align: center;

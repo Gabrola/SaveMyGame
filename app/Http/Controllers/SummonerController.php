@@ -138,8 +138,14 @@ class SummonerController extends Controller
             }
         }
 
+        $command = sprintf('replay %s:80 %s %s %s', env('APP_DOMAIN', 'localhost'), $game->encryption_key, $game->game_id, $game->platform_id);
+        $binaryData = pack('VVVVA*', 16, 1, 0, strlen($command), $command);
+        $binaryArray = implode(',', unpack('C*', $binaryData));
+        $cmdCommand = sprintf(config('constants.batfile2'), $binaryArray);
+
         return view('game', [
-            'game' => $game
+            'game' => $game,
+            'command'   => $cmdCommand
         ]);
     }
 

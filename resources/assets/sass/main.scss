@@ -55,3 +55,7 @@ label[for="summoner_name"] {
 .flex-fill {
   flex: 1;
 }
+
+#toast-container {
+  z-index: 1003;
+}
