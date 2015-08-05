@@ -38,6 +38,19 @@ class Chunk extends \Eloquent
     public $timestamps = false;
 
     /**
+     * The attributes that should be casted to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'game_id' => 'integer',
+        'chunk_id' => 'integer',
+        'keyframe_id' => 'integer',
+        'next_chunk_id' => 'integer',
+        'duration' => 'integer',
+    ];
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function game()

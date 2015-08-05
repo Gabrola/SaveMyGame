@@ -50,6 +50,10 @@ class Game extends \Eloquent
     protected $casts = [
         'start_stats' => 'array',
         'end_stats' => 'array',
+        'game_id' => 'integer',
+        'end_startup_chunk_id' => 'integer',
+        'end_game_chunk_id' => 'integer',
+        'interest_score' => 'integer',
     ];
 
     /**
