@@ -8,12 +8,6 @@ main {
   flex: 1 0 auto;
 }
 
-main.page-index {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
 .top-nav-bar {
   @extend .light-blue, .darken-1;
 }

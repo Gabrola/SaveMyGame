@@ -12070,17 +12070,6 @@ main {
   -ms-flex: 1 0 auto;
   flex: 1 0 auto; }
 
-main.page-index {
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center; }
-
 .server-button {
   position: absolute;
   top: 0.1rem;
