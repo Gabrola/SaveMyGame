@@ -52,6 +52,7 @@ class Game extends \Eloquent
         'end_stats' => 'array',
         'game_id' => 'integer',
         'end_startup_chunk_id' => 'integer',
+        'start_game_chunk_id' => 'integer',
         'end_game_chunk_id' => 'integer',
         'interest_score' => 'integer',
     ];
