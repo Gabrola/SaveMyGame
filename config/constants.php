@@ -142,7 +142,7 @@ cd .\solutions\lol_game_client_sln\releases\
 FOR /f %%%%i in (\'dir /a:d /b\') do set RELEASE=%%%%i
 cd .\%%RELEASE%%\deploy
 
-@start "" "League of Legends.exe" "8394" "LoLLauncher.exe" "" "replay homestead.app:80 %s %d %s"
+@start "" "League of Legends.exe" "8394" "LoLLauncher.exe" "" "replay savemyga.me:80 %s %d %s"
 GOTO DONE
 
 :NOTFOUND
