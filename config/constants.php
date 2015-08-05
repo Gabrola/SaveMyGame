@@ -142,7 +142,7 @@ cd .\solutions\lol_game_client_sln\releases\
 FOR /f %%%%i in (\'dir /a:d /b\') do set RELEASE=%%%%i
 cd .\%%RELEASE%%\deploy
 
-@start "" "League of Legends.exe" "8394" "LoLLauncher.exe" "" "replay savemyga.me:80 %s %d %s"
+@start "" "League of Legends.exe" "8394" "LoLLauncher.exe" "" "replay %s:80 %s %d %s"
 GOTO DONE
 
 :NOTFOUND
@@ -151,5 +151,8 @@ echo Could not find League of Legends installation.
 @pause
 
 :DONE
-endlocal'
+endlocal',
+
+    'batfile2'  => '@echo off
+powershell clear;if(Get-Process \"LolClient\" -ErrorAction SilentlyContinue){$ErrorActionPreference=\"Stop\";$c=New-Object Net.Sockets.TcpClient;$c.Connect(\"127.0.0.1\",8393);$c.GetStream().write((%s),0,86);Exit;}\"Error. Please make sure your LoL client is running.\";',
 ];

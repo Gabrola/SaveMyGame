@@ -53,11 +53,33 @@ Route::get('replay/{region}-{matchId}.bat', ['as' => 'replay', function($region,
     if(is_null($game))
         abort(404);
 
-    $batFile = sprintf(config('constants.batfile'), $game->encryption_key, $game->game_id, $game->platform_id);
+    $batFile = sprintf(config('constants.batfile'), env('APP_DOMAIN', 'localhost'), $game->encryption_key, $game->game_id, $game->platform_id);
 
     return Response::make($batFile, '200', array(
         'Content-Type' => 'application/x-bat',
         'Content-Disposition' => 'attachment; filename="REPLAY_' . $game->platform_id . $game->game_id . '.bat"'
+    ));
+}]);
+
+Route::get('replay2/{region}-{matchId}.bat', ['as' => 'replay2', function($region, $matchId){
+
+    if(!$platformId = LeagueHelper::getPlatformIdByRegion($region))
+        abort(404);
+
+    /** @var \App\Models\Game $game */
+    $game = \App\Models\Game::byGame($platformId, $matchId)->first();
+
+    if(is_null($game))
+        abort(404);
+
+    $command = sprintf('replay %s:80 %s %s %s', env('APP_DOMAIN', 'localhost'), $game->encryption_key, $game->game_id, $game->platform_id);
+    $binaryData = pack('VVVVA*', 16, 1, 0, strlen($command), $command);
+    $binaryArray = implode(',', unpack('C*', $binaryData));
+    $batFile = sprintf(config('constants.batfile2'), $binaryArray);
+
+    return Response::make($batFile, '200', array(
+        'Content-Type' => 'application/x-bat',
+        'Content-Disposition' => 'attachment; filename="REPLAY2_' . $game->platform_id . $game->game_id . '.bat"'
     ));
 }]);
 
