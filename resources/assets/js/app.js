@@ -91,27 +91,28 @@
 
         var $copyCommand = $('#copyCommand');
 
-        $copyCommand.on('click', function(event){
-            event.preventDefault();
-        });
-
-        ZeroClipboard.config( { swfPath: $copyCommand.data('zclip-path') } );
-        var clip = new ZeroClipboard($copyCommand);
-
-        clip.on("ready", function() {
-            $('#global-zeroclipboard-html-bridge').attr('title', 'Copy Command');
-            updateTooltips();
-
-            this.on("copy", function(event){
-                var clipboard = event.clipboardData;
-                clipboard.setData("text/plain", $('#commandText').val());
+        if($copyCommand.length > 0) {
+            $copyCommand.on('click', function (event) {
+                event.preventDefault();
             });
 
-            this.on("aftercopy", function(event) {
-                Materialize.toast('Command copied!', 2500);
-            });
-        });
+            ZeroClipboard.config({swfPath: $copyCommand.data('zclip-path')});
+            var clip = new ZeroClipboard($copyCommand);
 
+            clip.on("ready", function () {
+                $('#global-zeroclipboard-html-bridge').attr('title', 'Copy Command');
+                updateTooltips();
+
+                this.on("copy", function (event) {
+                    var clipboard = event.clipboardData;
+                    clipboard.setData("text/plain", $('#commandText').val());
+                });
+
+                this.on("aftercopy", function (event) {
+                    Materialize.toast('Command copied!', 2500);
+                });
+            });
+        }
 
     }); // end of document ready
 })(jQuery); // end of jQuery name space
