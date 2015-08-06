@@ -3,4 +3,5 @@
 /.idea
 /public/js
 /public/css
+/config/clientversion.php
 .env

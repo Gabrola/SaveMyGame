@@ -14,7 +14,7 @@ return [
     */
 
     'files' => [
-        //
+        'app\Helpers\LeagueHelper.php'
     ],
 
     /*

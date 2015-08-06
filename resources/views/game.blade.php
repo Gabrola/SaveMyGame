@@ -202,6 +202,14 @@
         <a class="btn waves-effect waves-light red modal-trigger" href="#alternative-modal"><i class="mdi-av-videocam left"></i> Watch Replay (Alternative)</a>
     </div>
 
+    @if($game->end_stats)
+        @if(version_compare(config('clientversion'), $game->end_stats['matchVersion']) > 0)
+            <div class="card-panel red">
+                <span class="white-text">This match was recorded on an older patch. This replay will probably no longer work.</span>
+            </div>
+        @endif
+    @endif
+
     <!-- Modal Structure -->
     <div id="alternative-modal" class="modal">
         <div class="modal-content">

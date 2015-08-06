@@ -356,6 +356,15 @@ class DownloadReplay extends Command
 
             $summoner->games()->save($summonerGame);
         }
+
+        if($this->game->end_stats){
+            $currentVersion = config('clientversion', '0.0.0.0');
+            $replayVersion = $this->game->end_stats['matchVersion'];
+
+            if(version_compare($replayVersion, $currentVersion) > 0)
+                \File::put(config_path('clientversion.php'), '<?php return \'' . $replayVersion . '\';');
+        }
+
         if(is_null($this->game->end_stats) && $this->game->end_game_chunk_id > 0) {
             $this->game->end_stats = false;
             $this->game->save();
