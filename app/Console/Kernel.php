@@ -50,8 +50,10 @@ class Kernel extends ConsoleKernel
             \Artisan::call('replay:check', ['batch' => 4]);
         })->cron('4/5 * * * *')->name('check_summoners_4')->withoutOverlapping();
 
-        $schedule->call(function(){
-            \Artisan::call('replay:static');
-        })->daily();
+        if(\App::environment() == 'local') {
+            $schedule->call(function () {
+                \Artisan::call('replay:static');
+            })->daily();
+        }
     }
 }
