@@ -3,5 +3,5 @@
 @task('deploy', ['on' => 'production'])
 cd /var/www/savemyga.me
 git pull origin master
-php artisan migrate
+php artisan migrate --force
 @endtask
