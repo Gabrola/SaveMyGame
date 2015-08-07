@@ -36,7 +36,7 @@ class CheckSummoners extends Command
     {
         $batch = $this->argument('batch');
 
-        $monitoredUsers = MonitoredUser::whereRaw('id % 5 = ?', [$batch])->get();
+        $monitoredUsers = MonitoredUser::whereRaw('id % 5 = ?', [$batch])->whereConfirmed(true)->get();
 
         if($monitoredUsers->count() == 0)
             return;
