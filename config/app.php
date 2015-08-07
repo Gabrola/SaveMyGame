@@ -144,7 +144,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class
+        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
+        Greggilbert\Recaptcha\RecaptchaServiceProvider::class,
     ],
 
     /*
@@ -193,7 +194,8 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View'      => Illuminate\Support\Facades\View::class,
 
-        'LeagueHelper'    => App\Facades\LeagueHelper::class
+        'LeagueHelper'  => App\Facades\LeagueHelper::class,
+        'Recaptcha'     => Greggilbert\Recaptcha\Facades\Recaptcha::class,
     ],
 
 ];

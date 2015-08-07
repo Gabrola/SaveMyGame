@@ -21,9 +21,13 @@
 
         $('.button-collapse').sideNav();
         $(".dropdown-button").dropdown({ belowOrigin: true, constrain_width: false });
-        $('.modal-trigger').leanModal();
+        $('.modal-trigger:not(.disabled)').leanModal();
 
         updateTooltips();
+
+        $('a[href="#"], a.disabled').on('click', function(event){
+            event.preventDefault();
+        });
 
         $('.server-choice').on('click', function(event){
             event.preventDefault();
@@ -113,6 +117,48 @@
                 });
             });
         }
+
+        $('.record-form-submit').on('click', function(event){
+            event.preventDefault();
+
+            if($(this).hasClass('disabled'))
+                return;
+
+            $('#record-form').submit();
+        });
+
+        $('#record-form').on('submit', function(event){
+            event.preventDefault();
+
+            $('.record-form-submit').addClass('disabled')
+                .html('<i class="mdi mdi-navigation-refresh mdi-spin right"></i>Submit');
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'post',
+                dataType: 'json',
+                data: $(this).serialize(),
+                success: function(response){
+                    Materialize.toast('The email has been sent.', 5000);
+                    $('#email-modal').closeModal();
+                    $('.btn-floating.modal-trigger').addClass('disabled');
+                },
+                error: function(data){
+                    var errors = $.parseJSON(data.responseText);
+
+                    $.each(errors, function(index, value) {
+                        Materialize.toast('Error: ' + value.join(' '), 5000);
+                    });
+
+                    if(typeof grecaptcha != 'undefined'){
+                        grecaptcha.reset();
+                    }
+
+                    $('.record-form-submit').removeClass('disabled')
+                        .html('Submit');
+                }
+            });
+        });
 
     }); // end of document ready
 })(jQuery); // end of jQuery name space

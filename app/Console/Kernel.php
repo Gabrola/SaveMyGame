@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Models\MonitoredUser;
+use Carbon\Carbon;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\DB;
@@ -55,5 +56,10 @@ class Kernel extends ConsoleKernel
                 \Artisan::call('replay:static');
             })->daily();
         }
+
+        $schedule->call(function(){
+            $hourAgo = Carbon::now()->subHour()->toDateTimeString();
+            MonitoredUser::whereConfirmed(false)->where('created_at', '<=', $hourAgo)->delete();
+        })->hourly();
     }
 }

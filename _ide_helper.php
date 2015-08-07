@@ -1,7 +1,7 @@
 <?php
 /**
  * A helper file for Laravel 5, to provide autocomplete information to your IDE
- * Generated for Laravel 5.1.1 (LTS) on 2015-08-02.
+ * Generated for Laravel 5.1.1 (LTS) on 2015-08-07.
  *
  * @author Barry vd. Heuvel <barryvdh@gmail.com>
  * @see https://github.com/barryvdh/laravel-ide-helper
@@ -2184,11 +2184,11 @@ namespace {
          *
          * @param string $key
          * @param mixed $value
-         * @return int 
+         * @return int|bool 
          * @static 
          */
         public static function increment($key, $value = 1){
-            return \Illuminate\Cache\FileStore::increment($key, $value);
+            return \Illuminate\Cache\MemcachedStore::increment($key, $value);
         }
         
         /**
@@ -2196,11 +2196,11 @@ namespace {
          *
          * @param string $key
          * @param mixed $value
-         * @return int 
+         * @return int|bool 
          * @static 
          */
         public static function decrement($key, $value = 1){
-            return \Illuminate\Cache\FileStore::decrement($key, $value);
+            return \Illuminate\Cache\MemcachedStore::decrement($key, $value);
         }
         
         /**
@@ -2210,27 +2210,17 @@ namespace {
          * @static 
          */
         public static function flush(){
-            \Illuminate\Cache\FileStore::flush();
+            \Illuminate\Cache\MemcachedStore::flush();
         }
         
         /**
-         * Get the Filesystem instance.
+         * Get the underlying Memcached connection.
          *
-         * @return \Illuminate\Filesystem\Filesystem 
+         * @return \Memcached 
          * @static 
          */
-        public static function getFilesystem(){
-            return \Illuminate\Cache\FileStore::getFilesystem();
-        }
-        
-        /**
-         * Get the working directory of the cache.
-         *
-         * @return string 
-         * @static 
-         */
-        public static function getDirectory(){
-            return \Illuminate\Cache\FileStore::getDirectory();
+        public static function getMemcached(){
+            return \Illuminate\Cache\MemcachedStore::getMemcached();
         }
         
         /**
@@ -2240,7 +2230,31 @@ namespace {
          * @static 
          */
         public static function getPrefix(){
-            return \Illuminate\Cache\FileStore::getPrefix();
+            return \Illuminate\Cache\MemcachedStore::getPrefix();
+        }
+        
+        /**
+         * Begin executing a new tags operation.
+         *
+         * @param string $name
+         * @return \Illuminate\Cache\TaggedCache 
+         * @static 
+         */
+        public static function section($name){
+            //Method inherited from \Illuminate\Cache\TaggableStore            
+            return \Illuminate\Cache\MemcachedStore::section($name);
+        }
+        
+        /**
+         * Begin executing a new tags operation.
+         *
+         * @param array|mixed $names
+         * @return \Illuminate\Cache\TaggedCache 
+         * @static 
+         */
+        public static function tags($names){
+            //Method inherited from \Illuminate\Cache\TaggableStore            
+            return \Illuminate\Cache\MemcachedStore::tags($names);
         }
         
     }
@@ -11850,15 +11864,6 @@ namespace {
          */
         public static function regionExists($region){
             return \App\Helpers\LeagueHelper::regionExists($region);
-        }
-        
-        /**
-         * 
-         *
-         * @static 
-         */
-        public static function platformIdExists($platformId){
-            return \App\Helpers\LeagueHelper::platformIdExists($platformId);
         }
         
         /**

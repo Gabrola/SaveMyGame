@@ -3,6 +3,7 @@
 @task('deploy', ['on' => 'production'])
 cd /var/www/savemyga.me
 git pull origin master
+composer install
 php artisan migrate --force
 php artisan optimize
 php artisan route:cache

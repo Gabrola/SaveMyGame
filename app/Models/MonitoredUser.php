@@ -16,9 +16,24 @@ namespace App\Models;
  * @method static \Illuminate\Database\Query\Builder|\App\Models\MonitoredUser whereCreatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\MonitoredUser whereUpdatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\MonitoredUser bySummonerId($region, $summonerID)
+ * @property string $email
+ * @property string $confirmation_code
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\MonitoredUser whereEmail($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\MonitoredUser whereConfirmationCode($value)
+ * @property boolean $confirmed 
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\MonitoredUser whereConfirmed($value)
  */
 class MonitoredUser extends \Eloquent
 {
+    /**
+     * The attributes that should be casted to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'confirmed' => 'boolean',
+    ];
+
     /**
      * @param string$value
      * @return string

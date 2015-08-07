@@ -9,6 +9,7 @@ use App\Models\SummonerGame;
 use App\SummonerSearch;
 use Illuminate\Http\Request;
 use App\Http\Requests;
+use Mail;
 
 class SummonerController extends Controller
 {
@@ -29,7 +30,7 @@ class SummonerController extends Controller
                 ->withCookie(cookie()->forever('search_region', $summoner->region));
         }
 
-        return view('errors/summoner-404');
+        return view('errors/generic')->withErrors('Summoner does not exist.');
     }
 
     public function getIndex(Request $request, $region, $summonerName)
@@ -44,7 +45,7 @@ class SummonerController extends Controller
             if($request->ajax())
                 abort(404);
             else
-                return view('errors/summoner-404');
+                return view('errors/generic')->withErrors('Summoner does not exist.');
         }
 
         $summonerGames = $summoner->games()->orderBy('id', 'desc')->paginate(7);
@@ -103,7 +104,7 @@ class SummonerController extends Controller
         $summoner = Summoner::bySummonerId($region, $summonerId)->first();
 
         if(is_null($summoner))
-            return view('errors/summoner-404');
+            return view('errors/generic')->withErrors('Summoner does not exist.');
 
         return response()->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_name]);
     }
@@ -117,7 +118,7 @@ class SummonerController extends Controller
         $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
 
         if(is_null($game))
-            return view('errors/game-404');
+            return view('errors/generic')->withErrors('Game not found.');
 
         if(is_null($game->end_stats))
         {
@@ -149,8 +150,19 @@ class SummonerController extends Controller
         ]);
     }
 
-    public function getRecord(Request $request, $region, $summonerId)
+    public function postRecord(Request $request)
     {
+        $this->validate($request, [
+            'region'                    => 'required|region',
+            'summoner_id'               => 'required|integer',
+            'email'                     => 'required|email|unique:monitored_users',
+            'g-recaptcha-response'      => 'required|recaptcha'
+        ]);
+
+        $region = $request->input('region');
+        $summonerId = $request->input('summoner_id');
+        $email = $request->input('email');
+
         /** @var \App\Models\Summoner $summoner */
         $summoner = Summoner::bySummonerId($region, $summonerId)->first();
 
@@ -158,24 +170,62 @@ class SummonerController extends Controller
             if($request->ajax())
                 abort(404);
             else
-                return view('errors/summoner-404');
+                return view('errors/generic')->withErrors('Summoner does not exist.');
         }
 
         $monitoredUser = MonitoredUser::bySummonerId($region, $summonerId)->first();
 
-        if(is_null($monitoredUser)) {
-            $monitoredUser = new MonitoredUser();
-            $monitoredUser->region = $summoner->region;
-            $monitoredUser->summoner_id = $summoner->summoner_id;
-            $monitoredUser->save();
+        if(!is_null($monitoredUser)){
+            if($request->ajax())
+                return response()->json([
+                    'summoner'  => [ 'Summoner is already monitored' ]
+                ], 422);
+            else
+                return response()
+                    ->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_id])
+                    ->withErrors('Summoner is already monitored');
         }
+
+        $monitoredUser = new MonitoredUser();
+        $monitoredUser->region = $summoner->region;
+        $monitoredUser->summoner_id = $summoner->summoner_id;
+        $monitoredUser->email = $email;
+        $monitoredUser->confirmation_code = str_random(30);
+
+        Mail::send('email.verify', ['confirmation_code' => $monitoredUser->confirmation_code], function($message) use ($monitoredUser, $summoner){
+            $message->from('no-reply@savemyga.me', "SaveMyGa.me");
+            $message->to($monitoredUser->email, $summoner->summoner_name);
+            $message->subject('SaveMyGa.me Email Verification');
+        });
+
+        $monitoredUser->save();
 
         if($request->ajax()){
             return response()->json(true);
         } else {
             return response()->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_id])
-                ->with('message', 'Summoner games will be recorded automatically!')
+                ->with('message', 'The email has been sent.')
                 ->with('message-color', 'green');
         }
+    }
+
+    public function verify($confirmationCode)
+    {
+        /** @var \App\Models\MonitoredUser $monitoredUser */
+        $monitoredUser = MonitoredUser::whereConfirmationCode($confirmationCode)->first();
+
+        if(is_null($monitoredUser)){
+            return view('errors.generic')->withErrors('Invalid confirmation code');
+        }
+
+        $monitoredUser->confirmed = true;
+        $monitoredUser->save();
+
+        /** @var \App\Models\Summoner $summoner */
+        $summoner = Summoner::bySummonerId($monitoredUser->region, $monitoredUser->summoner_id)->first();
+
+        return response()->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_name])
+            ->with('message', 'Your summoner is now being monitored and all games will be recorded!')
+            ->with('message-color', 'green');
     }
 }
