@@ -5,3 +5,4 @@
 /public/css
 /config/clientversion.php
 .env
+_ide_helper.php
