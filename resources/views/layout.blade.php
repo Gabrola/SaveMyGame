@@ -50,8 +50,20 @@
             @if(Session::has('message'))
                 <div class="row">
                     <div class="col s12">
-                        <div class="card-panel {{ Session::get('message-color', 'teal') }}">
-                              <span class="white-text">{{ Session::get('message') }}</span>
+                        <div class="card-panel {{ Session::get('message_color', 'teal') }} white-text">{{ Session::get('message') }}</div>
+                    </div>
+                </div>
+            @endif
+
+            @if (count($errors) > 0)
+                <div class="row">
+                    <div class="col s12">
+                        <div class="card-panel red white-text">
+                            <ul class="error-list">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                            </ul>
                         </div>
                     </div>
                 </div>

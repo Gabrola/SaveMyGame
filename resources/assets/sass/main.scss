@@ -53,3 +53,13 @@ label[for="summoner_name"] {
 #toast-container {
   z-index: 1003;
 }
+
+ul.error-list {
+  margin: 0;
+  padding-left: 25px;
+  list-style-type: disc;
+
+  li {
+    list-style-type: disc;
+  }
+}

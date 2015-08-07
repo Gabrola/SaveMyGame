@@ -33,8 +33,7 @@
                             {{--*/ $participantData = $game->start_stats['participants'][$parIndex] /*--}}
                             <div class="game-entry left-entry">
                                 <div class="game-champion">
-                                    <span class="lol-champion-{{ $participant['championId']  }} img-roundshadow" title="{{ config('static.champions.' . $participant['championId']) }}"></span>
-                                    <span class="game-champion-level">{{ $participant['stats']['champLevel'] }}</span>
+                                    <span class="lol-champion-{{ $participant['championId']  }} img-roundshadow" title="{{ config('static.champions.' . $participant['championId']) }}"><span class="game-champion-level">{{ $participant['stats']['champLevel'] }}</span></span>
                                 </div>
                                 <div class="game-spells valign-wrapper">
                                     <div class="valign">
@@ -148,8 +147,7 @@
                                     </div>
                                 </div>
                                 <div class="game-champion">
-                                    <span class="lol-champion-{{ $participant['championId']  }} img-roundshadow" title="{{ config('static.champions.' . $participant['championId']) }}"></span>
-                                    <span class="game-champion-level">{{ $participant['stats']['champLevel'] }}</span>
+                                    <span class="lol-champion-{{ $participant['championId']  }} img-roundshadow" title="{{ config('static.champions.' . $participant['championId']) }}"><span class="game-champion-level">{{ $participant['stats']['champLevel'] }}</span></span>
                                 </div>
                             </div>
                         @endif

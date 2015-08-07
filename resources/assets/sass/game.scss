@@ -26,7 +26,10 @@
 }
 
 .game-champion {
-  position: relative;
+
+  > span {
+    position: relative;
+  }
 
   .game-champion-level {
     position: absolute;

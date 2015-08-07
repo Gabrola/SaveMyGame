@@ -10,6 +10,7 @@ use App\SummonerSearch;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use Mail;
+use Session;
 
 class SummonerController extends Controller
 {
@@ -30,7 +31,7 @@ class SummonerController extends Controller
                 ->withCookie(cookie()->forever('search_region', $summoner->region));
         }
 
-        return view('errors/generic')->withErrors('Summoner does not exist.');
+        return redirect()->route('index')->withErrors('Summoner does not exist.');
     }
 
     public function getIndex(Request $request, $region, $summonerName)
@@ -45,7 +46,7 @@ class SummonerController extends Controller
             if($request->ajax())
                 abort(404);
             else
-                return view('errors/generic')->withErrors('Summoner does not exist.');
+                return redirect()->route('index')->withErrors('Summoner does not exist.');
         }
 
         $summonerGames = $summoner->games()->orderBy('id', 'desc')->paginate(7);
@@ -104,7 +105,7 @@ class SummonerController extends Controller
         $summoner = Summoner::bySummonerId($region, $summonerId)->first();
 
         if(is_null($summoner))
-            return view('errors/generic')->withErrors('Summoner does not exist.');
+            return redirect()->route('index')->withErrors('Summoner does not exist.');
 
         return response()->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_name]);
     }
@@ -118,7 +119,7 @@ class SummonerController extends Controller
         $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
 
         if(is_null($game))
-            return view('errors/generic')->withErrors('Game not found.');
+            return redirect()->route('index')->withErrors('Game not found.');
 
         if(is_null($game->end_stats))
         {
@@ -170,7 +171,7 @@ class SummonerController extends Controller
             if($request->ajax())
                 abort(404);
             else
-                return view('errors/generic')->withErrors('Summoner does not exist.');
+                return redirect()->route('index')->withErrors('Summoner does not exist.');
         }
 
         $monitoredUser = MonitoredUser::bySummonerId($region, $summonerId)->first();
@@ -203,9 +204,10 @@ class SummonerController extends Controller
         if($request->ajax()){
             return response()->json(true);
         } else {
-            return response()->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_id])
-                ->with('message', 'The email has been sent.')
-                ->with('message-color', 'green');
+            Session::flash('message', 'The email has been sent.');
+            Session::flash('message_color', 'green');
+
+            return response()->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_id]);
         }
     }
 
@@ -215,7 +217,7 @@ class SummonerController extends Controller
         $monitoredUser = MonitoredUser::whereConfirmationCode($confirmationCode)->first();
 
         if(is_null($monitoredUser)){
-            return view('errors.generic')->withErrors('Invalid confirmation code');
+            return redirect()->route('index')->withErrors('Invalid confirmation code');
         }
 
         $monitoredUser->confirmed = true;
@@ -224,8 +226,9 @@ class SummonerController extends Controller
         /** @var \App\Models\Summoner $summoner */
         $summoner = Summoner::bySummonerId($monitoredUser->region, $monitoredUser->summoner_id)->first();
 
-        return response()->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_name])
-            ->with('message', 'Your summoner is now being monitored and all games will be recorded!')
-            ->with('message-color', 'green');
+        Session::flash('message', 'Your summoner is now being monitored and all games will be recorded!');
+        Session::flash('message_color', 'green');
+
+        return response()->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_name]);
     }
 }
