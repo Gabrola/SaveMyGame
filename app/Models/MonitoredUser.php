@@ -20,7 +20,7 @@ namespace App\Models;
  * @property string $confirmation_code
  * @method static \Illuminate\Database\Query\Builder|\App\Models\MonitoredUser whereEmail($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\MonitoredUser whereConfirmationCode($value)
- * @property boolean $confirmed 
+ * @property boolean $confirmed
  * @method static \Illuminate\Database\Query\Builder|\App\Models\MonitoredUser whereConfirmed($value)
  */
 class MonitoredUser extends \Eloquent

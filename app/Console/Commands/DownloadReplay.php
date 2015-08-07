@@ -2,7 +2,8 @@
 
 namespace App\Console\Commands;
 
-use \LeagueHelper;
+use App\Models\ClientVersion;
+use LeagueHelper;
 use App\Models\Summoner;
 use App\Models\SummonerGame;
 use Illuminate\Console\Command;
@@ -361,6 +362,8 @@ class DownloadReplay extends Command
             $currentVersion = config('clientversion', '0.0.0.0');
             $replayVersion = $this->game->end_stats['matchVersion'];
 
+            $this->SetReleaseVersion($replayVersion);
+
             if(version_compare($replayVersion, $currentVersion) > 0)
                 \File::put(config_path('clientversion.php'), '<?php return \'' . $replayVersion . '\';');
         }
@@ -369,6 +372,31 @@ class DownloadReplay extends Command
             $this->game->end_stats = false;
             $this->game->save();
         }
+    }
+
+    public function SetReleaseVersion($clientV)
+    {
+        if(ClientVersion::whereClientVersion($clientV)->count() > 0)
+            return;
+
+        $region = LeagueHelper::getRegionByPlatformId($this->game->platform_id);
+
+        if(!($releaseId = LeagueHelper::getReleaseIdByRegion($region)))
+            return;
+
+        $releaseListingUrl = 'http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_' . $releaseId;
+
+        try
+        {
+            $res = $this->client->get($releaseListingUrl);
+            $releaseListing = $res->getBody();
+            $releaseVersion = trim(strtok($releaseListing, "\n"));
+
+            $clientVersion = new ClientVersion;
+            $clientVersion->client_version = $clientV;
+            $clientVersion->release_version = $releaseVersion;
+            $clientVersion->save();
+        } catch(\Exception $e){}
     }
 
     /**

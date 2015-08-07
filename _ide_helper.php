@@ -11920,6 +11920,17 @@ namespace {
         /**
          * 
          *
+         * @param string $region
+         * @return string 
+         * @static 
+         */
+        public static function getReleaseIdByRegion($region){
+            return \App\Helpers\LeagueHelper::getReleaseIdByRegion($region);
+        }
+        
+        /**
+         * 
+         *
          * @param string $platformId
          * @return string 
          * @static 
@@ -11959,6 +11970,22 @@ namespace {
          */
         public static function getInternalName($summonerName){
             return \App\Helpers\LeagueHelper::getInternalName($summonerName);
+        }
+        
+    }
+
+
+    class Recaptcha extends \Greggilbert\Recaptcha\Facades\Recaptcha{
+        
+        /**
+         * Render the recaptcha
+         *
+         * @param array $options
+         * @return \Greggilbert\Recaptcha\view 
+         * @static 
+         */
+        public static function render($options = array()){
+            return \Greggilbert\Recaptcha\Recaptcha::render($options);
         }
         
     }

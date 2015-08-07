@@ -60,6 +60,6 @@ class Kernel extends ConsoleKernel
         $schedule->call(function(){
             $hourAgo = Carbon::now()->subHour()->toDateTimeString();
             MonitoredUser::whereConfirmed(false)->where('created_at', '<=', $hourAgo)->delete();
-        })->hourly();
+        })->everyFiveMinutes();
     }
 }

@@ -12,21 +12,24 @@ class LeagueHelper
             'domain'        => 'spectator.na.lol.riotgames.com:80',
             'platformId'    => 'NA1',
             'api'           => 'na.api.pvp.net',
-            'name'          => 'North America'
+            'name'          => 'North America',
+            'releaseId'     => 'NA'
         ],
 
         'EUW'    => [
             'domain'        => 'spectator.euw1.lol.riotgames.com:80',
             'platformId'    => 'EUW1',
             'api'           => 'euw.api.pvp.net',
-            'name'          => 'Europe West'
+            'name'          => 'Europe West',
+            'releaseId'     => 'EUW'
         ],
 
         'EUNE'    => [
             'domain'        => 'spectator.eu.lol.riotgames.com:8088',
             'platformId'    => 'EUN1',
             'api'           => 'eune.api.pvp.net',
-            'name'          => 'Europe Nordic & East'
+            'name'          => 'Europe Nordic & East',
+            'releaseId'     => 'EUNE'
         ],
 
         'KR'    => [
@@ -40,42 +43,48 @@ class LeagueHelper
             'domain'        => 'spectator.oc1.lol.riotgames.com:80',
             'platformId'    => 'OC1',
             'api'           => 'oce.api.pvp.net',
-            'name'          => 'Oceania'
+            'name'          => 'Oceania',
+            'releaseId'     => 'OC1'
         ],
 
         'BR'    => [
             'domain'        => 'spectator.br.lol.riotgames.com:80',
             'platformId'    => 'BR1',
             'api'           => 'br.api.pvp.net',
-            'name'          => 'Brazil'
+            'name'          => 'Brazil',
+            'releaseId'     => 'BR'
         ],
 
         'LAN'    => [
             'domain'        => 'spectator.la1.lol.riotgames.com:80',
             'platformId'    => 'LA1',
             'api'           => 'lan.api.pvp.net',
-            'name'          => 'Latin America North'
+            'name'          => 'Latin America North',
+            'releaseId'     => 'LA1'
         ],
 
         'LAS'    => [
             'domain'        => 'spectator.la2.lol.riotgames.com:80',
             'platformId'    => 'LA2',
             'api'           => 'las.api.pvp.net',
-            'name'          => 'Latin America South'
+            'name'          => 'Latin America South',
+            'releaseId'     => 'LA2'
         ],
 
         'RU'    => [
             'domain'        => 'spectator.ru.lol.riotgames.com:80',
             'platformId'    => 'RU',
             'api'           => 'ru.api.pvp.net',
-            'name'          => 'Russia'
+            'name'          => 'Russia',
+            'releaseId'     => 'RU'
         ],
 
         'TR'    => [
             'domain'        => 'spectator.tr.lol.riotgames.com:80',
             'platformId'    => 'TR1',
             'api'           => 'tr.api.pvp.net',
-            'name'          => 'Turkey'
+            'name'          => 'Turkey',
+            'releaseId'     => 'TR'
         ],
 
         /*'PBE'    => [
@@ -163,6 +172,21 @@ class LeagueHelper
 
         if(array_key_exists($region, $this->regions))
             return $this->regions[$region]['api'];
+
+        return false;
+    }
+
+    /**
+     * @param string $region
+     * @return string
+     */
+    public function getReleaseIdByRegion($region)
+    {
+        $region = strtoupper($region);
+
+        if(array_key_exists($region, $this->regions))
+            if(array_key_exists('releaseId', $this->regions[$region]))
+                return $this->regions[$region]['releaseId'];
 
         return false;
     }

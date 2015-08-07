@@ -19,7 +19,9 @@ Route::post('summoner/record', 'SummonerController@postRecord');
 Route::get('verify/{confirmationCode}', 'SummonerController@verify');
 Route::get('game/{region}/{gameId}', 'SummonerController@getGame');
 Route::get('faq', 'PageController@faq');
+Route::get('versions', 'PageController@versions');
 Route::get('replay/{region}-{matchId}.bat', ['uses' => 'PageController@replay', 'as' => 'replay'] );
+
 Route::group(['prefix' => 'observer-mode/rest/consumer'], function () {
     Route::get('version', 'SpectatorController@version');
     Route::get('getGameMetaData/{region}/{gameId}/{num}/token', 'SpectatorController@getGameMetaData');

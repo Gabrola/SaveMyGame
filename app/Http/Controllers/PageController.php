@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ClientVersion;
 use Illuminate\Http\Request;
 
 class PageController extends Controller
@@ -44,5 +45,21 @@ class PageController extends Controller
             'Content-Type' => 'application/x-bat',
             'Content-Disposition' => 'attachment; filename="REPLAY_' . $game->platform_id . $game->game_id . '.bat"'
         ));
+    }
+
+    public function versions()
+    {
+        $clientVersions = ClientVersion::all();
+        $listing = [];
+
+        /** @var \App\Models\ClientVersion $clientVersion */
+        foreach($clientVersions as $clientVersion)
+            $listing[] = $clientVersion->client_version . ':' . $clientVersion->release_version;
+
+        $output = implode("\n", $listing);
+
+        return response()->make($output, 200, [
+            'Content-Type' => 'text/plain'
+        ]);
     }
 }
