@@ -135,22 +135,22 @@ class SummonerController extends Controller
 
             /** @var \App\Models\Game $game */
             $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
-
-            if(is_null($game->end_stats))
-            {
-                $game->end_stats = false;
-                $game->save();
-            }
         }
 
         $command = sprintf('replay %s:80 %s %s %s', env('APP_DOMAIN', 'localhost'), $game->encryption_key, $game->game_id, $game->platform_id);
         $binaryData = pack('VVVVA*', 16, 1, 0, strlen($command), $command);
         $binaryArray = implode(',', unpack('C*', $binaryData));
-        $cmdCommand = sprintf(config('constants.batfile2'), $binaryArray);
+        $hexString = preg_replace_callback("/../", function($matched) {
+            return '\x' . $matched[0];
+        }, bin2hex($binaryData));
+
+        $windowsCommand = sprintf(config('constants.windowsCommand'), $binaryArray);
+        $macCommand = sprintf(config('constants.macCommand'), $hexString);
 
         return view('game', [
-            'game' => $game,
-            'command'   => $cmdCommand
+            'game'              => $game,
+            'windowsCommand'    => $windowsCommand,
+            'macCommand'        => $macCommand
         ]);
     }
 

@@ -197,8 +197,7 @@
 
         <div class="section center">
             <a class="btn waves-effect waves-light" href="http://matchhistory.na.leagueoflegends.com/en/#match-details/{{ $game->platform_id }}/{{ $game->game_id }}" target="_blank"><i class="mdi-action-assessment left"></i> Full Match Details</a>
-            <a class="btn waves-effect waves-light red" href="{{ route('replay', [ LeagueHelper::getRegionByPlatformId($game->platform_id), $game->game_id ]) }}"><i class="mdi-av-videocam left"></i> Watch Replay</a>
-            <a class="btn waves-effect waves-light red modal-trigger" href="#alternative-modal"><i class="mdi-av-videocam left"></i> Watch Replay (Alternative)</a>
+            <a class="btn waves-effect waves-light red modal-trigger" href="#alternative-modal"><i class="mdi-av-videocam left"></i> Watch Replay</a>
         </div>
 
         @if($game->end_stats)
@@ -213,14 +212,38 @@
         <div id="alternative-modal" class="modal">
             <div class="modal-content">
                 <h4>Watch Replay</h4>
-                <p>Open a command prompt, paste this into it and press enter. Make sure your League of Legends client is running.</p>
-                <div style="display: flex">
-                    <textarea id="commandText" rows="1" readonly style="height: auto; max-width: 690px; overflow: hidden; resize: none; border: 0; padding: 0; font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;" onclick="this.focus();this.select()">{{ $command }}</textarea>
-                    <i class="mdi-content-content-copy" id="copyCommand" data-zclip-path="{{ asset('build/js/ZeroClipboard.swf') }}" style="cursor: pointer; color: #039be5"></i>
-                </div>
+                <ul class="collapsible" data-collapsible="accordion">
+                    <li>
+                        <div class="collapsible-header">Windows Command</div>
+                        <div class="collapsible-body modal-collapse-body">
+                            <p>Open a command prompt, paste this into it and press enter. Make sure your League of Legends client is running.</p>
+                            <div style="display: flex">
+                                <textarea id="windowsCommand" rows="1" readonly class="command-area" onclick="this.focus();this.select()">{{ $windowsCommand }}</textarea>
+                                <i class="mdi-content-content-copy copy-button" data-copy-element="windowsCommand" data-zclip-path="{{ asset('build/js/ZeroClipboard.swf') }}"></i>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="collapsible-header">Windows Batch File</div>
+                        <div class="collapsible-body modal-collapse-body">
+                            <a class="btn waves-effect waves-light red" href="{{ route('replay', [ LeagueHelper::getRegionByPlatformId($game->platform_id), $game->game_id ]) }}"><i class="mdi-file-file-download left"></i> Download</a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="collapsible-header">Mac Command</div>
+                        <div class="collapsible-body modal-collapse-body">
+                            <p>Open a terminal window, paste this into it and press enter. Make sure your League of Legends client is running.</p>
+                            <div style="display: flex">
+                                <textarea id="macCommand" rows="1" readonly class="command-area" onclick="this.focus();this.select()">{{ $macCommand }}</textarea>
+                                <i class="mdi-content-content-copy copy-button" data-copy-element="macCommand" data-zclip-path="{{ asset('build/js/ZeroClipboard.swf') }}"></i>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
             </div>
             <div class="modal-footer">
-                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Okay</a>
+                <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat ">Close</a>
             </div>
         </div>
     @else

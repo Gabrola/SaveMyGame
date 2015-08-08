@@ -87,3 +87,27 @@
   height: 24px;
   margin: 2px;
 }
+
+.modal-collapse-body {
+  padding: 2rem;
+
+  p {
+    padding: 0;
+    margin-bottom: 10px;
+  }
+}
+
+.command-area {
+  height: auto;
+  max-width: 690px;
+  overflow: hidden;
+  resize: none;
+  border: 0;
+  padding: 0;
+  font-family: Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace;
+}
+
+.copy-button {
+  cursor: pointer;
+  color: #039be5;
+}

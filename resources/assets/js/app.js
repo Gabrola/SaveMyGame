@@ -93,13 +93,9 @@
             });
         });
 
-        var $copyCommand = $('#copyCommand');
+        var $copyCommand = $('.copy-button');
 
         if($copyCommand.length > 0) {
-            $copyCommand.on('click', function (event) {
-                event.preventDefault();
-            });
-
             ZeroClipboard.config({swfPath: $copyCommand.data('zclip-path')});
             var clip = new ZeroClipboard($copyCommand);
 
@@ -109,7 +105,8 @@
 
                 this.on("copy", function (event) {
                     var clipboard = event.clipboardData;
-                    clipboard.setData("text/plain", $('#commandText').val());
+                    var copyElement = $(event.target).data('copy-element');
+                    clipboard.setData("text/plain", $('#' + copyElement).val());
                 });
 
                 this.on("aftercopy", function (event) {
