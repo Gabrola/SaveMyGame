@@ -33,4 +33,8 @@
             </div>
         </div>
     </form>
+
+    <div class="row">
+        <div class="col offset-m1 m10"><p class="flow-text center">SaveMyGa.me is a service that will automatically record all of your League of Legends game replays without needing you to download or install any 3rd party applications!</p></div>
+    </div>
 @endsection

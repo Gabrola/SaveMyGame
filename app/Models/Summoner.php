@@ -25,6 +25,8 @@ namespace App\Models;
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner bySummonerId($region, $summonerID)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner byInternalName($region, $internalName)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner bySummonerName($region, $summonerName)
+ * @property integer $in_game_id 
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner whereInGameId($value)
  */
 class Summoner extends \Eloquent
 {

@@ -9,6 +9,15 @@
             {{ $summoner->summoner_name }}
         </h1>
     </div>
+
+    @if($inGame)
+        <div class="divider"></div>
+        <div class="section center-align" id="games-container">
+            <h3 class="center-align">Current Match <span class="red-text"><i class="mdi-image-lens rec-dot"></i> REC</span></h3>
+            @include('_in_game', ['game' => $inGameData])
+        </div>
+    @endif
+
     <div class="divider"></div>
     <div class="section center-align" id="games-container">
         <h3 class="center-align">Recent Matches</h3>

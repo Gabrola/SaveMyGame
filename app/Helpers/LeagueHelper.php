@@ -116,6 +116,22 @@ class LeagueHelper
         return array_key_exists(strtoupper($region), $this->regions);
     }
 
+    public function getPatchFromVersion($version)
+    {
+        if(str_contains($version, '.'))
+            return implode('.', array_slice(explode('.', $version), 0, 2));
+
+        return $version;
+    }
+
+    public function comparePatch($version1, $version2, $operator = '>')
+    {
+        $version1Patch = $this->getPatchFromVersion($version1);
+        $version2Patch = $this->getPatchFromVersion($version2);
+
+        return version_compare($version1Patch, $version2Patch, $operator);
+    }
+
     public function formatGold($gold)
     {
         if($gold < 1000)

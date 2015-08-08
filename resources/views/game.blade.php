@@ -192,34 +192,40 @@
         </div>
     @endif
 
-    <div class="divider"></div>
+    @if($game->status != 'deleted')
+        <div class="divider"></div>
 
-    <div class="section center">
-        <a class="btn waves-effect waves-light" href="http://matchhistory.na.leagueoflegends.com/en/#match-details/{{ $game->platform_id }}/{{ $game->game_id }}" target="_blank"><i class="mdi-action-assessment left"></i> Full Match Details</a>
-        <a class="btn waves-effect waves-light red" href="{{ route('replay', [ LeagueHelper::getRegionByPlatformId($game->platform_id), $game->game_id ]) }}"><i class="mdi-av-videocam left"></i> Watch Replay</a>
-        <a class="btn waves-effect waves-light red modal-trigger" href="#alternative-modal"><i class="mdi-av-videocam left"></i> Watch Replay (Alternative)</a>
-    </div>
+        <div class="section center">
+            <a class="btn waves-effect waves-light" href="http://matchhistory.na.leagueoflegends.com/en/#match-details/{{ $game->platform_id }}/{{ $game->game_id }}" target="_blank"><i class="mdi-action-assessment left"></i> Full Match Details</a>
+            <a class="btn waves-effect waves-light red" href="{{ route('replay', [ LeagueHelper::getRegionByPlatformId($game->platform_id), $game->game_id ]) }}"><i class="mdi-av-videocam left"></i> Watch Replay</a>
+            <a class="btn waves-effect waves-light red modal-trigger" href="#alternative-modal"><i class="mdi-av-videocam left"></i> Watch Replay (Alternative)</a>
+        </div>
 
-    @if($game->end_stats)
-        @if(version_compare(config('clientversion'), $game->end_stats['matchVersion']) > 0)
-            <div class="card-panel red">
-                <span class="white-text">This match was recorded on an older patch. This replay will probably no longer work.</span>
-            </div>
+        @if($game->end_stats)
+            @if(LeagueHelper::comparePatch(config('clientversion'), $game->end_stats['matchVersion']))
+                <div class="card-panel red">
+                    <span class="white-text">This match was recorded on an older patch. This replay will probably no longer work.</span>
+                </div>
+            @endif
         @endif
-    @endif
 
-    <!-- Modal Structure -->
-    <div id="alternative-modal" class="modal">
-        <div class="modal-content">
-            <h4>Watch Replay</h4>
-            <p>Open a command prompt, paste this into it and press enter. Make sure your League of Legends client is running.</p>
-            <div style="display: flex">
-                <textarea id="commandText" rows="1" readonly style="height: auto; max-width: 690px; overflow: hidden; resize: none; border: 0; padding: 0; font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;" onclick="this.focus();this.select()">{{ $command }}</textarea>
-                <i class="mdi-content-content-copy" id="copyCommand" data-zclip-path="{{ asset('build/js/ZeroClipboard.swf') }}" style="cursor: pointer; color: #039be5"></i>
+        <!-- Modal Structure -->
+        <div id="alternative-modal" class="modal">
+            <div class="modal-content">
+                <h4>Watch Replay</h4>
+                <p>Open a command prompt, paste this into it and press enter. Make sure your League of Legends client is running.</p>
+                <div style="display: flex">
+                    <textarea id="commandText" rows="1" readonly style="height: auto; max-width: 690px; overflow: hidden; resize: none; border: 0; padding: 0; font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;" onclick="this.focus();this.select()">{{ $command }}</textarea>
+                    <i class="mdi-content-content-copy" id="copyCommand" data-zclip-path="{{ asset('build/js/ZeroClipboard.swf') }}" style="cursor: pointer; color: #039be5"></i>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Okay</a>
             </div>
         </div>
-        <div class="modal-footer">
-            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Okay</a>
+    @else
+        <div class="card-panel red">
+            <span class="white-text">This game's replay has been deleted because it has been recorded on an older patch and is more than 7 days old.</span>
         </div>
-    </div>
+    @endif
 @endsection

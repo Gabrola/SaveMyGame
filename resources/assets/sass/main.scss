@@ -63,3 +63,8 @@ ul.error-list {
     list-style-type: disc;
   }
 }
+
+.center-align-children {
+  display: flex;
+  justify-content: center;
+}

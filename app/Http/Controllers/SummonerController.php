@@ -25,13 +25,8 @@ class SummonerController extends Controller
         if(!\LeagueHelper::regionExists($region))
             abort(404);
 
-        if($summoner = SummonerSearch::ByName($region, $summonerName))
-        {
-            return response()->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_name])
-                ->withCookie(cookie()->forever('search_region', $summoner->region));
-        }
-
-        return redirect()->route('index')->withErrors('Summoner does not exist.');
+        return response()->redirectToAction('SummonerController@getIndex', [$region, $summonerName])
+            ->withCookie(cookie()->forever('search_region', $region));
     }
 
     public function getIndex(Request $request, $region, $summonerName)
@@ -40,17 +35,14 @@ class SummonerController extends Controller
             abort(404);
 
         /** @var \App\Models\Summoner $summoner */
-        $summoner = Summoner::bySummonerName($region, $summonerName)->first();
-
-        if(is_null($summoner)) {
-            if($request->ajax())
+        if(!($summoner = SummonerSearch::ByName($region, $summonerName))) {
+            if ($request->ajax())
                 abort(404);
             else
                 return redirect()->route('index')->withErrors('Summoner does not exist.');
         }
 
         $summonerGames = $summoner->games()->orderBy('id', 'desc')->paginate(7);
-        $monitoredUserExists = MonitoredUser::bySummonerId($region, $summoner->summoner_id)->exists();
 
         $somethingChanged = false;
 
@@ -82,6 +74,15 @@ class SummonerController extends Controller
             return $this->getIndex($request, $region, $summonerName);
         }
 
+        $monitoredUserExists = MonitoredUser::bySummonerId($region, $summoner->summoner_id)->exists();
+        $inGame = $summoner->in_game_id != 0;
+
+        /** @var \App\Models\Game $inGameData */
+        $inGameData = $inGame ? Game::find($summoner->in_game_id) : null;
+
+        if($inGameData && $inGameData->status != 'downloading')
+            $inGame = false;
+
         if($request->ajax()){
             return view('_games', [
                 'summoner' => $summoner,
@@ -89,9 +90,11 @@ class SummonerController extends Controller
             ]);
         } else {
             return view('summoner', [
-                'summoner' => $summoner,
-                'games' => $summonerGames,
-                'is_monitored' => $monitoredUserExists
+                'summoner'      => $summoner,
+                'games'         => $summonerGames,
+                'is_monitored'  => $monitoredUserExists,
+                'inGame'        => $inGame,
+                'inGameData'    => $inGameData
             ]);
         }
     }

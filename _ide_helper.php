@@ -1,7 +1,7 @@
 <?php
 /**
  * A helper file for Laravel 5, to provide autocomplete information to your IDE
- * Generated for Laravel 5.1.1 (LTS) on 2015-08-07.
+ * Generated for Laravel 5.1.1 (LTS) on 2015-08-08.
  *
  * @author Barry vd. Heuvel <barryvdh@gmail.com>
  * @see https://github.com/barryvdh/laravel-ide-helper
@@ -11864,6 +11864,24 @@ namespace {
          */
         public static function regionExists($region){
             return \App\Helpers\LeagueHelper::regionExists($region);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function getPatchFromVersion($version){
+            return \App\Helpers\LeagueHelper::getPatchFromVersion($version);
+        }
+        
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function comparePatch($version1, $version2, $operator = '>'){
+            return \App\Helpers\LeagueHelper::comparePatch($version1, $version2, $operator);
         }
         
         /**

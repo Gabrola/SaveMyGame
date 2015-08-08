@@ -167,6 +167,8 @@ class DownloadReplay extends Command
         $endChunk = 0;
         $downloaded = false;
 
+        $this->ProcessStartGame();
+
         if($this->GetMetaData())
         {
             while($endChunk <= 0 || $chunkID < $endChunk)
@@ -280,6 +282,8 @@ class DownloadReplay extends Command
             $downloaded = true;
         }
 
+        $this->RemoveInGameStatus();
+
         if($endGameStats = $this->GetEndOfGameStats()){
             $this->game->end_stats = $endGameStats;
             $this->game->save();
@@ -289,7 +293,7 @@ class DownloadReplay extends Command
         return $downloaded;
     }
 
-    public function ProcessEndGame()
+    public function ProcessStartGame()
     {
         if(is_null($this->game->start_stats))
             return;
@@ -316,7 +320,59 @@ class DownloadReplay extends Command
                 $summoner->internal_summoner_name = \LeagueHelper::getInternalName($participant['summonerName']);
                 $summoner->summoner_name = $participant['summonerName'];
                 $summoner->profile_icon_id = $participant['profileIconId'];
+                $summoner->in_game_id = $this->game->id;
                 $summoner->touch();
+            } else {
+                $summoner->save();
+            }
+        }
+    }
+
+    public function RemoveInGameStatus()
+    {
+        $updateSummoner = strtolower($this->argument('updateSummoner'));
+
+        if(is_null($this->game->start_stats) || $updateSummoner != 'y')
+            return;
+
+        $region = LeagueHelper::getRegionByPlatformId($this->game->platform_id);
+
+        foreach($this->game->start_stats['participants'] as $participantId => $participant)
+        {
+            if($participant['bot'])
+                continue;
+
+            if($summoner = Summoner::bySummonerId($region, $participant['summonerId'])->first())
+            {
+                $summoner->in_game_id = 0;
+                $summoner->save();
+            }
+        }
+    }
+
+    public function ProcessEndGame()
+    {
+        if(is_null($this->game->start_stats))
+            return;
+
+        $region = LeagueHelper::getRegionByPlatformId($this->game->platform_id);
+
+        foreach($this->game->start_stats['participants'] as $participantId => $participant)
+        {
+            if($participant['bot'])
+                continue;
+
+            $summoner = Summoner::bySummonerId($region, $participant['summonerId'])->first();
+
+            if(is_null($summoner))
+            {
+                $summoner = new Summoner;
+                $summoner->region = $region;
+                $summoner->summoner_id = $participant['summonerId'];
+                $summoner->internal_summoner_name = \LeagueHelper::getInternalName($participant['summonerName']);
+                $summoner->summoner_name = $participant['summonerName'];
+                $summoner->profile_icon_id = $participant['profileIconId'];
+                $summoner->save();
             }
 
             $summonerGame = SummonerGame::whereRegion($region)->whereSummonerId($summoner->summoner_id)->whereGameId($this->game->game_id)->first();

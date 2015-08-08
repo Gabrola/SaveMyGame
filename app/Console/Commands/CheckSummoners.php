@@ -36,7 +36,7 @@ class CheckSummoners extends Command
     {
         $batch = $this->argument('batch');
 
-        $monitoredUsers = MonitoredUser::whereRaw('id % 5 = ?', [$batch])->whereConfirmed(true)->get();
+        $monitoredUsers = MonitoredUser::whereRaw('id % 3 = ?', [$batch])->whereConfirmed(true)->get();
 
         if($monitoredUsers->count() == 0)
             return;
@@ -78,9 +78,6 @@ class CheckSummoners extends Command
 
                         $process = new Process($command, base_path());
                         $process->run();
-                        \Log::info($process->getErrorOutput());
-                        \Log::info($process->getExitCode());
-                        \Log::info($process->getExitCodeText());
                     }
                     catch(\Exception $e) {
                         \Log::error($e->getMessage());
