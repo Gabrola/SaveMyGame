@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\ClientVersion;
+use GuzzleHttp\Exception\ClientException;
 use LeagueHelper;
 use App\Models\Summoner;
 use App\Models\SummonerGame;
@@ -46,6 +47,11 @@ class DownloadReplay extends Command
      * @var array
      */
     private $downloadedChunks = [];
+
+    /**
+     * @var bool
+     */
+    private $endGameStatsFailed = false;
 
     /**
      * @return bool
@@ -154,6 +160,10 @@ class DownloadReplay extends Command
             if($res->getStatusCode() == 200) {
                 return json_decode($res->getBody(), true);
             }
+        }
+        catch (ClientException $e) {
+            if($e->getResponse()->getStatusCode() == 429)
+                $this->endGameStatsFailed = true;
         }
         catch(\Exception $e){}
 
@@ -405,7 +415,7 @@ class DownloadReplay extends Command
                 $summonerGame->queue_type = config('constants.queueIdToType.' . (isset($this->game->start_stats['gameQueueConfigId']) ? $this->game->start_stats['gameQueueConfigId'] : 0));
                 $summonerGame->match_time = round($this->game->start_stats['gameStartTime'] / 1000);
 
-                if($this->game->end_game_chunk_id > 0)
+                if($this->game->end_game_chunk_id > 0 && !$this->endGameStatsFailed)
                 {
                     $summonerGame->stats = false;
                 }
@@ -424,7 +434,7 @@ class DownloadReplay extends Command
                 \File::put(config_path('clientversion.php'), '<?php return \'' . $replayVersion . '\';');
         }
 
-        if(is_null($this->game->end_stats) && $this->game->end_game_chunk_id > 0) {
+        if(is_null($this->game->end_stats) && $this->game->end_game_chunk_id > 0 && !$this->endGameStatsFailed) {
             $this->game->end_stats = false;
             $this->game->save();
         }
