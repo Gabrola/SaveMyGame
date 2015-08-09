@@ -7,6 +7,7 @@ use App\Models\Game;
 use App\Models\Keyframe;
 use App\Models\MonitoredUser;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use LeagueHelper;
@@ -56,6 +57,38 @@ class Kernel extends ConsoleKernel
             $hourAgo = Carbon::now()->subHour()->toDateTimeString();
             MonitoredUser::whereConfirmed(false)->where('created_at', '<=', $hourAgo)->delete();
         })->everyFiveMinutes();
+
+        $schedule->call(function(){
+            $unconfirmedMonitoredUsers = MonitoredUser::whereConfirmed(false)->whereEmail(null)->get();
+
+            $client = new Client;
+
+            /** @var \App\Models\MonitoredUser $monitoredUser */
+            foreach($unconfirmedMonitoredUsers as $monitoredUser) {
+                $requestUrl = 'https://' . LeagueHelper::getApiByRegion($monitoredUser->region) . '/api/lol/' .
+                    strtolower($monitoredUser->region) . '/v1.4/summoner/' .
+                    $monitoredUser->summoner_id . '/runes?api_key=' . env('RIOT_API_KEY');
+
+                try {
+                    $res = $client->get($requestUrl);
+                    $json = json_decode($res->getBody(), true);
+
+                    $summonerId = strval($monitoredUser->summoner_id);
+
+                    if(array_key_exists($summonerId, $json)) {
+                        $pages = $json[$summonerId]['pages'];
+
+                        foreach($pages as $runePage){
+                            if(str_contains($runePage['name'], $monitoredUser->confirmation_code)){
+                                $monitoredUser->confirmed = true;
+                                $monitoredUser->save();
+                                break;
+                            }
+                        }
+                    }
+                } catch (\Exception $e){}
+            }
+        })->everyMinute();
 
         if(app()->environment() == 'production')
         {

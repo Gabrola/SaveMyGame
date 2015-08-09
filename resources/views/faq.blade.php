@@ -24,13 +24,5 @@
                     regardless of how much time has passed. This is done because replays take up too much space on our servers, in addition to replays almost always not working on later patches of the game.
                     Game stats will be saved forever though, only the replay data will be deleted.</p></div>
         </li>
-        <li>
-            <div class="collapsible-header">Why do you need my email to use your service?</div>
-            <div class="collapsible-body"><p>The only reason we need to verify your email is to prevent people from abusing our service.</p></div>
-        <li>
-            <div class="collapsible-header">I didn't get the email/I typed in the wrong email.</div>
-            <div class="collapsible-body"><p>Any requests that are not confirmed within 1 hour are deleted and the record button will be enabled again on the summoner page.<br>
-                If you are sure you typed your email correctly and you did not receive your email, please make sure your inbox is not full and are able to receive emails from other people.</p></div>
-        </li>
     </ul>
 @endsection

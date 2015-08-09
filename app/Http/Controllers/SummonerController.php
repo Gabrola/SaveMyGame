@@ -74,7 +74,12 @@ class SummonerController extends Controller
             return $this->getIndex($request, $region, $summonerName);
         }
 
-        $monitoredUserExists = MonitoredUser::bySummonerId($region, $summoner->summoner_id)->exists();
+        $isMonitored = false;
+
+        /** @var \App\Models\MonitoredUser $monitoredUser */
+        if($monitoredUser = MonitoredUser::bySummonerId($region, $summoner->summoner_id)->first())
+            $isMonitored = $monitoredUser->confirmed;
+
         $inGame = $summoner->in_game_id != 0;
 
         /** @var \App\Models\Game $inGameData */
@@ -92,7 +97,8 @@ class SummonerController extends Controller
             return view('summoner', [
                 'summoner'      => $summoner,
                 'games'         => $summonerGames,
-                'is_monitored'  => $monitoredUserExists,
+                'isMonitored'   => $isMonitored,
+                'monitoredUser' => $monitoredUser,
                 'inGame'        => $inGame,
                 'inGameData'    => $inGameData
             ]);
@@ -159,13 +165,11 @@ class SummonerController extends Controller
         $this->validate($request, [
             'region'                    => 'required|region',
             'summoner_id'               => 'required|integer',
-            'email'                     => 'required|email|unique:monitored_users',
             'g-recaptcha-response'      => 'required|recaptcha'
         ]);
 
         $region = $request->input('region');
         $summonerId = $request->input('summoner_id');
-        $email = $request->input('email');
 
         /** @var \App\Models\Summoner $summoner */
         $summoner = Summoner::bySummonerId($region, $summonerId)->first();
@@ -193,21 +197,13 @@ class SummonerController extends Controller
         $monitoredUser = new MonitoredUser();
         $monitoredUser->region = $summoner->region;
         $monitoredUser->summoner_id = $summoner->summoner_id;
-        $monitoredUser->email = $email;
-        $monitoredUser->confirmation_code = str_random(30);
-
-        Mail::send('email.verify', ['confirmation_code' => $monitoredUser->confirmation_code], function($message) use ($monitoredUser, $summoner){
-            $message->from('no-reply@savemyga.me', "SaveMyGa.me");
-            $message->to($monitoredUser->email, $summoner->summoner_name);
-            $message->subject('SaveMyGa.me Email Verification');
-        });
-
+        $monitoredUser->confirmation_code = str_random(10);
         $monitoredUser->save();
 
         if($request->ajax()){
-            return response()->json(true);
+            return response()->json([ 'code' => $monitoredUser->confirmation_code ]);
         } else {
-            Session::flash('message', 'The email has been sent.');
+            Session::flash('message', 'Please change one of your rune page names to <strong>'.$monitoredUser->confirmation_code.'</strong>.');
             Session::flash('message_color', 'green');
 
             return response()->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_id]);
@@ -219,7 +215,7 @@ class SummonerController extends Controller
         /** @var \App\Models\MonitoredUser $monitoredUser */
         $monitoredUser = MonitoredUser::whereConfirmationCode($confirmationCode)->first();
 
-        if(is_null($monitoredUser)){
+        if(is_null($monitoredUser) || is_null($monitoredUser->email)){
             return redirect()->route('index')->withErrors('Invalid confirmation code');
         }
 

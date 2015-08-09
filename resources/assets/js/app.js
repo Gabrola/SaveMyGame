@@ -127,8 +127,8 @@
         $('#record-form').on('submit', function(event){
             event.preventDefault();
 
-            $('.record-form-submit').addClass('disabled')
-                .html('<i class="mdi mdi-navigation-refresh mdi-spin right"></i>Submit');
+            $('.begin-record-submit').addClass('disabled')
+                .html('<i class="mdi mdi-navigation-refresh mdi-spin right"></i>Please wait');
 
             $.ajax({
                 url: $(this).attr('action'),
@@ -136,9 +136,7 @@
                 dataType: 'json',
                 data: $(this).serialize(),
                 success: function(response){
-                    Materialize.toast('The email has been sent.', 5000);
-                    $('#email-modal').closeModal();
-                    $('.btn-floating.modal-trigger').addClass('disabled');
+                    $('.record-form-area').html('<div class="col s12"><p>Please rename one of your rune pages to <strong>'+ response.code +'</strong> and it will be confirmed within one minute.</p></div>')
                 },
                 error: function(data){
                     var errors = $.parseJSON(data.responseText);
@@ -151,8 +149,8 @@
                         grecaptcha.reset();
                     }
 
-                    $('.record-form-submit').removeClass('disabled')
-                        .html('Submit');
+                    $('.begin-record-submit').removeClass('disabled')
+                        .html('Begin');
                 }
             });
         });
