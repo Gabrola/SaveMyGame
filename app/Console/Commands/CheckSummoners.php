@@ -43,21 +43,14 @@ class CheckSummoners extends Command
 
         $client = new Client();
 
-        $requests = function ($monitoredUsers) {
-            foreach($monitoredUsers as $user){
-                /** @var \App\Models\MonitoredUser $user */
+        /** @var \App\Models\MonitoredUser $user */
+        foreach($monitoredUsers as $user){
+            $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
+                LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY');
 
-                $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
-                    LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY');
+            try {
+                $response = $client->get($requestUrl);
 
-                yield new Request('GET', $requestUrl);
-            }
-        };
-
-        $pool = new Pool($client, $requests($monitoredUsers), [
-            'concurrency' => 20,
-            'fulfilled' => function ($response, $index) {
-                /** @var \GuzzleHttp\Psr7\Response $response */
                 if($response->getStatusCode() == 200){
                     $jsonString = $response->getBody();
                     $json = json_decode($jsonString);
@@ -83,11 +76,10 @@ class CheckSummoners extends Command
                         \Log::error($e->getMessage());
                     }
                 }
-            }
-        ]);
+            } catch(\Exception $e){}
 
-        $promise = $pool->promise();
-        $promise->wait();
+            usleep(10 * 1000);
+        }
     }
 
     /**

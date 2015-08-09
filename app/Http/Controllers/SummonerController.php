@@ -209,25 +209,4 @@ class SummonerController extends Controller
             return response()->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_id]);
         }
     }
-
-    public function verify($confirmationCode)
-    {
-        /** @var \App\Models\MonitoredUser $monitoredUser */
-        $monitoredUser = MonitoredUser::whereConfirmationCode($confirmationCode)->first();
-
-        if(is_null($monitoredUser) || is_null($monitoredUser->email)){
-            return redirect()->route('index')->withErrors('Invalid confirmation code');
-        }
-
-        $monitoredUser->confirmed = true;
-        $monitoredUser->save();
-
-        /** @var \App\Models\Summoner $summoner */
-        $summoner = Summoner::bySummonerId($monitoredUser->region, $monitoredUser->summoner_id)->first();
-
-        Session::flash('message', 'Your summoner is now being monitored and all games will be recorded!');
-        Session::flash('message_color', 'green');
-
-        return response()->redirectToAction('SummonerController@getIndex', [$summoner->region, $summoner->summoner_name]);
-    }
 }

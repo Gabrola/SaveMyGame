@@ -25,16 +25,15 @@
         @include('_games')
     </div>
 
-    {{--*/ $isMonitoredTemp = $isMonitored || ($monitoredUser && !is_null($monitoredUser->email)); /*--}}
     <div class="fixed-action-btn stick-bottom" style="bottom: 20px; right: 25px;">
-        <a class="btn-floating btn-large red {{ $isMonitoredTemp ? 'disabled' : ''  }} tooltipped modal-trigger" data-position="left" data-delay="10"
-           data-tooltip="{{ $isMonitoredTemp ? 'All games are already recorded' : 'Start recording all matches'  }}"
+        <a class="btn-floating btn-large red {{ $isMonitored ? 'disabled' : ''  }} tooltipped modal-trigger" data-position="left" data-delay="10"
+           data-tooltip="{{ $isMonitored ? 'All games are already recorded' : 'Start recording all matches'  }}"
                 href="#confirm-modal">
             <i class="mdi-av-videocam"></i>
         </a>
     </div>
 
-    @if(!$isMonitoredTemp)
+    @if(!$isMonitored)
         <div id="confirm-modal" class="modal">
             <div class="modal-content">
                 <h4>Start Monitoring My Summoner</h4>

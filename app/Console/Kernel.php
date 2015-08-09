@@ -59,7 +59,7 @@ class Kernel extends ConsoleKernel
         })->everyFiveMinutes();
 
         $schedule->call(function(){
-            $unconfirmedMonitoredUsers = MonitoredUser::whereConfirmed(false)->whereEmail(null)->get();
+            $unconfirmedMonitoredUsers = MonitoredUser::whereConfirmed(false)->get();
 
             $client = new Client;
 

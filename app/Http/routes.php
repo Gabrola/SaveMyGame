@@ -16,7 +16,6 @@ Route::post('summoner/search', 'SummonerController@postSearch');
 Route::get('summoner/{region}/{summonerName}', 'SummonerController@getIndex');
 Route::get('summoner/id/{region}/{summonerId}', 'SummonerController@getById');
 Route::post('summoner/record', 'SummonerController@postRecord');
-Route::get('verify/{confirmationCode}', 'SummonerController@verify');
 Route::get('game/{region}/{gameId}', 'SummonerController@getGame');
 Route::get('faq', 'PageController@faq');
 Route::get('versions', 'PageController@versions');
