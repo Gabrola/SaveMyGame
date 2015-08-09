@@ -255,6 +255,6 @@ class LeagueHelper
      */
     public function getInternalName($summonerName)
     {
-        return str_replace(' ', '', strtolower($summonerName));
+        return str_replace(' ', '', mb_strtolower($summonerName));
     }
 }
