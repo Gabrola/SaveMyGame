@@ -220,11 +220,11 @@ class DownloadReplay extends Command
                         $keyframe->keyframe_id = $currentKeyframeID;
                         $keyframe->game()->associate($this->game);
 
+                        $keyframeID = $currentKeyframeID;
+
                         $startTimeKeyframe = round(microtime(true) * 1000);
                         if ($this->DownloadKeyframe($keyframe)) {
-                            $keyframeID = $currentKeyframeID;
                             $this->downloadedKeyframes[] = $currentKeyframeID;
-
                             $this->comment("Keyframe $currentKeyframeID downloaded in " . (round(microtime(true) * 1000) - $startTimeKeyframe) . "ms");
                         } else
                             $this->comment("Keyframe $currentKeyframeID download failed");
@@ -252,6 +252,8 @@ class DownloadReplay extends Command
                             $chunk->duration = 30000;
                         }
 
+                        $chunkID = $currentChunkID;
+
                         if(!in_array($chunk->keyframe_id, $this->downloadedKeyframes) && $chunk->keyframe_id != 0) {
                             $this->comment("Chunk $currentChunkID skipped because keyframe is not available");
                             continue;
@@ -266,9 +268,7 @@ class DownloadReplay extends Command
 
                         $startTimeChunk = round(microtime(true) * 1000);
                         if($this->DownloadChunk($chunk)) {
-                            $chunkID = $currentChunkID;
                             $this->downloadedChunks[] = $currentChunkID;
-
                             $this->comment("Chunk $currentChunkID downloaded in " . (round(microtime(true) * 1000) - $startTimeChunk) . "ms");
                         } else
                             $this->comment("Chunk $currentChunkID download failed");
