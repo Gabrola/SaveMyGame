@@ -33,7 +33,7 @@ return [
         'HEXAKILL'                  => 'Hexakill',
         'KING_PORO_5x5'             => 'King Poro',
         'COUNTER_PICK'              => 'Nemesis',
-        'BILGEWATER_ARAM_5x5'       => 'Butcher\'s Bridge',
+        'BILGEWATER_ARAM_5x5'       => 'Butcher\'s Bridge ARAM',
         'BILGEWATER_5x5'            => 'Black Market Brawlers'
     ],
 
@@ -70,7 +70,7 @@ return [
         98  => 'Hexakill',
         300 => 'King Poro',
         310 => 'Nemesis',
-        100 => 'Butcher\'s Bridge',
+        100 => 'Butcher\'s Bridge ARAM',
         313 => 'Black Market Brawlers'
     ],
 

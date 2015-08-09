@@ -19,7 +19,7 @@
         </div>
     @endif
 
-    @if(!is_null($game->end_stats) && $game->end_stats && $game->start_stats)
+    @if($game->end_stats && $game->start_stats)
         <div class="divider"></div>
 
         <div class="section">
@@ -92,15 +92,22 @@
                                 <div>Towers</div>
                             </div>
 
-                            <div class="col center">
-                                <div class="bans-value">{{ $game->end_stats['teams'][0]['dragonKills'] }}</div>
-                                <div>Dragons</div>
-                            </div>
+                            @if($game->end_stats['mapId'] == 11)
+                                <div class="col center right">
+                                    <div class="bans-value">{{ $game->end_stats['teams'][0]['dragonKills'] }}</div>
+                                    <div>Dragons</div>
+                                </div>
 
-                            <div class="col center">
-                                <div class="bans-value">{{ $game->end_stats['teams'][0]['baronKills'] }}</div>
-                                <div>Barons</div>
-                            </div>
+                                <div class="col center right">
+                                    <div class="bans-value">{{ $game->end_stats['teams'][0]['baronKills'] }}</div>
+                                    <div>Barons</div>
+                                </div>
+                            @elseif($game->end_stats['mapId'] == 10)
+                                <div class="col center right">
+                                    <div class="bans-value">{{ $game->end_stats['teams'][0]['vilemawKills'] }}</div>
+                                    <div>Vilemaws</div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -172,15 +179,22 @@
                                 <div>Towers</div>
                             </div>
 
-                            <div class="col center right">
-                                <div class="bans-value">{{ $game->end_stats['teams'][1]['dragonKills'] }}</div>
-                                <div>Dragons</div>
-                            </div>
+                            @if($game->end_stats['mapId'] == 11)
+                                <div class="col center right">
+                                    <div class="bans-value">{{ $game->end_stats['teams'][1]['dragonKills'] }}</div>
+                                    <div>Dragons</div>
+                                </div>
 
-                            <div class="col center right">
-                                <div class="bans-value">{{ $game->end_stats['teams'][1]['baronKills'] }}</div>
-                                <div>Barons</div>
-                            </div>
+                                <div class="col center right">
+                                    <div class="bans-value">{{ $game->end_stats['teams'][1]['baronKills'] }}</div>
+                                    <div>Barons</div>
+                                </div>
+                            @elseif($game->end_stats['mapId'] == 10)
+                                <div class="col center right">
+                                    <div class="bans-value">{{ $game->end_stats['teams'][1]['vilemawKills'] }}</div>
+                                    <div>Vilemaws</div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
