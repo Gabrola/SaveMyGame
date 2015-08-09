@@ -72,43 +72,41 @@
                             </div>
                         @endif
                     @endforeach
-                    <div class="row bans-left">
-                        <div class="col s12">
-                            @if(!empty($game->start_stats['bannedChampions']))
-                                <div class="col center">
-                                    <div>
-                                        @foreach($game->start_stats['bannedChampions'] as $ban)
-                                            @if($ban['teamId'] == $game->end_stats['teams'][0]['teamId'])
-                                                <span class="lol-tiny-champion-{{ $ban['championId']  }} img-roundshadow left" title="{{ config('static.champions.' . $ban['championId']) }}"></span>
-                                            @endif
-                                        @endforeach
-                                    </div>
-                                    <div>Bans</div>
-                                </div>
-                            @endif
-
+                    <div class="row bans-left center-align-children">
+                        @if(!empty($game->start_stats['bannedChampions']))
                             <div class="col center">
-                                <div class="bans-value">{{ $game->end_stats['teams'][0]['towerKills'] }}</div>
-                                <div>Towers</div>
+                                <div>
+                                    @foreach($game->start_stats['bannedChampions'] as $ban)
+                                        @if($ban['teamId'] == $game->end_stats['teams'][0]['teamId'])
+                                            <span class="lol-tiny-champion-{{ $ban['championId']  }} img-roundshadow left" title="{{ config('static.champions.' . $ban['championId']) }}"></span>
+                                        @endif
+                                    @endforeach
+                                </div>
+                                <div>Bans</div>
+                            </div>
+                        @endif
+
+                        <div class="col center">
+                            <div class="bans-value">{{ $game->end_stats['teams'][0]['towerKills'] }}</div>
+                            <div>{{ Pluralizer::plural('Tower', $game->end_stats['teams'][0]['towerKills']) }}</div>
+                        </div>
+
+                        @if($game->end_stats['mapId'] == 11)
+                            <div class="col center right">
+                                <div class="bans-value">{{ $game->end_stats['teams'][0]['dragonKills'] }}</div>
+                                <div>{{ Pluralizer::plural('Dragon', $game->end_stats['teams'][0]['dragonKills']) }}</div>
                             </div>
 
-                            @if($game->end_stats['mapId'] == 11)
-                                <div class="col center right">
-                                    <div class="bans-value">{{ $game->end_stats['teams'][0]['dragonKills'] }}</div>
-                                    <div>Dragons</div>
-                                </div>
-
-                                <div class="col center right">
-                                    <div class="bans-value">{{ $game->end_stats['teams'][0]['baronKills'] }}</div>
-                                    <div>Barons</div>
-                                </div>
-                            @elseif($game->end_stats['mapId'] == 10)
-                                <div class="col center right">
-                                    <div class="bans-value">{{ $game->end_stats['teams'][0]['vilemawKills'] }}</div>
-                                    <div>Vilemaws</div>
-                                </div>
-                            @endif
-                        </div>
+                            <div class="col center right">
+                                <div class="bans-value">{{ $game->end_stats['teams'][0]['baronKills'] }}</div>
+                                <div>{{ Pluralizer::plural('Baron', $game->end_stats['teams'][0]['baronKills']) }}</div>
+                            </div>
+                        @elseif($game->end_stats['mapId'] == 10)
+                            <div class="col center right">
+                                <div class="bans-value">{{ $game->end_stats['teams'][0]['vilemawKills'] }}</div>
+                                <div>{{ Pluralizer::plural('Vilemaw', $game->end_stats['teams'][0]['vilemawKills']) }}</div>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 <div class="col l6">
@@ -159,43 +157,41 @@
                             </div>
                         @endif
                     @endforeach
-                    <div class="row bans-right">
-                        <div class="col s12">
-                            @if(!empty($game->start_stats['bannedChampions']))
-                                <div class="col center right">
-                                    <div>
-                                        @foreach($game->start_stats['bannedChampions'] as $ban)
-                                            @if($ban['teamId'] == $game->end_stats['teams'][1]['teamId'])
-                                                <span class="lol-tiny-champion-{{ $ban['championId']  }} img-roundshadow left" title="{{ config('static.champions.' . $ban['championId']) }}"></span>
-                                            @endif
-                                        @endforeach
-                                    </div>
-                                    <div>Bans</div>
-                                </div>
-                            @endif
+                    <div class="row bans-right center-align-children">
+                        <div class="col center right">
+                            <div class="bans-value">{{ $game->end_stats['teams'][1]['towerKills'] }}</div>
+                            <div>{{ Pluralizer::plural('Tower', $game->end_stats['teams'][1]['towerKills']) }}</div>
+                        </div>
 
+                        @if($game->end_stats['mapId'] == 11)
                             <div class="col center right">
-                                <div class="bans-value">{{ $game->end_stats['teams'][1]['towerKills'] }}</div>
-                                <div>Towers</div>
+                                <div class="bans-value">{{ $game->end_stats['teams'][1]['dragonKills'] }}</div>
+                                <div>{{ Pluralizer::plural('Dragon', $game->end_stats['teams'][1]['dragonKills']) }}</div>
                             </div>
 
-                            @if($game->end_stats['mapId'] == 11)
-                                <div class="col center right">
-                                    <div class="bans-value">{{ $game->end_stats['teams'][1]['dragonKills'] }}</div>
-                                    <div>Dragons</div>
-                                </div>
+                            <div class="col center right">
+                                <div class="bans-value">{{ $game->end_stats['teams'][1]['baronKills'] }}</div>
+                                <div>{{ Pluralizer::plural('Baron', $game->end_stats['teams'][1]['baronKills']) }}</div>
+                            </div>
+                        @elseif($game->end_stats['mapId'] == 10)
+                            <div class="col center right">
+                                <div class="bans-value">{{ $game->end_stats['teams'][1]['vilemawKills'] }}</div>
+                                <div>{{ Pluralizer::plural('Vilemaw', $game->end_stats['teams'][1]['vilemawKills']) }}</div>
+                            </div>
+                        @endif
 
-                                <div class="col center right">
-                                    <div class="bans-value">{{ $game->end_stats['teams'][1]['baronKills'] }}</div>
-                                    <div>Barons</div>
+                        @if(!empty($game->start_stats['bannedChampions']))
+                            <div class="col center right">
+                                <div>
+                                    @foreach($game->start_stats['bannedChampions'] as $ban)
+                                        @if($ban['teamId'] == $game->end_stats['teams'][1]['teamId'])
+                                            <span class="lol-tiny-champion-{{ $ban['championId']  }} img-roundshadow left" title="{{ config('static.champions.' . $ban['championId']) }}"></span>
+                                        @endif
+                                    @endforeach
                                 </div>
-                            @elseif($game->end_stats['mapId'] == 10)
-                                <div class="col center right">
-                                    <div class="bans-value">{{ $game->end_stats['teams'][1]['vilemawKills'] }}</div>
-                                    <div>Vilemaws</div>
-                                </div>
-                            @endif
-                        </div>
+                                <div>Bans</div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
