@@ -12,7 +12,7 @@ class SpectatorController extends Controller
     {
         /** @var \App\Models\Game $game */
         $game = \App\Models\Game::byGame($region, $gameId)->firstOrFail();
-        $firstChunk = \App\Models\Chunk::whereDbGameId($game->id)->startGame($game->start_game_chunk_id)->firstOrFail();
+        //$firstChunk = \App\Models\Chunk::whereDbGameId($game->id)->startGame($game->start_game_chunk_id)->firstOrFail();
         $lastChunk = \App\Models\Chunk::byGame($region, $gameId)->lastChunk()->firstOrFail();
 
         return \Response::json(
@@ -35,7 +35,7 @@ class SpectatorController extends Controller
                 'pendingAvailableKeyFrameInfo' => [],
                 'keyFrameTimeInterval' => 60000,
                 'decodedEncryptionKey' => '',
-                'startGameChunkId' => $firstChunk->chunk_id,
+                'startGameChunkId' => $game->start_game_chunk_id,
                 'gameLength' => 0,
                 'clientAddedLag' => 30000,
                 'clientBackFetchingEnabled' => false,
@@ -53,7 +53,6 @@ class SpectatorController extends Controller
     {
         /** @var \App\Models\Game $game */
         $game = \App\Models\Game::byGame($region, $gameId)->firstOrFail();
-        $firstChunk = \App\Models\Chunk::whereDbGameId($game->id)->startGame($game->start_game_chunk_id)->firstOrFail();
         $lastChunk = \App\Models\Chunk::byGame($region, $gameId)->lastChunk()->firstOrFail();
 
         return \Response::json(
@@ -64,7 +63,7 @@ class SpectatorController extends Controller
                 'keyFrameId' => $lastChunk->keyframe_id,
                 'nextChunkId' => $lastChunk->chunk_id,
                 'endStartupChunkId' => $game->end_startup_chunk_id,
-                'startGameChunkId' => $firstChunk->chunk_id,
+                'startGameChunkId' => $game->start_game_chunk_id,
                 'endGameChunkId' => $lastChunk->chunk_id,
                 'duration' => $lastChunk->duration
             ]
