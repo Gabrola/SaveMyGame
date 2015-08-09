@@ -20,6 +20,8 @@ class SummonerSearch
 
         $internalName = \LeagueHelper::getInternalName($summonerName);
 
+        \Log::info($internalName);
+
         $summoner = Summoner::byInternalName($region, $internalName)->first();
 
         if(!is_null($summoner))
