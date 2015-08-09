@@ -127,7 +127,7 @@ class SummonerController extends Controller
         /** @var \App\Models\Game $game */
         $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
 
-        if(is_null($game))
+        if(is_null($game) || $game->status == 'downloading')
             return redirect()->route('index')->withErrors('Game not found.');
 
         if(is_null($game->end_stats))
