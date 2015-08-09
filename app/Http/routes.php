@@ -28,7 +28,3 @@ Route::group(['prefix' => 'observer-mode/rest/consumer'], function () {
     Route::get('getGameDataChunk/{region}/{gameId}/{num}/token', 'SpectatorController@getGameDataChunk');
     Route::get('getKeyFrame/{region}/{gameId}/{num}/token', 'SpectatorController@getKeyFrame');
 });
-
-Route::get('gabrolatest', function(){
-    return mb_strtolower('ƒound');
-});
