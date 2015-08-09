@@ -136,7 +136,7 @@
                 dataType: 'json',
                 data: $(this).serialize(),
                 success: function(response){
-                    $('.record-form-area').html('<div class="col s12"><p>Please rename one of your rune pages to <strong>'+ response.code +'</strong> and it will be confirmed within one minute.</p></div>')
+                    $('.record-form-area').html('<div class="col s12"><p>Please rename one of your rune pages to <strong>'+ response.code +'</strong> and it will be confirmed within one minute. After it is confirmed you are free to rename your rune page.</p></div>')
                 },
                 error: function(data){
                     var errors = $.parseJSON(data.responseText);

@@ -42,7 +42,8 @@
                 be deleted and you will have to request a new code.</p>
                 <div class="row record-form-area">
                     @if($monitoredUser)
-                        <div class="col s12"><p>Please rename one of your rune pages to <strong>{{ $monitoredUser->confirmation_code }}</strong> and it will be confirmed within one minute.</p></div>
+                        <div class="col s12"><p>Please rename one of your rune pages to <strong>{{ $monitoredUser->confirmation_code }}</strong> and it will be confirmed within one minute.
+                                After it is confirmed you are free to rename your rune page.</p></div>
                     @else
                         <form id="record-form" action="{{ action('SummonerController@postRecord') }}" method="post" class="col s12 m6 offset-m3">
                             <input type="hidden" name="region" value="{{ $summoner->region }}">

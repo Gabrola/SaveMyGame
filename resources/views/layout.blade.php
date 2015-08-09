@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>@yield('title') - SaveMyGa.me</title>
+    <title>@yield('title') - SaveMyGame</title>
 
     <!-- CSS  -->
     <link href="{{ elixir('css/app.css') }}" type="text/css" rel="stylesheet" media="screen,projection"/>
@@ -77,8 +77,8 @@
     <div class="container">
         <div class="row">
             <div class="col s12 center">
-                <small class="white-text">SaveMyGa.me isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.<br>
-                Copyright &copy; {{ date('Y') }} SaveMyGa.me </small>
+                <small class="white-text">SaveMyGame isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.<br>
+                Copyright &copy; {{ date('Y') }} SaveMyGame </small>
             </div>
         </div>
     </div>
