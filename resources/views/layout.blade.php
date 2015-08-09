@@ -29,7 +29,7 @@
 </head>
 <body>
 <nav class="top-nav-bar" role="navigation">
-    <div class="nav-wrapper container"><a id="logo-container" href="{{ url('/') }}" class="brand-logo">SaveMyGa.me</a>
+    <div class="nav-wrapper container"><a id="logo-container" href="{{ url('/') }}" class="brand-logo">SaveMyGame</a>
         <ul class="right hide-on-med-and-down main-nav">
             @section('nav-items')
                 <li><a href="{{ url('faq') }}">FAQ</a></li>
