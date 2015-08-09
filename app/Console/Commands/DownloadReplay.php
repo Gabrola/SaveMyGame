@@ -172,6 +172,8 @@ class DownloadReplay extends Command
 
     public function StartDownload()
     {
+        $updateSummoner = strtolower($this->argument('updateSummoner'));
+
         $chunkID = 0;
         $keyframeID = 0;
         $endChunk = 0;
@@ -179,7 +181,7 @@ class DownloadReplay extends Command
 
         $this->ProcessStartGame();
 
-        if($this->GetMetaData())
+        if($this->GetMetaData() && $updateSummoner == 'y')
         {
             while($endChunk <= 0 || $chunkID < $endChunk)
             {
@@ -472,6 +474,8 @@ class DownloadReplay extends Command
      */
     public function handle()
     {
+        set_time_limit(0);
+
         $platformId = $this->argument('platformId');
         $gameId = $this->argument('gameId');
         $encryptionKey = $this->argument('encryptionKey');
