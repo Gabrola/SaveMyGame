@@ -150,7 +150,7 @@ class SummonerController extends Controller
             return '\x' . $matched[0];
         }, bin2hex($binaryData));
 
-        $windowsCommand = sprintf(config('constants.windowsCommand'), $binaryArray);
+        $windowsCommand = sprintf(config('constants.windowsCommand'), $binaryArray, strlen($binaryData));
         $macCommand = sprintf(config('constants.macCommand'), $hexString);
 
         return view('game', [

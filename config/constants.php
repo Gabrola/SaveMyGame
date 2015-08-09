@@ -157,7 +157,7 @@ echo Could not find League of Legends installation.
 :DONE
 endlocal',
 
-    'windowsCommand'  => 'powershell clear;if(Get-Process \"LolClient\" -ErrorAction SilentlyContinue){$ErrorActionPreference=\"Stop\";$c=New-Object Net.Sockets.TcpClient;$c.Connect(\"127.0.0.1\",8393);$c.GetStream().write((%s),0,86);Exit;}\"Error. Please make sure your LoL client is running.\";',
+    'windowsCommand'  => 'powershell clear;if(Get-Process \"LolClient\" -ErrorAction SilentlyContinue){$ErrorActionPreference=\"Stop\";$c=New-Object Net.Sockets.TcpClient;$c.Connect(\"127.0.0.1\",8393);$c.GetStream().write((%s),0,%u);Exit;}\"Error. Please make sure your LoL client is running.\";',
 
     'macCommand'  => "echo -e '%s' | nc 127.0.0.1 8393",
 ];
