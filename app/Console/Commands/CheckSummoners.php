@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use GuzzleHttp\Exception\ClientException;
 use \LeagueHelper;
 use App\Models\Game;
 use App\Models\MonitoredUser;
@@ -76,8 +77,10 @@ class CheckSummoners extends Command
                         \Log::error($e->getMessage());
                     }
                 }
-            } catch(\Exception $e){
-                \Log::error($e);
+            } catch(ClientException $e){
+                \Log::error($requestUrl . ':' . $e->getMessage());
+            }
+            catch(\Exception $e){
             }
 
             usleep(10 * 1000);
