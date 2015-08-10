@@ -78,7 +78,7 @@ class CheckSummoners extends Command
                     }
                 }
             } catch(ClientException $e){
-                \Log::error($requestUrl . ':' . $e->getMessage());
+                \Log::error($requestUrl . "\n" . $e->getMessage() . "\nCount:" . $monitoredUsers->count());
             }
             catch(\Exception $e){
             }
