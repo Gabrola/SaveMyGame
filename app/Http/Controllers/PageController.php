@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClientVersion;
+use App\Models\Game;
 use Illuminate\Http\Request;
 
 class PageController extends Controller
@@ -80,5 +81,12 @@ class PageController extends Controller
         return response()->make($output, 200, [
             'Content-Type' => 'text/plain'
         ]);
+    }
+
+    public function test()
+    {
+        $game = Game::byGame('EUW1', 2242959087)->firstOrFail();
+
+        return $game->end_stats;
     }
 }

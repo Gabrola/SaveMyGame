@@ -153,7 +153,7 @@ class DownloadReplay extends Command
 
             $requestUrl = 'https://' . LeagueHelper::getApiByPlatformId($this->game->platform_id) . '/api/lol/' .
                 strtolower(LeagueHelper::getRegionByPlatformId($this->game->platform_id)) . '/v2.2/match/' .
-                $this->game->game_id . '?api_key=' . env('RIOT_API_KEY');
+                $this->game->game_id . '?includeTimeline=true&api_key=' . env('RIOT_API_KEY');
 
             $res = $this->client->get($requestUrl);
 

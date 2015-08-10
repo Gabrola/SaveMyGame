@@ -256,6 +256,69 @@
                 <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat ">Close</a>
             </div>
         </div>
+
+        @if($game->end_stats && isset($game->end_stats['timeline']))
+            <div class="divider"></div>
+
+            <div class="section">
+                <h4 class="center">Re-PLAYS</h4>
+                <h5 class="center">Stop looking for your plays and re-PLAY only the moments you choose.</h5>
+                <p>
+                    Time Leeway: <strong>10 seconds</strong> <i class="mdi-action-help" title="Amount of time to be guaranteed to be playable available before and after the chosen moment."></i>
+                </p>
+
+                <style scoped="scoped">
+                    table.event-table {
+                        width: auto;
+                    }
+
+                    table.event-table td {
+                        padding-right: 20px;
+                    }
+                </style>
+
+                <table class="event-table">
+                    <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Event Type</th>
+                        <th>Event Information</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($events as $event)
+                            @if($event['eventType'] == 'CHAMPION_KILL')
+                                {{--*/ $killerParticipant = $game->end_stats['participants'][$event['killerId'] - 1]; /*--}
+                                {{--*/ $killedParticipant = $game->end_stats['participants'][$event['victimId'] - 1]; /*--}}
+                                <tr data-type="kill" data-killer="{{ $event['killerId'] }}">
+                                    <td>{{ gmdate("i:s", floor($event['timestamp'] / 1000)) }}</td>
+                                    <td>
+                                        @if($event['multiKill'] == 1)
+                                            Champion Kill
+                                        @elseif($event['multiKill'] == 2)
+                                            <strong>Double Kill</strong>
+                                        @elseif($event['multiKill'] == 3)
+                                            <strong>Triple Kill</strong>
+                                        @elseif($event['multiKill'] == 4)
+                                            <strong>Quadra Kill</strong>
+                                        @elseif($event['multiKill'] == 5)
+                                            <strong>Penta Kill</strong>
+                                        @elseif($event['multiKill'] > 5)
+                                            <strong>Legendary Kill</strong>
+                                        @endif
+                                    </td>
+                                    <td style="display: flex; align-items: center">
+                                        <span class="lol-champion-{{ $killerParticipant['championId']  }} img-roundshadow" title="{{ config('static.champions.' . $killerParticipant['championId']) }}"></span>
+                                        <span style="margin: 0 20px">killed</span>
+                                        <span class="lol-champion-{{ $killedParticipant['championId']  }} img-roundshadow" title="{{ config('static.champions.' . $killedParticipant['championId']) }}"></span>
+                                    </td>
+                                </tr>
+                            @endif
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
     @else
         <div class="card-panel red">
             <span class="white-text">This game's replay has been deleted because it has been recorded on an older patch and is more than 7 days old.</span>

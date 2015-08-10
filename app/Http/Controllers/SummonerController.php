@@ -167,12 +167,51 @@ class SummonerController extends Controller
 
         $windowsCommand = sprintf(config('constants.windowsCommand'), $binaryArray, strlen($binaryData));
         $macCommand = sprintf(config('constants.macCommand'), $hexString);
+        $events = [];
+
+        if($game->status != 'deleted' && $game->end_stats && isset($game->end_stats['timeline']))
+        {
+            $killCount = [];
+            $lastKill = [];
+
+            foreach($game->end_stats['participants'] as $participant)
+            {
+                $killCount[$participant['participantId']] = 0;
+                $lastKill[$participant['participantId']] = -100000;
+            }
+
+            foreach($game->end_stats['timeline']['frames'] as $frame)
+            {
+                if(isset($frame['events'])) {
+                    foreach($frame['events'] as $event)
+                    {
+                        if($event['eventType'] == 'CHAMPION_KILL')
+                        {
+                            $killerId = $event['killerId'];
+                            $lastKillTime = $lastKill[$killerId];
+                            $thisKillTime = $event['timestamp'];
+
+                            if($thisKillTime - $lastKillTime <= 10000){
+                                $event['multiKill'] = ++$killCount[$killerId];
+                            } else {
+                                $event['multiKill'] = $killCount[$killerId] = 1;
+                            }
+
+                            $lastKill[$killerId] = $thisKillTime;
+                        }
+
+                        $events[] = $event;
+                    }
+                }
+            }
+        }
 
         return view('game', [
             'game'              => $game,
             'windowsCommand'    => $windowsCommand,
             'macCommand'        => $macCommand,
-            'useAlt'            => $useAlt
+            'useAlt'            => $useAlt,
+            'events'            => $events
         ]);
     }
 
