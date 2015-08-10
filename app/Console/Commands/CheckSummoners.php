@@ -36,37 +36,21 @@ class CheckSummoners extends Command
     {
         $batch = $this->argument('batch');
 
-        $monitoredUsers = MonitoredUser::whereRaw('id % 3 = ?', [$batch])->whereConfirmed(true)->get()->toArray();
+        $monitoredUsers = MonitoredUser::whereRaw('id % 3 = ?', [$batch])->whereConfirmed(true)->get();
 
-        $client = new Client();
+        if($monitoredUsers->count() == 0)
+            return;
 
         $startTime = microtime(true);
 
-        $monitoredUserChunks = array_chunk($monitoredUsers, 1000);
+        $client = new Client();
 
-        foreach($monitoredUserChunks as $chunk)
-        {
-            $this->downloadPool($client, $chunk);
-        }
-
-        $totalTime = microtime(true) - $startTime;
-
-        \Log::error('CheckSummoners Time = ' . $totalTime . ' seconds');
-    }
-
-    /**
-     * @param Client $client
-     * @param array $monitoredUsers
-     * @throws \Exception
-     */
-    public function downloadPool(&$client, $monitoredUsers)
-    {
         $requests = function ($monitoredUsers) {
             foreach($monitoredUsers as $user){
                 /** @var \App\Models\MonitoredUser $user */
 
-                $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user['region']) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
-                    LeagueHelper::getPlatformIdByRegion($user['region']) . '/' . $user['summoner_id'] . '?api_key=' . env('RIOT_API_KEY');
+                $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
+                    LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY');
 
                 yield new Request('GET', $requestUrl);
             }
@@ -106,6 +90,10 @@ class CheckSummoners extends Command
 
         $promise = $pool->promise();
         $promise->wait();
+
+        $commandTime = microtime(true) - $startTime;
+
+        \Log::error('CheckSummoners Time = ' . $commandTime . ' seconds');
     }
 
     /**
