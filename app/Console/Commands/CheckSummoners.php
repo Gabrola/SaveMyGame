@@ -43,13 +43,32 @@ class CheckSummoners extends Command
 
         $client = new Client();
 
+        $countTime = 0;
+        $minTime = 100000000;
+        $maxTime = 0;
+        $totalTime = 0;
+
+        $startTime = microtime(true);
+
         /** @var \App\Models\MonitoredUser $user */
         foreach($monitoredUsers as $user){
             $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
                 LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY');
 
             try {
+
+                $beginTime = microtime(true);
                 $response = $client->get($requestUrl);
+                $timeItTook = (microtime(true) - $beginTime) * 1000;
+
+                if($timeItTook < $minTime)
+                    $minTime = $timeItTook;
+
+                if($timeItTook > $maxTime)
+                    $maxTime = $timeItTook;
+
+                $totalTime += $timeItTook;
+                $countTime++;
 
                 if($response->getStatusCode() == 200){
                     $jsonString = $response->getBody();
@@ -80,6 +99,11 @@ class CheckSummoners extends Command
 
             usleep(10 * 1000);
         }
+
+        $commandTime = microtime(true) - $startTime;
+
+        \Log::write('CRON', 'CheckSummoners Time = ' . $commandTime . ' seconds');
+        \Log::write('CRON', 'CheckSummoners Min Request Time = ' . $minTime . 'ms, Max Request Time = ' . $maxTime . 'ms, Avg. Request Time = ' . ($totalTime / $countTime) . 'ms');
     }
 
     /**
