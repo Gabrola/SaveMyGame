@@ -56,6 +56,8 @@ class CheckSummoners extends Command
             }
         };
 
+        \Log::error('Prepare Requests Time = ' . (microtime(true) - $startTime) . ' seconds');
+
         $pool = new Pool($client, $requests($monitoredUsers), [
             'concurrency' => 1000,
             'fulfilled' => function ($response, $index) {
