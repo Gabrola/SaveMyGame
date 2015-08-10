@@ -30,7 +30,7 @@ class SummonerSearch
         $requestUrl = 'https://' . \LeagueHelper::getApiByRegion($region) . '/api/lol/' . strtolower($region) . '/v1.4/summoner/by-name/' .
             $summonerName . '?api_key=' . env('RIOT_API_KEY');
 
-        if(Cache::has($requestUrl))
+        if(Cache::get($requestUrl, 1) == 5)
             return false;
 
         try {
@@ -63,7 +63,11 @@ class SummonerSearch
         }
         catch(\Exception $e){}
 
-        Cache::add($requestUrl, true, 60);
+        if(Cache::has($requestUrl))
+            Cache::increment($requestUrl);
+        else
+            Cache::add($requestUrl, 1, 60);
+
         return false;
     }
 }
