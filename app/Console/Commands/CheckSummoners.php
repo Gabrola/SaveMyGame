@@ -76,7 +76,9 @@ class CheckSummoners extends Command
                         \Log::error($e->getMessage());
                     }
                 }
-            } catch(\Exception $e){}
+            } catch(\Exception $e){
+                \Log::error($e);
+            }
 
             usleep(10 * 1000);
         }
