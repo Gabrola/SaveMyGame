@@ -65,8 +65,8 @@ class CheckSummoners extends Command
             foreach($monitoredUsers as $user){
                 /** @var \App\Models\MonitoredUser $user */
 
-                $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
-                    LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY');
+                $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user['region']) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
+                    LeagueHelper::getPlatformIdByRegion($user['region']) . '/' . $user['summoner_id'] . '?api_key=' . env('RIOT_API_KEY');
 
                 yield new Request('GET', $requestUrl);
             }
