@@ -104,6 +104,6 @@ class PageController extends Controller
 
         $commandTime = microtime(true) - $startTime;
 
-        return ('CheckSummoners Time = ' . $commandTime . ' seconds');
+        return 'CheckSummoners Time = ' . $commandTime . ' seconds';
     }
 }
