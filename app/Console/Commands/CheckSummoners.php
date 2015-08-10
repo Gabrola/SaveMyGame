@@ -42,10 +42,13 @@ class CheckSummoners extends Command
         if($monitoredUsers->count() == 0)
             return;
 
+        $loopRunTimes = 0;
+
         $client = new Client();
 
         /** @var \App\Models\MonitoredUser $user */
         foreach($monitoredUsers as $user){
+            $loopRunTimes++;
             $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
                 LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY');
 
@@ -87,6 +90,8 @@ class CheckSummoners extends Command
 
             usleep(10 * 1000);
         }
+
+        \Log::error('Loop ran ' . $loopRunTimes . ' times and array count is ' . $monitoredUsers->count());
     }
 
     /**
