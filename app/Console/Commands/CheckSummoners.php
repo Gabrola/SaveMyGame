@@ -56,9 +56,11 @@ class CheckSummoners extends Command
             }
         };
 
+        $listOfRequests = $requests($monitoredUsers);
+
         \Log::error('Prepare Requests Time = ' . (microtime(true) - $startTime) . ' seconds');
 
-        $pool = new Pool($client, $requests($monitoredUsers), [
+        $pool = new Pool($client, $listOfRequests, [
             'concurrency' => 1000,
             'fulfilled' => function ($response, $index) {
                 /** @var \GuzzleHttp\Psr7\Response $response */
