@@ -92,13 +92,13 @@ class PageController extends Controller
         // Initiate each request but do not block
         $promises = [];
 
-        $client = new Client;
+        $client = new Client(['base_uri' => 'https://oce.api.pvp.net/observer-mode/rest/consumer/getSpectatorGameInfo/OC1/']);
 
         $startTime = microtime(true);
 
         /** @var MonitoredUser $monitoredUser */
         foreach($monitoredUsers as $monitoredUser)
-            $promises[$monitoredUser->id] = $client->getAsync('https://' . \LeagueHelper::getApiByRegion($monitoredUser->region));
+            $promises[$monitoredUser->id] = $client->getAsync($monitoredUser->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
 
         $results = Promise\unwrap($promises);
 
