@@ -1,6 +1,9 @@
 <?php
 namespace App\Http\Controllers;
 
+use Cache;
+use Request;
+
 class SpectatorController extends Controller
 {
     public function version()
@@ -53,6 +56,37 @@ class SpectatorController extends Controller
     {
         /** @var \App\Models\Game $game */
         $game = \App\Models\Game::byGame($region, $gameId)->firstOrFail();
+
+        $requestHost = Request::getHost();
+
+        if(str_contains($requestHost, 'spectator')) {
+            $domainParts = explode('.', $requestHost);
+            $firstPart = $domainParts[0];
+
+            $cacheKey = $firstPart . '_' . Request::getClientIp();
+
+            if(!Cache::has($cacheKey) || $num == 30000) {
+                $firstChunk = \App\Models\Chunk::whereDbGameId($game->id)->startGame($game->start_game_chunk_id)->firstOrFail();
+
+                if($num != 30000)
+                    Cache::add($cacheKey, true, 60);
+
+                return \Response::json(
+                    [
+                        'chunkId' => $firstChunk->chunk_id,
+                        'availableSince' => 30000,
+                        'nextAvailableChunk' => 0,
+                        'keyFrameId' => $firstChunk->keyframe_id,
+                        'nextChunkId' => $firstChunk->chunk_id,
+                        'endStartupChunkId' => $game->end_startup_chunk_id,
+                        'startGameChunkId' => $game->start_game_chunk_id,
+                        'endGameChunkId' => $firstChunk->chunk_id,
+                        'duration' => $firstChunk->duration
+                    ]
+                );
+            }
+        }
+
         $lastChunk = \App\Models\Chunk::byGame($region, $gameId)->lastChunk()->firstOrFail();
 
         return \Response::json(
