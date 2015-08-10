@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use GuzzleHttp\Exception\ClientException;
 use \LeagueHelper;
 use App\Models\Game;
 use App\Models\MonitoredUser;
@@ -42,13 +41,10 @@ class CheckSummoners extends Command
         if($monitoredUsers->count() == 0)
             return;
 
-        $loopRunTimes = 0;
-
         $client = new Client();
 
         /** @var \App\Models\MonitoredUser $user */
         foreach($monitoredUsers as $user){
-            $loopRunTimes++;
             $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
                 LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY');
 
@@ -60,7 +56,7 @@ class CheckSummoners extends Command
                     $json = json_decode($jsonString);
 
                     if(Game::byGame($json->platformId, $json->gameId)->count() > 0)
-                        return;
+                        continue;
 
                     try {
                         $game = new Game();
@@ -77,21 +73,13 @@ class CheckSummoners extends Command
                         $process->run();
                     }
                     catch(\Exception $e) {
-                        \Log::error($requestUrl . ' ' . $e->getMessage());
+                        \Log::error($e->getMessage());
                     }
-                } else {
-                    \Log::error($requestUrl . ' ' . $response->getStatusCode());
                 }
-            } catch(ClientException $e){
-                \Log::error($requestUrl . ' ' . $e->getMessage());
-            }
-            catch(\Exception $e){
-            }
+            } catch(\Exception $e){}
 
             usleep(10 * 1000);
         }
-
-        \Log::error('Loop ran ' . $loopRunTimes . ' times and array count is ' . $monitoredUsers->count());
     }
 
     /**
