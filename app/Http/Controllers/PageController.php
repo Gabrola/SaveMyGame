@@ -101,7 +101,9 @@ class PageController extends Controller
             foreach ($monitoredUsers as $monitoredUser)
                 $promises[$monitoredUser->id] = $client->getAsync($monitoredUser->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
 
-            $results = Promise\unwrap($promises);
+            try {
+                $results = Promise\unwrap($promises);
+            } catch (\Exception $e){}
 
             $commandTime = microtime(true) - $startTime;
 
