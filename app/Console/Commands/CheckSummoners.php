@@ -74,11 +74,13 @@ class CheckSummoners extends Command
                         $process->run();
                     }
                     catch(\Exception $e) {
-                        \Log::error($e->getMessage());
+                        \Log::error($requestUrl . ' ' . $e->getMessage());
                     }
+                } else {
+                    \Log::error($requestUrl . ' ' . $response->getStatusCode());
                 }
             } catch(ClientException $e){
-                \Log::error($requestUrl . "\n" . $e->getMessage() . "\nCount:" . $monitoredUsers->count());
+                \Log::error($requestUrl . ' ' . $e->getMessage());
             }
             catch(\Exception $e){
             }
