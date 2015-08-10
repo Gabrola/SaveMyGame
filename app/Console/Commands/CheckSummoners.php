@@ -41,10 +41,29 @@ class CheckSummoners extends Command
         if($monitoredUsers->count() == 0)
             return;
 
-        $startTime = microtime(true);
-
         $client = new Client();
 
+        $startTime = microtime(true);
+
+        $monitoredUserChunks = array_chunk($monitoredUsers, 1000);
+
+        foreach($monitoredUserChunks as $chunk)
+        {
+            $this->downloadPool($client, $chunk);
+        }
+
+        $totalTime = microtime(true) - $startTime;
+
+        \Log::error('CheckSummoners Time = ' . $totalTime . ' seconds');
+    }
+
+    /**
+     * @param Client $client
+     * @param array $monitoredUsers
+     * @throws \Exception
+     */
+    public function downloadPool(&$client, $monitoredUsers)
+    {
         $requests = function ($monitoredUsers) {
             foreach($monitoredUsers as $user){
                 /** @var \App\Models\MonitoredUser $user */
@@ -57,7 +76,7 @@ class CheckSummoners extends Command
         };
 
         $pool = new Pool($client, $requests($monitoredUsers), [
-            'concurrency' => 100,
+            'concurrency' => 1000,
             'fulfilled' => function ($response, $index) {
                 /** @var \GuzzleHttp\Psr7\Response $response */
                 if($response->getStatusCode() == 200){
@@ -90,10 +109,6 @@ class CheckSummoners extends Command
 
         $promise = $pool->promise();
         $promise->wait();
-
-        $commandTime = microtime(true) - $startTime;
-
-        \Log::error('CheckSummoners Time = ' . $commandTime . ' seconds');
     }
 
     /**
