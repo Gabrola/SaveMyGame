@@ -57,7 +57,7 @@ class CheckSummoners extends Command
         };
 
         $pool = new Pool($client, $requests($monitoredUsers), [
-            'concurrency' => 50,
+            'concurrency' => 100,
             'fulfilled' => function ($response, $index) {
                 /** @var \GuzzleHttp\Psr7\Response $response */
                 if($response->getStatusCode() == 200){
