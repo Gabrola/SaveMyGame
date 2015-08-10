@@ -45,31 +45,22 @@ class CheckSummoners extends Command
 
         $client = new Client();
 
-        $requests = function ($monitoredUsers) {
-            foreach($monitoredUsers as $user){
-                /** @var \App\Models\MonitoredUser $user */
+        foreach($monitoredUsers as $user){
+            /** @var \App\Models\MonitoredUser $user */
 
-                $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
-                    LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY');
+            $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
+                LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY');
 
-                yield new Request('GET', $requestUrl);
-            }
-        };
+            try
+            {
+                $response = $client->get($requestUrl);
 
-        $listOfRequests = $requests($monitoredUsers);
-
-        \Log::error('Prepare Requests Time = ' . (microtime(true) - $startTime) . ' seconds');
-
-        $pool = new Pool($client, $listOfRequests, [
-            'concurrency' => 1000,
-            'fulfilled' => function ($response, $index) {
-                /** @var \GuzzleHttp\Psr7\Response $response */
                 if($response->getStatusCode() == 200){
                     $jsonString = $response->getBody();
                     $json = json_decode($jsonString);
 
                     if(Game::byGame($json->platformId, $json->gameId)->count() > 0)
-                        return;
+                        continue;
 
                     try {
                         $game = new Game();
@@ -89,11 +80,9 @@ class CheckSummoners extends Command
                         \Log::error($e->getMessage());
                     }
                 }
-            }
-        ]);
 
-        $promise = $pool->promise();
-        $promise->wait();
+            } catch(\Exception $e){}
+        }
 
         $commandTime = microtime(true) - $startTime;
 
