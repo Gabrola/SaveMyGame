@@ -88,7 +88,7 @@ class PageController extends Controller
     public function test()
     {
         try {
-            $monitoredUsers = MonitoredUser::whereConfirmed(true)->whereRegion('OCE')->get();
+            $monitoredUsers = MonitoredUser::whereConfirmed(true)->whereRegion('OCE')->limit(10)->get();
 
             // Initiate each request but do not block
             $promises = [];
