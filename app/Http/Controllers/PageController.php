@@ -87,17 +87,23 @@ class PageController extends Controller
 
     public function test()
     {
-        $monitoredUsers = MonitoredUser::whereConfirmed(true)->limit(50)->get();
+        $monitoredUsers = MonitoredUser::whereConfirmed(true)->whereRegion('OCE')->get();
 
         // Initiate each request but do not block
         $promises = [];
 
         $client = new Client;
 
+        $startTime = microtime(true);
+
         /** @var MonitoredUser $monitoredUser */
         foreach($monitoredUsers as $monitoredUser)
             $promises[$monitoredUser->id] = $client->getAsync('https://' . \LeagueHelper::getApiByRegion($monitoredUser->region));
 
         $results = Promise\unwrap($promises);
+
+        $commandTime = microtime(true) - $startTime;
+
+        return ('CheckSummoners Time = ' . $commandTime . ' seconds');
     }
 }
