@@ -41,41 +41,31 @@ class CheckSummoners extends Command
         if($monitoredUsers->count() == 0)
             return;
 
-        $client = new Client();
-
-        $countTime = 0;
-        $minTime = 100000000;
-        $maxTime = 0;
-        $totalTime = 0;
-
         $startTime = microtime(true);
 
-        /** @var \App\Models\MonitoredUser $user */
-        foreach($monitoredUsers as $user){
-            $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
-                LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY');
+        $client = new Client();
 
-            try {
+        $requests = function ($monitoredUsers) {
+            foreach($monitoredUsers as $user){
+                /** @var \App\Models\MonitoredUser $user */
 
-                $beginTime = microtime(true);
-                $response = $client->get($requestUrl);
-                $timeItTook = (microtime(true) - $beginTime) * 1000;
+                $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
+                    LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY');
 
-                if($timeItTook < $minTime)
-                    $minTime = $timeItTook;
+                yield new Request('GET', $requestUrl);
+            }
+        };
 
-                if($timeItTook > $maxTime)
-                    $maxTime = $timeItTook;
-
-                $totalTime += $timeItTook;
-                $countTime++;
-
+        $pool = new Pool($client, $requests($monitoredUsers), [
+            'concurrency' => 50,
+            'fulfilled' => function ($response, $index) {
+                /** @var \GuzzleHttp\Psr7\Response $response */
                 if($response->getStatusCode() == 200){
                     $jsonString = $response->getBody();
                     $json = json_decode($jsonString);
 
                     if(Game::byGame($json->platformId, $json->gameId)->count() > 0)
-                        continue;
+                        return;
 
                     try {
                         $game = new Game();
@@ -95,15 +85,15 @@ class CheckSummoners extends Command
                         \Log::error($e->getMessage());
                     }
                 }
-            } catch(\Exception $e){}
+            }
+        ]);
 
-            usleep(10 * 1000);
-        }
+        $promise = $pool->promise();
+        $promise->wait();
 
         $commandTime = microtime(true) - $startTime;
 
         \Log::error('CheckSummoners Time = ' . $commandTime . ' seconds');
-        \Log::error('CheckSummoners Min Request Time = ' . $minTime . 'ms, Max Request Time = ' . $maxTime . 'ms, Avg. Request Time = ' . ($totalTime / $countTime) . 'ms');
     }
 
     /**
