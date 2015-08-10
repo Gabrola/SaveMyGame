@@ -157,6 +157,52 @@ echo Could not find League of Legends installation.
 :DONE
 endlocal',
 
+    'batfileAlt'   => '@echo off
+setlocal ENABLEEXTENSIONS
+setlocal EnableDelayedExpansion
+
+set VALUE_NAME=LocalRootFolder
+
+set KEY_NAME=HKLM\SOFTWARE\Wow6432Node\Riot Games\RADS
+FOR /F "tokens=2*" %%%%A IN (\'REG.EXE QUERY "%%KEY_NAME%%" /v "%%VALUE_NAME%%" 2^>NUL ^| FIND "REG_SZ"\') DO SET RADS=%%%%B
+IF NOT "!RADS!"=="" GOTO PLAY
+
+set KEY_NAME=HKCU\SOFTWARE\Riot Games\RADS
+FOR /F "tokens=2*" %%%%A IN (\'REG.EXE QUERY "%%KEY_NAME%%" /v "%%VALUE_NAME%%" 2^>NUL ^| FIND "REG_SZ"\') DO SET RADS=%%%%B
+IF NOT "!RADS!"=="" GOTO PLAY
+
+set KEY_NAME=HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE\Wow6432Node\Riot Games\RADS
+FOR /F "tokens=2*" %%%%A IN (\'REG.EXE QUERY "%%KEY_NAME%%" /v "%%VALUE_NAME%%" 2^>NUL ^| FIND "REG_SZ"\') DO SET RADS=%%%%B
+IF NOT "!RADS!"=="" GOTO PLAY
+
+set KEY_NAME=HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE\Riot Games\RADS
+FOR /F "tokens=2*" %%%%A IN (\'REG.EXE QUERY "%%KEY_NAME%%" /v "%%VALUE_NAME%%" 2^>NUL ^| FIND "REG_SZ"\') DO SET RADS=%%%%B
+IF NOT "!RADS!"=="" GOTO PLAY
+
+IF EXIST "C:\Riot Games\League of Legends\RADS" DO
+SET RADS=C:\Riot Games\League of Legends\RADS
+GOTO PLAY
+
+GOTO NOTFOUND
+
+:PLAY
+
+cd /D %%RADS%%
+cd .\solutions\lol_game_client_sln\releases\
+FOR /f %%%%i in (\'dir /a:d /b\') do set RELEASE=%%%%i
+cd .\%%RELEASE%%\deploy
+
+@start "" "League of Legends.exe" "8394" "LoLLauncher.exe" "" "spectator %%RANDOM%%%%RANDOM%%.alt.%s:80 %s %d %s"
+GOTO DONE
+
+:NOTFOUND
+
+echo Could not find League of Legends installation.
+@pause
+
+:DONE
+endlocal',
+
     'windowsCommand'  => 'powershell clear;if(Get-Process \"LolClient\" -ErrorAction SilentlyContinue){$ErrorActionPreference=\"Stop\";$c=New-Object Net.Sockets.TcpClient;$c.Connect(\"127.0.0.1\",8393);$c.GetStream().write((%s),0,%u);Exit;}\"Error. Please make sure your LoL client is running.\";',
 
     'macCommand'  => "echo -e '%s' | nc 127.0.0.1 8393",

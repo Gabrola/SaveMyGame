@@ -236,7 +236,7 @@
                     <li>
                         <div class="collapsible-header">Windows Batch File</div>
                         <div class="collapsible-body modal-collapse-body">
-                            <a class="btn waves-effect waves-light red" href="{{ route('replay', [ LeagueHelper::getRegionByPlatformId($game->platform_id), $game->game_id ]) }}"><i class="mdi-file-file-download left"></i> Download</a>
+                            <a class="btn waves-effect waves-light red" href="{{ route('replay' . ($useAlt ? 'Alt' : ''), [ LeagueHelper::getRegionByPlatformId($game->platform_id), $game->game_id ]) }}"><i class="mdi-file-file-download left"></i> Download</a>
                         </div>
                     </li>
                     <li>

@@ -15,7 +15,6 @@ class SpectatorController extends Controller
     {
         /** @var \App\Models\Game $game */
         $game = \App\Models\Game::byGame($region, $gameId)->firstOrFail();
-        //$firstChunk = \App\Models\Chunk::whereDbGameId($game->id)->startGame($game->start_game_chunk_id)->firstOrFail();
         $lastChunk = \App\Models\Chunk::byGame($region, $gameId)->lastChunk()->firstOrFail();
 
         return \Response::json(
@@ -59,31 +58,39 @@ class SpectatorController extends Controller
 
         $requestHost = Request::getHost();
 
-        if(str_contains($requestHost, 'spectator')) {
+        if(str_contains($requestHost, '.alt.')) {
             $domainParts = explode('.', $requestHost);
             $firstPart = $domainParts[0];
 
-            $cacheKey = $firstPart . '_' . Request::getClientIp();
+            $cacheKey = $firstPart . '_' . Request::getClientIp() . '_' . $game->platform_id . $game->game_id;
 
-            if(!Cache::has($cacheKey) || $num == 30000) {
-                $firstChunk = \App\Models\Chunk::whereDbGameId($game->id)->startGame($game->start_game_chunk_id)->firstOrFail();
+            if(Cache::get($cacheKey, 1) < $game->end_startup_chunk_id) {
+                /** @var \App\Models\Chunk $firstChunk */
+                $firstChunk = \App\Models\Chunk::byGame($region, $gameId)->startGame($game->start_game_chunk_id)->firstOrFail();
 
-                if($num != 30000)
-                    Cache::add($cacheKey, true, 60);
+                if($firstChunk->next_chunk_id != $firstChunk->chunk_id)
+                    $firstChunk = \App\Models\Chunk::byGame($region, $gameId)->whereChunkId($firstChunk->chunk_id + 1)->first();
 
-                return \Response::json(
-                    [
-                        'chunkId' => $firstChunk->chunk_id,
-                        'availableSince' => 30000,
-                        'nextAvailableChunk' => 0,
-                        'keyFrameId' => $firstChunk->keyframe_id,
-                        'nextChunkId' => $firstChunk->chunk_id,
-                        'endStartupChunkId' => $game->end_startup_chunk_id,
-                        'startGameChunkId' => $game->start_game_chunk_id,
-                        'endGameChunkId' => $firstChunk->chunk_id,
-                        'duration' => $firstChunk->duration
-                    ]
-                );
+                if($firstChunk) {
+                    if (Cache::has($cacheKey))
+                        Cache::increment($cacheKey);
+                    else
+                        Cache::add($cacheKey, 1, 60);
+
+                    return \Response::json(
+                        [
+                            'chunkId' => $firstChunk->chunk_id,
+                            'availableSince' => 30000,
+                            'nextAvailableChunk' => 0,
+                            'keyFrameId' => $firstChunk->keyframe_id,
+                            'nextChunkId' => $firstChunk->next_chunk_id,
+                            'endStartupChunkId' => $game->end_startup_chunk_id,
+                            'startGameChunkId' => $game->start_game_chunk_id,
+                            'endGameChunkId' => $firstChunk->chunk_id,
+                            'duration' => $firstChunk->duration
+                        ]
+                    );
+                }
             }
         }
 

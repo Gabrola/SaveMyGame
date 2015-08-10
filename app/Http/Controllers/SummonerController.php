@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Chunk;
 use App\Models\Game;
 use App\Models\MonitoredUser;
 use App\Models\Summoner;
@@ -9,7 +10,7 @@ use App\Models\SummonerGame;
 use App\SummonerSearch;
 use Illuminate\Http\Request;
 use App\Http\Requests;
-use Mail;
+use LeagueHelper;
 use Session;
 
 class SummonerController extends Controller
@@ -143,7 +144,21 @@ class SummonerController extends Controller
             $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
         }
 
-        $command = sprintf('replay %s:80 %s %s %s', env('APP_DOMAIN', 'localhost'), $game->encryption_key, $game->game_id, $game->platform_id);
+        $useAlt = false;
+
+        /** @var \App\Models\Chunk $firstChunk */
+        $firstChunk = Chunk::byGame(LeagueHelper::getPlatformIdByRegion($region), $gameId)->startGame($game->start_game_chunk_id)->firstOrFail();
+
+        $domain = env('APP_DOMAIN', 'localhost');
+        $commandPart = 'replay';
+
+        if($firstChunk->chunk_id != $game->start_game_chunk_id) {
+            $useAlt = true;
+            $domain = mt_rand() . '.alt.' . $domain;
+            $commandPart = 'spectator';
+        }
+
+        $command = sprintf('%s %s:80 %s %s %s', $commandPart, $domain, $game->encryption_key, $game->game_id, $game->platform_id);
         $binaryData = pack('VVVVA*', 16, 1, 0, strlen($command), $command);
         $binaryArray = implode(',', unpack('C*', $binaryData));
         $hexString = preg_replace_callback("/../", function($matched) {
@@ -156,7 +171,8 @@ class SummonerController extends Controller
         return view('game', [
             'game'              => $game,
             'windowsCommand'    => $windowsCommand,
-            'macCommand'        => $macCommand
+            'macCommand'        => $macCommand,
+            'useAlt'            => $useAlt
         ]);
     }
 

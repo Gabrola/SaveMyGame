@@ -20,6 +20,7 @@ Route::get('game/{region}/{gameId}', 'SummonerController@getGame');
 Route::get('faq', 'PageController@faq');
 Route::get('versions', 'PageController@versions');
 Route::get('replay/{region}-{matchId}.bat', ['uses' => 'PageController@replay', 'as' => 'replay'] );
+Route::get('replayAlt/{region}-{matchId}.bat', ['uses' => 'PageController@replayAlt', 'as' => 'replayAlt'] );
 
 Route::group(['prefix' => 'observer-mode/rest/consumer'], function () {
     Route::get('version', 'SpectatorController@version');
