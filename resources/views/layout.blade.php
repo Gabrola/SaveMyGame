@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,9 +22,13 @@
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
     <link rel="manifest" href="/manifest.json">
+
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="msapplication-TileImage" content="/mstile-144x144.png">
     <meta name="theme-color" content="#ffffff">
+
+    <meta name="description" content="SaveMyGame is a service that will automatically record all of your League of Legends game replays without needing you to download or install any 3rd party applications">
+    <meta name="keywords" content="lol, league of legends, replay, lolreplay"/>
 </head>
 <body>
 <nav class="top-nav-bar" role="navigation">
@@ -60,9 +63,9 @@
                     <div class="col s12">
                         <div class="card-panel red white-text">
                             <ul class="error-list">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
                             </ul>
                         </div>
                     </div>
@@ -78,7 +81,7 @@
         <div class="row">
             <div class="col s12 center">
                 <small class="white-text">SaveMyGame isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.<br>
-                Copyright &copy; {{ date('Y') }} SaveMyGame </small>
+                    Copyright &copy; {{ date('Y') }} SaveMyGame </small>
             </div>
         </div>
     </div>
