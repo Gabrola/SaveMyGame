@@ -102,8 +102,8 @@ class CheckSummoners extends Command
 
         $commandTime = microtime(true) - $startTime;
 
-        \Log::write('CRON', 'CheckSummoners Time = ' . $commandTime . ' seconds');
-        \Log::write('CRON', 'CheckSummoners Min Request Time = ' . $minTime . 'ms, Max Request Time = ' . $maxTime . 'ms, Avg. Request Time = ' . ($totalTime / $countTime) . 'ms');
+        \Log::error('CheckSummoners Time = ' . $commandTime . ' seconds');
+        \Log::error('CheckSummoners Min Request Time = ' . $minTime . 'ms, Max Request Time = ' . $maxTime . 'ms, Avg. Request Time = ' . ($totalTime / $countTime) . 'ms');
     }
 
     /**
