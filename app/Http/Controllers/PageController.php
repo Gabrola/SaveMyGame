@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClientVersion;
+use App\Models\MonitoredUser;
+use GuzzleHttp\Client;
+use GuzzleHttp\Promise;
 use Illuminate\Http\Request;
 
 class PageController extends Controller
@@ -80,5 +83,21 @@ class PageController extends Controller
         return response()->make($output, 200, [
             'Content-Type' => 'text/plain'
         ]);
+    }
+
+    public function test()
+    {
+        $monitoredUsers = MonitoredUser::whereConfirmed(true)->limit(50)->get();
+
+        // Initiate each request but do not block
+        $promises = [];
+
+        $client = new Client;
+
+        /** @var MonitoredUser $monitoredUser */
+        foreach($monitoredUsers as $monitoredUser)
+            $promises[$monitoredUser->id] = $client->getAsync('https://' . \LeagueHelper::getApiByRegion($monitoredUser->region));
+
+        $results = Promise\unwrap($promises);
     }
 }
