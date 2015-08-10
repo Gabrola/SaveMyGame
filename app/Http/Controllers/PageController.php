@@ -87,25 +87,29 @@ class PageController extends Controller
 
     public function test()
     {
-        return 'wtf';
+        try {
+            $monitoredUsers = MonitoredUser::whereConfirmed(true)->whereRegion('OCE')->get();
 
-        $monitoredUsers = MonitoredUser::whereConfirmed(true)->whereRegion('OCE')->get();
+            // Initiate each request but do not block
+            $promises = [];
 
-        // Initiate each request but do not block
-        $promises = [];
+            $client = new Client(['base_uri' => 'https://oce.api.pvp.net/observer-mode/rest/consumer/getSpectatorGameInfo/OC1/']);
 
-        $client = new Client(['base_uri' => 'https://oce.api.pvp.net/observer-mode/rest/consumer/getSpectatorGameInfo/OC1/']);
+            $startTime = microtime(true);
 
-        $startTime = microtime(true);
+            /** @var MonitoredUser $monitoredUser */
+            foreach ($monitoredUsers as $monitoredUser)
+                $promises[$monitoredUser->id] = $client->getAsync($monitoredUser->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
 
-        /** @var MonitoredUser $monitoredUser */
-        foreach($monitoredUsers as $monitoredUser)
-            $promises[$monitoredUser->id] = $client->getAsync($monitoredUser->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
+            $results = Promise\unwrap($promises);
 
-        $results = Promise\unwrap($promises);
+            $commandTime = microtime(true) - $startTime;
 
-        $commandTime = microtime(true) - $startTime;
-
-        return 'CheckSummoners Time = ' . $commandTime . ' seconds';
+            return 'CheckSummoners Time = ' . $commandTime . ' seconds';
+        }
+        catch(\Exception $e)
+        {
+            return $e->getMessage();
+        }
     }
 }
