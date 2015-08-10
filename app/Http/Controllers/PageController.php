@@ -87,6 +87,8 @@ class PageController extends Controller
 
     public function test()
     {
+        return 'wtf';
+
         $monitoredUsers = MonitoredUser::whereConfirmed(true)->whereRegion('OCE')->get();
 
         // Initiate each request but do not block
