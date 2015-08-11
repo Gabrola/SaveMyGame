@@ -49,16 +49,19 @@ class CheckSummoners extends Command
 
         $handler = HandlerStack::create();
         $handler->push(Middleware::retry(function($retries, $request, $response, $e){
-            if($e instanceof ServerException && $retries < 5) {
+            /** @var \Psr\Http\Message\RequestInterface $request */
+            if($e instanceof ServerException && $retries < 15) {
                 $statusCode = $e->getResponse()->getStatusCode();
 
                 if($statusCode == 500 || $statusCode == 503)
                     return true;
+            } else if($retries == 15) {
+                \Log::error('Retried 15 Times: ' . $request->getUri());
             }
 
             return false;
         }, function($retries){
-            return $retries * 200;
+            return $retries * 250;
         }));
 
         $client = new Client(['handler' => $handler]);
@@ -80,6 +83,8 @@ class CheckSummoners extends Command
                     if($reason instanceof ClientException){
                         if($reason->getResponse()->getStatusCode() != 404)
                             \Log::error($reason->getMessage());
+                    } else if($reason instanceof ServerException) {
+                        \Log::error($reason->getRequest()->getUri() . ' ' . $reason->getMessage());
                     } else if($reason instanceof \Exception) {
                         \Log::error($reason->getMessage());
                     }
