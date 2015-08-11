@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use GuzzleHttp\Exception\ClientException;
 use LeagueHelper;
 use App\Models\Game;
 use App\Models\MonitoredUser;
@@ -83,7 +84,12 @@ class CheckSummoners extends Command
                     }
                 },
                 'rejected' => function ($reason, $index) {
-                    \Log::error($reason);
+                    if($reason instanceof ClientException){
+                        if($reason->getResponse()->getStatusCode() != 404)
+                            \Log::error($reason->getMessage());
+                    } else if($reason instanceof \Exception) {
+                        \Log::error($reason->getMessage());
+                    }
                 },
             ]);
 
