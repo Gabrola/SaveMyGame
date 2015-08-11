@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>@yield('title') - SaveMyGame</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>@yield('title') - SaveMyGame</title>
-
-    <!-- CSS  -->
+    <meta content="index, follow" name="robots" />
+    <meta name="description" content="SaveMyGame is a service that will automatically record all of your League of Legends game replays without needing you to download or install any 3rd party applications">
+    <meta name="keywords" content="lol, league of legends, replay, lolreplay"/>
     <link href="{{ elixir('css/app.css') }}" type="text/css" rel="stylesheet" media="screen,projection"/>
-
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
@@ -22,13 +22,9 @@
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
     <link rel="manifest" href="/manifest.json">
-
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="msapplication-TileImage" content="/mstile-144x144.png">
     <meta name="theme-color" content="#ffffff">
-
-    <meta name="description" content="SaveMyGame is a service that will automatically record all of your League of Legends game replays without needing you to download or install any 3rd party applications">
-    <meta name="keywords" content="lol, league of legends, replay, lolreplay"/>
 </head>
 <body>
 <nav class="top-nav-bar" role="navigation">
