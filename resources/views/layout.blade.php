@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>@yield('title') - SaveMyGame</title>
+    <title>@yield('title') - SaveMyGame - Automated League of Legends Replay Recorder</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta content="index, follow" name="robots" />
@@ -43,8 +43,8 @@
         <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="mdi-navigation-menu"></i></a>
     </div>
 </nav>
-<main class="page-{{ Route::currentRouteName() }}">
-    <div class="section no-pad-bot" style="position: relative">
+<main class="page-{{ isset($pageName) ? $pageName : Route::currentRouteName() }}">
+    <div class="section" style="position: relative">
         <div class="container">
             @if(Session::has('message'))
                 <div class="row">
@@ -94,7 +94,6 @@
 
     ga('create', 'UA-66134065-1', 'auto');
     ga('send', 'pageview');
-
 </script>
 </body>
 </html>

@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Validator;
 use LeagueHelper;
+use View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,6 +18,10 @@ class AppServiceProvider extends ServiceProvider
     {
         Validator::extend('region', function($attribute, $value, $parameters) {
             return LeagueHelper::regionExists($value);
+        });
+
+        View::composer('errors.404', function($view){
+            $view->with('pageName', '404');
         });
     }
 
