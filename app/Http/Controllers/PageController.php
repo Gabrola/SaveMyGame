@@ -100,20 +100,11 @@ class PageController extends Controller
 
             /** @var MonitoredUser $monitoredUser */
             foreach ($monitoredUsers as $monitoredUser)
-                $requests[] = new \GuzzleHttp\Psr7\Request('GET', $monitoredUser->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
-
-            $pool = new Pool($client, $requests, [
-                'concurrency' => 20,
-                'fulfilled' => function ($response, $index) {
-                    // this is delivered each successful response
-                },
-                'rejected' => function ($reason, $index) {
-                    // this is delivered each failed request
-                },
-            ]);
-
-            $promise = $pool->promise();
-            $promise->wait();
+            {
+                try {
+                    $client->get($monitoredUser->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
+                } catch(\Exception $e){}
+            }
 
             $commandTime = microtime(true) - $startTime;
 
