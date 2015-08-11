@@ -105,7 +105,7 @@ class PageController extends Controller
             $pool = new Pool($client, $requests, [
                 'concurrency' => 40,
                 'fulfilled' => function ($response, $index) {
-                    // this is delivered each successful response
+                    echo microtime(true) . '<br>';
                 },
                 'rejected' => function ($reason, $index) {
                     // this is delivered each failed request
