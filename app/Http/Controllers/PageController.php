@@ -88,43 +88,6 @@ class PageController extends Controller
 
     public function test()
     {
-        try {
-            $monitoredUsers = MonitoredUser::whereConfirmed(true)->limit(100)->get();
-
-            // Initiate each request but do not block
-            $requests = [];
-
-            $client = new Client;
-
-            $startTime = microtime(true);
-
-            $output = '';
-
-            /** @var MonitoredUser $user */
-            foreach ($monitoredUsers as $user)
-                $requests[] = new \GuzzleHttp\Psr7\Request('GET', 'https://' . \LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
-                    \LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
-
-            $pool = new Pool($client, $requests, [
-                'concurrency' => 100,
-                'fulfilled' => function ($response, $index) use(&$output, $startTime) {
-                    $output .= (microtime(true) - $startTime) . '<br>';
-                },
-                'rejected' => function ($reason, $index) use(&$output, $startTime) {
-                    $output .= (microtime(true) - $startTime) . '<br>';
-                },
-            ]);
-
-            $promise = $pool->promise();
-            $promise->wait();
-
-            $commandTime = microtime(true) - $startTime;
-
-            return $output . 'CheckSummoners Time = ' . $commandTime . ' seconds';
-        }
-        catch(\Exception $e)
-        {
-            return $e->getMessage();
-        }
+        abort(404);
     }
 }

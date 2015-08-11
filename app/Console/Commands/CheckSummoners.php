@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use \LeagueHelper;
+use LeagueHelper;
 use App\Models\Game;
 use App\Models\MonitoredUser;
 use GuzzleHttp\Client;
@@ -36,52 +36,66 @@ class CheckSummoners extends Command
     {
         $batch = $this->argument('batch');
 
-        $monitoredUsers = MonitoredUser::whereRaw('id % 3 = ?', [$batch])->whereConfirmed(true)->get();
+        $monitoredUsersAll = MonitoredUser::whereRaw('id % 3 = ?', [$batch])->whereConfirmed(true)->get()->toArray();
 
-        if($monitoredUsers->count() == 0)
+        if(count($monitoredUsersAll) == 0)
             return;
+
+        $monitoredUserChunks = array_chunk($monitoredUsersAll, 2000);
 
         $startTime = microtime(true);
 
-        $client = new Client();
+        $client = new Client;
 
-        foreach($monitoredUsers as $user){
-            /** @var \App\Models\MonitoredUser $user */
-
-            $requestUrl = 'https://' . LeagueHelper::getApiByRegion($user->region) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
-                LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY');
-
-            try
-            {
-                $response = $client->get($requestUrl);
-
-                if($response->getStatusCode() == 200){
-                    $jsonString = $response->getBody();
-                    $json = json_decode($jsonString);
-
-                    if(Game::byGame($json->platformId, $json->gameId)->count() > 0)
-                        continue;
-
-                    try {
-                        $game = new Game();
-                        $game->platform_id = $json->platformId;
-                        $game->game_id = $json->gameId;
-                        $game->encryption_key = $json->observers->encryptionKey;
-                        $game->start_stats = json_decode($jsonString, true);
-                        $game->status = 'not_downloaded';
-                        $game->save();
-
-                        $command = $this->getCommand($json->platformId, $json->gameId, $json->observers->encryptionKey);
-
-                        $process = new Process($command, base_path());
-                        $process->run();
-                    }
-                    catch(\Exception $e) {
-                        \Log::error($e->getMessage());
-                    }
+        foreach($monitoredUserChunks as $monitoredUsers) {
+            $requests = function ($monitoredUsers) {
+                foreach ($monitoredUsers as $user) {
+                    yield new Request('GET', 'https://' . LeagueHelper::getApiByRegion($user['region']) . '/observer-mode/rest/consumer/getSpectatorGameInfo/' .
+                        LeagueHelper::getPlatformIdByRegion($user['region']) . '/' . $user['summoner_id'] . '?api_key=' . env('RIOT_API_KEY'));
                 }
+            };
 
-            } catch(\Exception $e){}
+            $pool = new Pool($client, $requests($monitoredUsers), [
+                'concurrency' => 2000,
+                'fulfilled' => function ($response, $index) {
+                    /** @var \GuzzleHttp\Psr7\Response $response */
+                    if ($response->getStatusCode() == 200) {
+                        $jsonString = $response->getBody();
+                        $json = json_decode($jsonString);
+
+                        if (Game::byGame($json->platformId, $json->gameId)->count() > 0)
+                            return;
+
+                        try {
+                            $game = new Game();
+                            $game->platform_id = $json->platformId;
+                            $game->game_id = $json->gameId;
+                            $game->encryption_key = $json->observers->encryptionKey;
+                            $game->start_stats = json_decode($jsonString, true);
+                            $game->status = 'not_downloaded';
+                            $game->save();
+
+                            $command = $this->getCommand($json->platformId, $json->gameId, $json->observers->encryptionKey);
+
+                            $process = new Process($command, base_path());
+                            $process->run();
+                        } catch (\Exception $e) {
+                            \Log::error($e->getMessage());
+                        }
+                    }
+                },
+                'rejected' => function ($reason, $index) { },
+            ]);
+
+            $chunkStartTime = microtime(true);
+
+            $promise = $pool->promise();
+            $promise->wait();
+
+            $chunkTimeElapsed = (microtime(true) - $chunkStartTime) * 1000000;
+
+            if($chunkTimeElapsed < 10000000)
+                usleep(10000000 - $chunkTimeElapsed);
         }
 
         $commandTime = microtime(true) - $startTime;
