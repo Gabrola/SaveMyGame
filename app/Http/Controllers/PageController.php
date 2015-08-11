@@ -89,7 +89,7 @@ class PageController extends Controller
     public function test()
     {
         try {
-            $monitoredUsers = MonitoredUser::whereConfirmed(true)->whereRegion('OCE')->limit(10)->get();
+            $monitoredUsers = MonitoredUser::whereConfirmed(true)->whereRegion('OCE')->limit(40)->get();
 
             // Initiate each request but do not block
             $requests = [];
@@ -103,7 +103,7 @@ class PageController extends Controller
                 $requests[] = new \GuzzleHttp\Psr7\Request('GET', $monitoredUser->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
 
             $pool = new Pool($client, $requests, [
-                'concurrency' => 5,
+                'concurrency' => 20,
                 'fulfilled' => function ($response, $index) {
                     // this is delivered each successful response
                 },
