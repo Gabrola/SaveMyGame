@@ -102,22 +102,12 @@ class PageController extends Controller
 
             /** @var MonitoredUser $monitoredUser */
             foreach ($monitoredUsers as $monitoredUser)
-                $requests[] = new \GuzzleHttp\Psr7\Request('GET', 'observer-mode/rest/consumer/getSpectatorGameInfo/OC1/' . $monitoredUser->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
-
-            $requests[] = new \GuzzleHttp\Psr7\Request('GET', 'api/lol/oce/v1.2/champion?freeToPlay=true&api_key=' . env('RIOT_API_KEY'));
-
-            $pool = new Pool($client, $requests, [
-                'concurrency' => 40,
-                'fulfilled' => function ($response, $index) use(&$output, $startTime) {
-                    $output .= 'S: ' . (microtime(true) - $startTime) . '<br>';
-                },
-                'rejected' => function ($reason, $index) use(&$output, $startTime) {
-                    $output .= 'F: ' . (microtime(true) - $startTime) . '<br>';
-                },
-            ]);
-
-            $promise = $pool->promise();
-            $promise->wait();
+            {
+                try
+                {
+                    $client->get('observer-mode/rest/consumer/getSpectatorGameInfo/OC1/' . $monitoredUser->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
+                } catch(\Exception $e) { }
+            }
 
             $commandTime = microtime(true) - $startTime;
 
