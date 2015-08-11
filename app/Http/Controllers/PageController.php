@@ -107,10 +107,10 @@ class PageController extends Controller
             $pool = new Pool($client, $requests, [
                 'concurrency' => 40,
                 'fulfilled' => function ($response, $index) use(&$output, $startTime) {
-                    $output .= ($startTime - microtime(true)) . '<br>';
+                    $output .= (microtime(true) - $startTime) . '<br>';
                 },
                 'rejected' => function ($reason, $index) use(&$output, $startTime) {
-                    $output .= ($startTime - microtime(true)) . '<br>';
+                    $output .= (microtime(true) - $startTime) . '<br>';
                 },
             ]);
 
