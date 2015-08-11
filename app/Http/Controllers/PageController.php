@@ -109,8 +109,8 @@ class PageController extends Controller
                 'fulfilled' => function ($response, $index) use(&$output, $startTime) {
                     $output .= ($startTime - microtime(true)) . '<br>';
                 },
-                'rejected' => function ($reason, $index) {
-                    // this is delivered each failed request
+                'rejected' => function ($reason, $index) use(&$output, $startTime) {
+                    $output .= ($startTime - microtime(true)) . '<br>';
                 },
             ]);
 
