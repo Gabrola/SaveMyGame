@@ -89,7 +89,7 @@ class PageController extends Controller
     public function test()
     {
         try {
-            $monitoredUsers = MonitoredUser::whereConfirmed(true)->limit(40)->get();
+            $monitoredUsers = MonitoredUser::whereConfirmed(true)->limit(100)->get();
 
             // Initiate each request but do not block
             $requests = [];
@@ -106,7 +106,7 @@ class PageController extends Controller
                     \LeagueHelper::getPlatformIdByRegion($user->region) . '/' . $user->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
 
             $pool = new Pool($client, $requests, [
-                'concurrency' => 40,
+                'concurrency' => 100,
                 'fulfilled' => function ($response, $index) use(&$output, $startTime) {
                     $output .= (microtime(true) - $startTime) . '<br>';
                 },
