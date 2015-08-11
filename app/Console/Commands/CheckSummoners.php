@@ -3,6 +3,9 @@
 namespace App\Console\Commands;
 
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use LeagueHelper;
 use App\Models\Game;
 use App\Models\MonitoredUser;
@@ -44,7 +47,21 @@ class CheckSummoners extends Command
 
         $monitoredUserChunks = array_chunk($monitoredUsersAll, 2000);
 
-        $client = new Client;
+        $handler = HandlerStack::create();
+        $handler->push(Middleware::retry(function($retries, $request, $response, $e){
+            if($e instanceof ServerException && $retries < 5) {
+                $statusCode = $e->getResponse()->getStatusCode();
+
+                if($statusCode == 500 || $statusCode == 503)
+                    return true;
+            }
+
+            return false;
+        }, function($retries){
+            return $retries * 200;
+        }));
+
+        $client = new Client(['handler' => $handler]);
 
         foreach($monitoredUserChunks as $monitoredUsers) {
             $requests = function ($monitoredUsers) {
@@ -57,31 +74,7 @@ class CheckSummoners extends Command
             $pool = new Pool($client, $requests($monitoredUsers), [
                 'concurrency' => 2000,
                 'fulfilled' => function ($response, $index) {
-                    /** @var \GuzzleHttp\Psr7\Response $response */
-                    if ($response->getStatusCode() == 200) {
-                        $jsonString = $response->getBody();
-                        $json = json_decode($jsonString);
-
-                        if (Game::byGame($json->platformId, $json->gameId)->count() > 0)
-                            return;
-
-                        try {
-                            $game = new Game();
-                            $game->platform_id = $json->platformId;
-                            $game->game_id = $json->gameId;
-                            $game->encryption_key = $json->observers->encryptionKey;
-                            $game->start_stats = json_decode($jsonString, true);
-                            $game->status = 'not_downloaded';
-                            $game->save();
-
-                            $command = $this->getCommand($json->platformId, $json->gameId, $json->observers->encryptionKey);
-
-                            $process = new Process($command, base_path());
-                            $process->run();
-                        } catch (\Exception $e) {
-                            \Log::error($e->getMessage());
-                        }
-                    }
+                    $this->handleResponse($response);
                 },
                 'rejected' => function ($reason, $index) {
                     if($reason instanceof ClientException){
@@ -102,6 +95,37 @@ class CheckSummoners extends Command
 
             if($chunkTimeElapsed < 10000000)
                 usleep(10000000 - $chunkTimeElapsed);
+        }
+    }
+
+    /**
+     * @param \GuzzleHttp\Psr7\Response $response
+     */
+    protected function handleResponse($response)
+    {
+        if ($response->getStatusCode() == 200) {
+            $jsonString = $response->getBody();
+            $json = json_decode($jsonString);
+
+            if (Game::byGame($json->platformId, $json->gameId)->count() > 0)
+                return;
+
+            try {
+                $game = new Game();
+                $game->platform_id = $json->platformId;
+                $game->game_id = $json->gameId;
+                $game->encryption_key = $json->observers->encryptionKey;
+                $game->start_stats = json_decode($jsonString, true);
+                $game->status = 'not_downloaded';
+                $game->save();
+
+                $command = $this->getCommand($json->platformId, $json->gameId, $json->observers->encryptionKey);
+
+                $process = new Process($command, base_path());
+                $process->run();
+            } catch (\Exception $e) {
+                \Log::error($e->getMessage());
+            }
         }
     }
 
