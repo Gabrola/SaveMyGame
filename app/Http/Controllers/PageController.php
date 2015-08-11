@@ -89,12 +89,12 @@ class PageController extends Controller
     public function test()
     {
         try {
-            $monitoredUsers = MonitoredUser::whereConfirmed(true)->whereRegion('OCE')->limit(40)->get();
+            $monitoredUsers = MonitoredUser::whereConfirmed(true)->whereRegion('OCE')->limit(39)->get();
 
             // Initiate each request but do not block
             $requests = [];
 
-            $client = new Client(['base_uri' => 'https://oce.api.pvp.net/observer-mode/rest/consumer/getSpectatorGameInfo/OC1/']);
+            $client = new Client(['base_uri' => 'https://oce.api.pvp.net/']);
 
             $startTime = microtime(true);
 
@@ -102,15 +102,17 @@ class PageController extends Controller
 
             /** @var MonitoredUser $monitoredUser */
             foreach ($monitoredUsers as $monitoredUser)
-                $requests[] = new \GuzzleHttp\Psr7\Request('GET', $monitoredUser->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
+                $requests[] = new \GuzzleHttp\Psr7\Request('GET', 'observer-mode/rest/consumer/getSpectatorGameInfo/OC1/' . $monitoredUser->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
+
+            $requests[] = new \GuzzleHttp\Psr7\Request('GET', 'api/lol/oce/v1.2/champion?freeToPlay=true&api_key=' . env('RIOT_API_KEY'));
 
             $pool = new Pool($client, $requests, [
                 'concurrency' => 40,
                 'fulfilled' => function ($response, $index) use(&$output, $startTime) {
-                    $output .= (microtime(true) - $startTime) . '<br>';
+                    $output .= 'S: ' . (microtime(true) - $startTime) . '<br>';
                 },
                 'rejected' => function ($reason, $index) use(&$output, $startTime) {
-                    $output .= (microtime(true) - $startTime) . '<br>';
+                    $output .= 'F: ' . (microtime(true) - $startTime) . '<br>';
                 },
             ]);
 
