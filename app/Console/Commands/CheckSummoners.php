@@ -43,8 +43,6 @@ class CheckSummoners extends Command
 
         $monitoredUserChunks = array_chunk($monitoredUsersAll, 2000);
 
-        $startTime = microtime(true);
-
         $client = new Client;
 
         foreach($monitoredUserChunks as $monitoredUsers) {
@@ -84,7 +82,9 @@ class CheckSummoners extends Command
                         }
                     }
                 },
-                'rejected' => function ($reason, $index) { },
+                'rejected' => function ($reason, $index) {
+                    \Log::error($reason);
+                },
             ]);
 
             $chunkStartTime = microtime(true);
@@ -97,10 +97,6 @@ class CheckSummoners extends Command
             if($chunkTimeElapsed < 10000000)
                 usleep(10000000 - $chunkTimeElapsed);
         }
-
-        $commandTime = microtime(true) - $startTime;
-
-        \Log::error('CheckSummoners Time = ' . $commandTime . ' seconds');
     }
 
     /**
