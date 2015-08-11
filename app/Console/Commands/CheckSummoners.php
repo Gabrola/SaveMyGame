@@ -48,23 +48,25 @@ class CheckSummoners extends Command
         $monitoredUserChunks = array_chunk($monitoredUsersAll, 2000);
 
         $handler = HandlerStack::create();
-        $handler->push(Middleware::retry(function($retries, $request, $response, $e){
+        $middleware = Middleware::retry(function($retries, $request, $response, $e){
             /** @var \Psr\Http\Message\RequestInterface $request */
+
+            \Log::error('Retried ' . $retries . ' Times: ' . $request->getUri());
+
             if($e instanceof ServerException && $retries < 15) {
                 $statusCode = $e->getResponse()->getStatusCode();
 
                 if($statusCode == 500 || $statusCode == 503)
                     return true;
             } else if($retries == 15) {
-                \Log::error('Retried 15 Times: ' . $request->getUri());
             }
 
             return false;
         }, function($retries){
             return $retries * 250;
-        }));
+        });
 
-        $client = new Client(['handler' => $handler]);
+        $client = new Client(['handler' => $middleware($handler)]);
 
         foreach($monitoredUserChunks as $monitoredUsers) {
             $requests = function ($monitoredUsers) {
