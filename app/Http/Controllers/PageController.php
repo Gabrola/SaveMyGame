@@ -98,14 +98,16 @@ class PageController extends Controller
 
             $startTime = microtime(true);
 
+            $output = '';
+
             /** @var MonitoredUser $monitoredUser */
             foreach ($monitoredUsers as $monitoredUser)
                 $requests[] = new \GuzzleHttp\Psr7\Request('GET', $monitoredUser->summoner_id . '?api_key=' . env('RIOT_API_KEY'));
 
             $pool = new Pool($client, $requests, [
                 'concurrency' => 40,
-                'fulfilled' => function ($response, $index) {
-                    echo microtime(true) . '<br>';
+                'fulfilled' => function ($response, $index) use(&$output, $startTime) {
+                    $output .= ($startTime - microtime(true)) . '<br>';
                 },
                 'rejected' => function ($reason, $index) {
                     // this is delivered each failed request
@@ -117,7 +119,7 @@ class PageController extends Controller
 
             $commandTime = microtime(true) - $startTime;
 
-            return 'CheckSummoners Time = ' . $commandTime . ' seconds';
+            return $output . 'CheckSummoners Time = ' . $commandTime . ' seconds';
         }
         catch(\Exception $e)
         {
