@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Models\ClientVersion;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use LeagueHelper;
 use App\Models\Summoner;
 use App\Models\SummonerGame;
@@ -282,7 +284,7 @@ class DownloadReplay extends Command
 
                 $executionTime = round(microtime(true) * 1000) - $startTime;
 
-                $sleepTime = min($info['nextAvailableChunk'] - $executionTime + 500, 10000);
+                $sleepTime = $info['nextAvailableChunk'] - $executionTime + 500;
 
                 if($sleepTime > 0)
                 {
@@ -481,8 +483,30 @@ class DownloadReplay extends Command
         $encryptionKey = $this->argument('encryptionKey');
         $updateSummoner = strtolower($this->argument('updateSummoner'));
 
+        $handler = HandlerStack::create();
+        $middleware = Middleware::retry(function($retries, $request, $response, $e){
+            /** @var \Psr\Http\Message\RequestInterface $request */
+
+            //Do not retry if successful request
+            if(!is_null($response))
+                return false;
+
+            //Do not retry 404 errors
+            if($e instanceof ClientException && $e->getResponse()->getStatusCode() == 404)
+                return false;
+
+            //Do not retry after 5 retries
+            if($retries == 5)
+                return false;
+
+            return true;
+        }, function($retries){
+            return $retries * 100;
+        });
+
         $this->client = new \GuzzleHttp\Client([
-            'base_uri'  => 'http://' . \LeagueHelper::getDomainByPlatformId($platformId) . '/observer-mode/rest/consumer/'
+            'base_uri'  => 'http://' . \LeagueHelper::getDomainByPlatformId($platformId) . '/observer-mode/rest/consumer/',
+            'handler'   => $middleware($handler)
         ]);
 
         $this->game = Game::firstOrNew([
