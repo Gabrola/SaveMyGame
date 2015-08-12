@@ -94,7 +94,7 @@ class Kernel extends ConsoleKernel
         {
             $schedule->call(function () {
                 $sevenDaysAgo = Carbon::now()->subDays(7)->toDateTimeString();
-                $games = Game::where('created_at', '<', $sevenDaysAgo)->all();
+                $games = Game::where('created_at', '<', $sevenDaysAgo)->get();
 
                 /** @var \App\Models\Game $game */
                 foreach($games as $game)
