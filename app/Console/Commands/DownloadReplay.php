@@ -266,7 +266,7 @@ class DownloadReplay extends Command
 
                         $chunkID = $currentChunkID;
 
-                        if($chunk->keyframe_id <= 0) {
+                        if($chunk->keyframe_id > 0) {
                             if (!in_array($chunk->keyframe_id, $this->downloadedKeyframes)) {
                                 $this->log("Chunk %d skipped because keyframe is not available", $currentChunkID);
                                 continue;
