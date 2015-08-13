@@ -202,6 +202,8 @@ class DownloadReplay extends Command
                     $requestNum = 30000;
 
                 if(!$info = $this->GetLastChunkInfo($requestNum)){
+                    $this->log('GetLastChunkInfo failed. Replay download aborted.');
+
                     $endChunk = $chunkID;
                     $this->game->end_game_chunk_id = $endChunk;
                     $this->game->save();
