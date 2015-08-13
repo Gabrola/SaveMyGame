@@ -37,15 +37,15 @@ class Kernel extends ConsoleKernel
     {
         $schedule->call(function(){
             \Artisan::call('replay:check', ['batch' => 0]);
-        })->cron('0/3 * * * *')->name('check_summoners_0');
+        })->cron('0/3 * * * *');
 
         $schedule->call(function(){
             \Artisan::call('replay:check', ['batch' => 1]);
-        })->cron('1/3 * * * *')->name('check_summoners_1');
+        })->cron('1/3 * * * *');
 
         $schedule->call(function(){
             \Artisan::call('replay:check', ['batch' => 2]);
-        })->cron('2/3 * * * *')->name('check_summoners_2');
+        })->cron('2/3 * * * *');
 
         if(\App::environment() == 'local') {
             $schedule->call(function () {
