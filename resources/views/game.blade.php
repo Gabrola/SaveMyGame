@@ -23,14 +23,20 @@
         <div class="divider"></div>
 
         <div class="section">
-            <div class="row">
+            <div class="row game-row">
                 <div class="col l6">
                     <div class="row">
-                        <div class="col s12"><h4>{{ $game->end_stats['teams'][0]['winner'] ? 'Victory' : 'Defeat' }}</h4></div>
+                        <div class="col s12">
+                            <h4>
+                                @if(isset($game->end_stats['teams'][0]['winner']))
+                                    {{ $game->end_stats['teams'][0]['winner'] ? 'Victory' : 'Defeat' }}
+                                @endif
+                            </h4>
+                        </div>
                     </div>
                     @foreach($game->end_stats['participants'] as $parIndex => $participant)
                         @if($participant['teamId'] == $game->end_stats['teams'][0]['teamId'])
-                            {{--*/ $participantData = $game->start_stats['participants'][$parIndex] /*--}}
+                            {{--*/ $participantData = isset($game->start_stats['participants'][$parIndex]) ? $game->start_stats['participants'][$parIndex] : null; /*--}}
                             <div class="game-entry left-entry">
                                 <div class="game-champion">
                                     <span class="lol-champion-{{ $participant['championId']  }} img-roundshadow" title="{{ config('static.champions.' . $participant['championId']) }}"><span class="game-champion-level">{{ $participant['stats']['champLevel'] }}</span></span>
@@ -42,7 +48,9 @@
                                     </div>
                                 </div>
                                 <div class="game-items">
-                                    <a href="{{ action('SummonerController@getById', [LeagueHelper::getRegionByPlatformId($game->platform_id), $participantData['summonerId']]) }}">{{ $participantData['summonerName'] }}</a><br>
+                                    @if($participantData)
+                                        <a href="{{ action('SummonerController@getById', [LeagueHelper::getRegionByPlatformId($game->platform_id), $participantData['summonerId']]) }}">{{ $participantData['summonerName'] }}</a><br>
+                                    @endif
                                     <span class="lol-tiny-item-{{ $participant['stats']['item0'] }} img-roundshadow left" title="{{ config('static.items.' . $participant['stats']['item0']) }}"></span>
                                     <span class="lol-tiny-item-{{ $participant['stats']['item1'] }} img-roundshadow left" title="{{ config('static.items.' . $participant['stats']['item1']) }}"></span>
                                     <span class="lol-tiny-item-{{ $participant['stats']['item2'] }} img-roundshadow left" title="{{ config('static.items.' . $participant['stats']['item2']) }}"></span>
@@ -111,11 +119,17 @@
                 </div>
                 <div class="col l6">
                     <div class="row">
-                        <div class="col s12 right-align"><h4>{{ $game->end_stats['teams'][1]['winner'] ? 'Victory' : 'Defeat' }}</h4></div>
+                        <div class="col s12">
+                            <h4>
+                                @if(isset($game->end_stats['teams'][1]['winner']))
+                                    {{ $game->end_stats['teams'][1]['winner'] ? 'Victory' : 'Defeat' }}
+                                @endif
+                            </h4>
+                        </div>
                     </div>
                     @foreach($game->end_stats['participants'] as $parIndex => $participant)
                         @if($participant['teamId'] == $game->end_stats['teams'][1]['teamId'])
-                            {{--*/ $participantData = $game->start_stats['participants'][$parIndex] /*--}}
+                            {{--*/ $participantData = isset($game->start_stats['participants'][$parIndex]) ? $game->start_stats['participants'][$parIndex] : null; /*--}}
                             <div class="game-entry right-entry">
                                 <div class="game-gold">
                                     <span>
@@ -136,7 +150,9 @@
                                     </span>
                                 </div>
                                 <div class="game-items">
-                                    <a href="{{ action('SummonerController@getById', [LeagueHelper::getRegionByPlatformId($game->platform_id), $participantData['summonerId']]) }}" class="purple-text">{{ $participantData['summonerName'] }}</a><br>
+                                    @if($participantData)
+                                        <a href="{{ action('SummonerController@getById', [LeagueHelper::getRegionByPlatformId($game->platform_id), $participantData['summonerId']]) }}">{{ $participantData['summonerName'] }}</a><br>
+                                    @endif
                                     <span class="lol-tiny-item-{{ $participant['stats']['item0'] }} img-roundshadow left" title="{{ config('static.items.' . $participant['stats']['item0']) }}"></span>
                                     <span class="lol-tiny-item-{{ $participant['stats']['item1'] }} img-roundshadow left" title="{{ config('static.items.' . $participant['stats']['item1']) }}"></span>
                                     <span class="lol-tiny-item-{{ $participant['stats']['item2'] }} img-roundshadow left" title="{{ config('static.items.' . $participant['stats']['item2']) }}"></span>
