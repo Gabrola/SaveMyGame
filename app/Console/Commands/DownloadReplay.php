@@ -13,6 +13,10 @@ use Illuminate\Console\Command;
 use App\Models\Game;
 use App\Models\Chunk;
 use App\Models\Keyframe;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Monolog\Formatter\LineFormatter;
+use File;
 
 class DownloadReplay extends Command
 {
@@ -54,6 +58,11 @@ class DownloadReplay extends Command
      * @var bool
      */
     private $endGameStatsFailed = false;
+
+    /**
+     * @var Logger
+     */
+    protected $logger;
 
     /**
      * @return bool
@@ -199,8 +208,8 @@ class DownloadReplay extends Command
                     break;
                 }
 
-                $this->comment('');
-                $this->comment("Chunk Info (Chunk ID = " . $info['chunkId'] . ", Keyframe ID = " . $info['keyFrameId'] . ")");
+                $this->log('');
+                $this->log("Chunk Info (Chunk ID = %d, Keyframe ID = %d)", $info['chunkId'], $info['keyFrameId']);
 
                 $startTime = round(microtime(true) * 1000);
 
@@ -229,9 +238,9 @@ class DownloadReplay extends Command
                         $startTimeKeyframe = round(microtime(true) * 1000);
                         if ($this->DownloadKeyframe($keyframe)) {
                             $this->downloadedKeyframes[] = $currentKeyframeID;
-                            $this->comment("Keyframe $currentKeyframeID downloaded in " . (round(microtime(true) * 1000) - $startTimeKeyframe) . "ms");
+                            $this->log("Keyframe %d downloaded in %dms", $currentKeyframeID, (round(microtime(true) * 1000) - $startTimeKeyframe));
                         } else
-                            $this->comment("Keyframe $currentKeyframeID download failed");
+                            $this->log("Keyframe %d download failed", $currentKeyframeID);
                     }
 
                     if($currentChunkID <= $info['chunkId']){
@@ -259,23 +268,23 @@ class DownloadReplay extends Command
                         $chunkID = $currentChunkID;
 
                         if(!in_array($chunk->keyframe_id, $this->downloadedKeyframes) && $chunk->keyframe_id != 0) {
-                            $this->comment("Chunk $currentChunkID skipped because keyframe is not available");
+                            $this->log("Chunk %d skipped because keyframe is not available", $currentChunkID);
                             continue;
                         }
 
                         if($chunk->chunk_id >= $this->game->start_game_chunk_id &&
                             $chunk->chunk_id != $chunk->next_chunk_id &&
                             !in_array($chunk->next_chunk_id, $this->downloadedChunks)){
-                            $this->comment("Chunk $currentChunkID skipped because next chunk is not available");
+                            $this->log("Chunk %d skipped because next chunk is not available", $currentChunkID);
                             continue;
                         }
 
                         $startTimeChunk = round(microtime(true) * 1000);
                         if($this->DownloadChunk($chunk)) {
                             $this->downloadedChunks[] = $currentChunkID;
-                            $this->comment("Chunk $currentChunkID downloaded in " . (round(microtime(true) * 1000) - $startTimeChunk) . "ms");
+                            $this->log("Chunk %d downloaded in %dms", $currentChunkID, (round(microtime(true) * 1000) - $startTimeChunk));
                         } else
-                            $this->comment("Chunk $currentChunkID download failed");
+                            $this->log("Chunk %d download failed", $currentChunkID);
                     }
                 }
 
@@ -284,11 +293,11 @@ class DownloadReplay extends Command
 
                 $executionTime = round(microtime(true) * 1000) - $startTime;
 
-                $sleepTime = $info['nextAvailableChunk'] - $executionTime + 500;
+                $sleepTime = min($info['nextAvailableChunk'] - $executionTime + 500, 30000);
 
                 if($sleepTime > 0)
                 {
-                    $this->comment("Sleep = " . $sleepTime . "ms");
+                    $this->log("Sleep = %dms", $sleepTime);
                     usleep($sleepTime * 1000);
                 }
             }
@@ -514,19 +523,39 @@ class DownloadReplay extends Command
             'game_id'       => $gameId
         ]);
 
+        $gameString = $platformId . '-' . $gameId;
+
+        $this->logger = new Logger('Replay');
+        $logFile = storage_path('logs/replays/' . $gameString . '.log');
+
+        $handler = new StreamHandler($logFile, Logger::INFO);
+        $handler->setFormatter(new LineFormatter(null, null, true, true));
+        $this->logger->pushHandler($handler);
+
         $this->game->encryption_key = $encryptionKey;
         $this->game->status = 'downloading';
         $this->game->save();
 
         if($this->StartDownload()) {
-            $this->comment("Game " . $this->game->platform_id . "-" . $this->game->game_id . " downloaded successfully!");
+            $this->log("Game %s-%d downloaded successfully!", $this->game->platform_id, $this->game->game_id);
             $this->game->status = 'downloaded';
             $this->game->save();
             $this->ProcessEndGame();
+
+            File::delete($logFile);
+
         } else if($updateSummoner == 'y') {
-            $this->comment("Game " . $this->game->platform_id . "-" . $this->game->game_id . " download failed!");
+            $this->log("Game %s-%d download failed!", $this->game->platform_id, $this->game->game_id);
             $this->game->status = 'failed';
             $this->game->save();
         }
+    }
+
+    public function log($string)
+    {
+        $args = func_get_args();
+        $string = array_shift($args);
+
+        $this->logger->info(vsprintf($string, $args));
     }
 }

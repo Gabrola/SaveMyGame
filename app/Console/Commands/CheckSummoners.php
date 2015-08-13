@@ -110,6 +110,9 @@ class CheckSummoners extends Command
             $jsonString = $response->getBody();
             $json = json_decode($jsonString);
 
+            if($json === NULL)
+                return;
+
             if (Game::byGame($json->platformId, $json->gameId)->count() > 0)
                 return;
 
