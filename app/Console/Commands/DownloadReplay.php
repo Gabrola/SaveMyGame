@@ -267,16 +267,19 @@ class DownloadReplay extends Command
 
                         $chunkID = $currentChunkID;
 
-                        if(!in_array($chunk->keyframe_id, $this->downloadedKeyframes) && $chunk->keyframe_id != 0) {
-                            $this->log("Chunk %d skipped because keyframe is not available", $currentChunkID);
-                            continue;
-                        }
+                        if($chunk->keyframe_id <= 0) {
+                            if (!in_array($chunk->keyframe_id, $this->downloadedKeyframes)) {
+                                $this->log("Chunk %d skipped because keyframe is not available", $currentChunkID);
+                                continue;
+                            }
 
-                        if($chunk->chunk_id >= $this->game->start_game_chunk_id &&
-                            $chunk->chunk_id != $chunk->next_chunk_id &&
-                            !in_array($chunk->next_chunk_id, $this->downloadedChunks)){
-                            $this->log("Chunk %d skipped because next chunk is not available", $currentChunkID);
-                            continue;
+                            if ($chunk->chunk_id >= $this->game->start_game_chunk_id &&
+                                $chunk->chunk_id != $chunk->next_chunk_id &&
+                                !in_array($chunk->next_chunk_id, $this->downloadedChunks)
+                            ) {
+                                $this->log("Chunk %d skipped because next chunk is not available", $currentChunkID);
+                                continue;
+                            }
                         }
 
                         $startTimeChunk = round(microtime(true) * 1000);
