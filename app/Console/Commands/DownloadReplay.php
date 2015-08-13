@@ -294,9 +294,17 @@ class DownloadReplay extends Command
                 if($info['endGameChunkId'] > 0)
                     $endChunk = $info['endGameChunkId'];
 
+                if($startKeyframeID == $info['keyFrameId'] && $startChunkID == $info['chunkId'] && $info['nextAvailableChunk'] == 0 && $info['availableSince'] > 600000) {
+                    $this->log("Timeout! No new chunks or keyframes for 10 minutes");
+                    break;
+                }
+
                 $executionTime = round(microtime(true) * 1000) - $startTime;
 
                 $sleepTime = min($info['nextAvailableChunk'] - $executionTime + 500, 30000);
+
+                if($info['nextAvailableChunk'] == 0 && $info['availableSince'] > 60000)
+                    $sleepTime = 30000;
 
                 if($sleepTime > 0)
                 {
@@ -513,7 +521,7 @@ class DownloadReplay extends Command
 
             return true;
         }, function($retries){
-            return $retries * 100;
+            return $retries * 250;
         });
 
         $this->client = new \GuzzleHttp\Client([
