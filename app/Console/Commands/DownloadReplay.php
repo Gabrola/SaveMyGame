@@ -208,7 +208,6 @@ class DownloadReplay extends Command
                     break;
                 }
 
-                $this->log('');
                 $this->log("Chunk Info (Chunk ID = %d, Keyframe ID = %d)", $info['chunkId'], $info['keyFrameId']);
 
                 $startTime = round(microtime(true) * 1000);
