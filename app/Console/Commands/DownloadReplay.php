@@ -511,13 +511,17 @@ class DownloadReplay extends Command
             if(!is_null($response))
                 return false;
 
+            $this->log('Request Failed: %s', $request->getUri());
+
             //Do not retry 404 errors
             if($e instanceof ClientException && $e->getResponse()->getStatusCode() == 404)
                 return false;
 
             //Do not retry after 5 retries
-            if($retries == 5)
+            if($retries >= 5)
                 return false;
+
+            $this->log('Request Retried!');
 
             return true;
         }, function($retries){
