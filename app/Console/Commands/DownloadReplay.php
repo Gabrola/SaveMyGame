@@ -208,7 +208,8 @@ class DownloadReplay extends Command
                     break;
                 }
 
-                $this->log("Chunk Info (Chunk ID = %d, Keyframe ID = %d)", $info['chunkId'], $info['keyFrameId']);
+                $this->log("Chunk Info (Chunk ID = %d, Keyframe ID = %d, StartGameChunk ID = %d, EndGameChunk ID = %d)",
+                    $info['chunkId'], $info['keyFrameId'], $info['startGameChunkId'], $info['endGameChunkId']);
 
                 $startTime = round(microtime(true) * 1000);
 
@@ -253,7 +254,7 @@ class DownloadReplay extends Command
                             $chunk->keyframe_id = $info['keyFrameId'];
                             $chunk->next_chunk_id = $info['nextChunkId'];
                             $chunk->duration = $info['duration'];
-                        } else if ($currentChunkID < $info['startGameChunkId']) {
+                        } else if ($currentChunkID < $info['startGameChunkId'] || $info['startGameChunkId'] <= 0) {
                             $chunk->keyframe_id = 0;
                             $chunk->next_chunk_id = 0;
                             $chunk->duration = 0;
