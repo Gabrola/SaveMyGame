@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Game;
 use DB;
 use Illuminate\Console\Command;
 
@@ -13,14 +12,14 @@ class CleanMatches extends Command
      *
      * @var string
      */
-    protected $signature = 'replay:clean {skip=0}';
+    protected $signature = 'replay:migrate';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Clean matches from chunks not used.';
+    protected $description = 'Migrate to new database format.';
 
     /**
      * Create a new command instance.
@@ -39,38 +38,45 @@ class CleanMatches extends Command
      */
     public function handle()
     {
-        $skip = $this->argument('skip');
+        $this->comment('Migrating chunks');
 
-        $this->output->progressStart(Game::count());
-        $this->output->progressAdvance($skip);
+        $this->output->progressStart(DB::table('chunks')->count());
 
-        $games = DB::table('games')->select(['id', 'status', 'end_startup_chunk_id'])->get();
-        $games = array_slice($games, $skip);
+        DB::table('chunks')->select(['id', 'chunk_data'])->chunk(100, function($chunks) {
+            foreach($chunks as $chunk) {
+                $id = DB::table('chunk_data')->insertGetId([
+                    'chunk_id'      => $chunk->id,
+                    'chunk_data'    => $chunk->chunk_data
+                ]);
 
-        $count = 0;
-        $gameIds = [];
-
-        foreach($games as $game) {
-            $this->output->progressAdvance();
-
-            if($game->status != 'downloaded')
-                continue;
-
-            $countChunks = DB::table('chunks')->where('db_game_id', $game->id)->whereBetween('chunk_id', [1, $game->end_startup_chunk_id])->count();
-
-            if($game->end_startup_chunk_id != $countChunks) {
-                $count++;
-                $gameIds[] = $game->id;
-
-                if($count % 200 == 0){
-                    DB::table('chunks')->whereIn('db_game_id', $gameIds)->delete();
-                    DB::table('keyframes')->whereIn('db_game_id', $gameIds)->delete();
-                    DB::table('games')->whereIn('id', $gameIds)->update(['status' => 'deleted']);
-
-                    $gameIds = [];
-                }
+                DB::table('chunks')->where('id', $chunk->id)->update([
+                    'chunk_data_id' => $id
+                ]);
             }
-        }
+
+            $this->output->progressAdvance(100);
+        });
+
+        $this->output->progressFinish();
+
+        $this->comment('Migrating keyframes');
+
+        $this->output->progressStart(DB::table('keyframes')->count());
+
+        DB::table('keyframes')->select(['id', 'keyframe_data'])->chunk(100, function($keyframes) {
+            foreach($keyframes as $keyframe) {
+                $id = DB::table('keyframe_data')->insertGetId([
+                    'keyframe_id'      => $keyframe->id,
+                    'keyframe_data'    => $keyframe->keyframe_data
+                ]);
+
+                DB::table('keyframes')->where('id', $keyframe->id)->update([
+                    'keyframe_data_id' => $id
+                ]);
+            }
+
+            $this->output->progressAdvance(100);
+        });
 
         $this->output->progressFinish();
     }

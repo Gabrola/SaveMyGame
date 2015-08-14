@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\GameUtil;
+use App\Models\ChunkData;
 use App\Models\ClientVersion;
+use App\Models\KeyframeData;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -134,8 +136,13 @@ class DownloadReplay extends Command
             );
 
             if($res->getStatusCode() == 200) {
-                $chunk->chunk_data = $res->getBody();
                 $chunk->save();
+
+                $chunkData = new ChunkData();
+                $chunkData->chunk_data = $res->getBody();
+                $chunkData->chunk_id = $chunk->id;
+                $chunkData->save();
+                $chunkData->chunkInfo()->save($chunk);
 
                 $this->downloadedChunks[] = $chunk->chunk_id;
 
@@ -160,8 +167,13 @@ class DownloadReplay extends Command
             );
 
             if($res->getStatusCode() == 200) {
-                $keyframe->keyframe_data = $res->getBody();
                 $keyframe->save();
+
+                $keyframeData = new KeyframeData();
+                $keyframeData->keyframe_data = $res->getBody();
+                $keyframeData->keyframe_id = $keyframe->id;
+                $keyframeData->save();
+                $keyframeData->keyframe()->save($keyframe);
 
                 $this->downloadedKeyframes[] = $keyframe->keyframe_id;
 

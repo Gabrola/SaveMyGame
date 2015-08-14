@@ -22,8 +22,6 @@ class CreateKeyframesTable extends Migration
             $table->unique(['platform_id', 'game_id', 'keyframe_id']);
             $table->index(['db_game_id']);
         });
-
-        DB::statement("ALTER TABLE keyframes ADD keyframe_data MEDIUMBLOB AFTER keyframe_id");
     }
 
     /**

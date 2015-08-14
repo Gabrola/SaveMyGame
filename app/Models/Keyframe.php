@@ -19,6 +19,9 @@ namespace App\Models;
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Keyframe whereKeyframeId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Keyframe whereKeyframeData($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Keyframe byGame($platformID, $gameID)
+ * @property integer $keyframe_data_id
+ * @property-read \App\Models\KeyframeData $keyframeData
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\Keyframe whereKeyframeDataId($value)
  */
 class Keyframe extends \Eloquent
 {
@@ -45,6 +48,14 @@ class Keyframe extends \Eloquent
     public function game()
     {
         return $this->belongsTo('App\Models\Game', 'db_game_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function keyframeData()
+    {
+        return $this->belongsTo('App\Models\KeyframeData');
     }
 
     /**
