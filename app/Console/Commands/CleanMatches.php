@@ -45,7 +45,7 @@ class CleanMatches extends Command
 
         $this->output->progressStart(DB::table('chunks')->count());
 
-        $chunkCount = 500;
+        $chunkCount = 250;
         $lastId = $chunkCount;
 
         while(true) {
