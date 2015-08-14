@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\GameUtil;
 use App\Models\Chunk;
 use App\Models\Game;
 use App\Models\MonitoredUser;
@@ -53,12 +54,7 @@ class SummonerController extends Controller
                 /** @var \App\Models\Game $game */
                 $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $summonerGame->game_id)->first();
 
-                \Artisan::call('replay:download', [
-                    'platformId'    => \LeagueHelper::getPlatformIdByRegion($summonerGame->region),
-                    'gameId'        => $summonerGame->game_id,
-                    'encryptionKey' => $game->encryption_key,
-                    'updateSummoner'=> 'n'
-                ]);
+                GameUtil::DownloadEndGame($game, true);
 
                 $summonerGame = SummonerGame::find($summonerGame->id);
 
@@ -133,12 +129,7 @@ class SummonerController extends Controller
 
         if(is_null($game->end_stats))
         {
-            \Artisan::call('replay:download', [
-                'platformId'    => $game->platform_id,
-                'gameId'        => $game->game_id,
-                'encryptionKey' => $game->encryption_key,
-                'updateSummoner'=> 'n'
-            ]);
+            GameUtil::DownloadEndGame($game, true);
 
             /** @var \App\Models\Game $game */
             $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();

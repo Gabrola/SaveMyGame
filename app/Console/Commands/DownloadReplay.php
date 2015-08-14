@@ -2,13 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\GameUtil;
 use App\Models\ClientVersion;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use LeagueHelper;
 use App\Models\Summoner;
-use App\Models\SummonerGame;
+use Exception;
 use Illuminate\Console\Command;
 use App\Models\Game;
 use App\Models\Chunk;
@@ -25,7 +26,7 @@ class DownloadReplay extends Command
      *
      * @var string
      */
-    protected $signature = 'replay:download {platformId} {gameId} {encryptionKey} {updateSummoner=y}';
+    protected $signature = 'replay:download {platformId} {gameId} {encryptionKey}';
 
     /**
      * The console command description.
@@ -55,9 +56,19 @@ class DownloadReplay extends Command
     private $downloadedChunks = [];
 
     /**
-     * @var bool
+     * @var int
      */
-    private $endGameStatsFailed = false;
+    private $lastChunkId = 0;
+
+    /**
+     * @var int
+     */
+    private $lastKeyframeId = 0;
+
+    /**
+     * @var int
+     */
+    private $tabs = 0;
 
     /**
      * @var Logger
@@ -77,13 +88,16 @@ class DownloadReplay extends Command
             if($res->getStatusCode() == 200) {
                 $metaData = json_decode($res->getBody());
 
+                $this->game->end_game_chunk_id = 0;
                 $this->game->interest_score = $metaData->interestScore;
                 $this->game->save();
 
                 return true;
             }
         }
-        catch(\Exception $e){}
+        catch(Exception $e){
+            $this->log('GetMetaData Error: %s', $e->getMessage());
+        }
 
         return false;
     }
@@ -102,7 +116,9 @@ class DownloadReplay extends Command
                 return json_decode($res->getBody(), true);
             }
         }
-        catch(\Exception $e){}
+        catch(Exception $e){
+            $this->log('GetLastChunkInfo Error: %s', $e->getMessage());
+        }
 
         return false;
     }
@@ -121,10 +137,14 @@ class DownloadReplay extends Command
                 $chunk->chunk_data = $res->getBody();
                 $chunk->save();
 
+                $this->downloadedChunks[] = $chunk->chunk_id;
+
                 return true;
             }
         }
-        catch(\Exception $e){}
+        catch(Exception $e){
+            $this->log("DownloadChunk Error: %s", $e->getMessage());
+        }
 
         return false;
     }
@@ -143,60 +163,118 @@ class DownloadReplay extends Command
                 $keyframe->keyframe_data = $res->getBody();
                 $keyframe->save();
 
+                $this->downloadedKeyframes[] = $keyframe->keyframe_id;
+
                 return true;
             }
         }
-        catch(\Exception $e){}
+        catch(Exception $e){
+            $this->log("DownloadKeyframe Error: %s", $e->getMessage());
+        }
 
         return false;
     }
 
-    private function GetEndOfGameStats()
+    protected function DownloadKeyframes($info)
     {
-        try {
-            /*$res = $this->client->get(
-                sprintf('endOfGameStats/%s/%d/null', $this->game->platform_id, $this->game->game_id)
-            );
+        $this->log("DownloadKeyframes(lastKeyframeId = %d, info[keyFrameId] = %d)", $this->lastKeyframeId, $info['keyFrameId']);
 
-            if($res->getStatusCode() == 200) {
-                return gzencode($res->getBody());
-            }*/
+        $this->tabs++;
+        while ($this->lastKeyframeId < $info['keyFrameId'])
+        {
+            $this->lastKeyframeId++;
 
-            $requestUrl = 'https://' . LeagueHelper::getApiByPlatformId($this->game->platform_id) . '/api/lol/' .
-                strtolower(LeagueHelper::getRegionByPlatformId($this->game->platform_id)) . '/v2.2/match/' .
-                $this->game->game_id . '?api_key=' . env('RIOT_API_KEY');
+            try {
+                $keyframe = new Keyframe();
+                $keyframe->platform_id = $this->game->platform_id;
+                $keyframe->game_id = $this->game->game_id;
+                $keyframe->keyframe_id = $this->lastKeyframeId;
+                $keyframe->game()->associate($this->game);
 
-            $res = $this->client->get($requestUrl);
+                $startTimeKeyframe = round(microtime(true) * 1000);
 
-            if($res->getStatusCode() == 200) {
-                return json_decode($res->getBody(), true);
+                if ($this->DownloadKeyframe($keyframe))
+                    $this->log("Keyframe %d downloaded in %dms", $this->lastKeyframeId, (round(microtime(true) * 1000) - $startTimeKeyframe));
+                else
+                    $this->log("Keyframe %d download failed", $this->lastKeyframeId);
+            }
+            catch(Exception $e) {
+                $this->log("DownloadKeyframes(%d) Error: %s", $this->lastKeyframeId, (string)$e);
             }
         }
-        catch (ClientException $e) {
-            if($e->getResponse()->getStatusCode() == 429)
-                $this->endGameStatsFailed = true;
-        }
-        catch(\Exception $e){}
+        $this->tabs--;
+    }
 
-        return false;
+    protected function DownloadChunks($info)
+    {
+        $this->log("DownloadChunks(lastChunkId = %d, info[chunkId] = %d)", $this->lastChunkId, $info['chunkId']);
+
+        $this->tabs++;
+        while ($this->lastChunkId < $info['chunkId'])
+        {
+            $this->lastChunkId++;
+
+            try {
+                $chunk = new Chunk();
+                $chunk->platform_id = $this->game->platform_id;
+                $chunk->game_id = $this->game->game_id;
+                $chunk->chunk_id = $this->lastChunkId;
+                $chunk->game()->associate($this->game);
+
+                if ($this->lastChunkId == $info['chunkId']) {
+                    $chunk->keyframe_id = $info['keyFrameId'];
+                    $chunk->next_chunk_id = $info['nextChunkId'];
+                    $chunk->duration = $info['duration'];
+                } else if ($this->lastChunkId < $info['startGameChunkId'] || $info['startGameChunkId'] == 0) {
+                    $chunk->keyframe_id = 0;
+                    $chunk->next_chunk_id = 0;
+                    $chunk->duration = 0;
+                } else {
+                    $chunkKeyframeID = floor(($this->lastChunkId - $info['startGameChunkId']) / 2) + 1;
+                    $chunk->keyframe_id = $chunkKeyframeID;
+                    $chunk->next_chunk_id = $info['startGameChunkId'] + ($chunkKeyframeID - 1) * 2;
+                    $chunk->duration = 30000;
+                }
+
+                if ($chunk->keyframe_id > 0) {
+                    if (!in_array($chunk->keyframe_id, $this->downloadedKeyframes)) {
+                        $this->log("Chunk %d skipped because keyframe is not available", $this->lastChunkId);
+                        continue;
+                    }
+
+                    if ($chunk->chunk_id >= $this->game->start_game_chunk_id &&
+                        $chunk->chunk_id != $chunk->next_chunk_id &&
+                        !in_array($chunk->next_chunk_id, $this->downloadedChunks)
+                    ) {
+                        $this->log("Chunk %d skipped because next chunk is not available", $this->lastChunkId);
+                        continue;
+                    }
+                }
+
+                $startTimeChunk = round(microtime(true) * 1000);
+                if ($this->DownloadChunk($chunk))
+                    $this->log("Chunk %d downloaded in %dms", $this->lastChunkId, (round(microtime(true) * 1000) - $startTimeChunk));
+                else
+                    $this->log("Chunk %d download failed", $this->lastChunkId);
+            }
+            catch(Exception $e) {
+                $this->log("DownloadChunks(%d) Error: %s", $this->lastChunkId, (string)$e);
+            }
+        }
+        $this->tabs--;
     }
 
     public function StartDownload()
     {
-        $updateSummoner = strtolower($this->argument('updateSummoner'));
-
-        $chunkID = 0;
-        $keyframeID = 0;
-        $endChunk = 0;
         $downloaded = false;
 
         $this->ProcessStartGame();
 
-        if($this->GetMetaData() && $updateSummoner == 'y')
+        if($this->GetMetaData())
         {
-            while($endChunk <= 0 || $chunkID < $endChunk)
+            while($this->game->end_game_chunk_id <= 0 || $this->lastChunkId < $this->game->end_game_chunk_id)
             {
-                if($chunkID >= $this->game->start_game_chunk_id)
+                if($this->lastChunkId >= $this->game->start_game_chunk_id)
                     $requestNum = 0;
                 else
                     $requestNum = 30000;
@@ -204,14 +282,12 @@ class DownloadReplay extends Command
                 if(!$info = $this->GetLastChunkInfo($requestNum)){
                     $this->log('GetLastChunkInfo failed. Replay download aborted.');
 
-                    $endChunk = $chunkID;
-                    $this->game->end_game_chunk_id = $endChunk;
+                    $this->game->end_game_chunk_id = $this->lastChunkId;
                     $this->game->save();
                     break;
                 }
 
-                $this->log("Chunk Info (Chunk ID = %d, Keyframe ID = %d, StartGameChunk ID = %d, EndGameChunk ID = %d)",
-                    $info['chunkId'], $info['keyFrameId'], $info['startGameChunkId'], $info['endGameChunkId']);
+                $this->log("LastChunkInfo JSON(%s)", json_encode($info));
 
                 $startTime = round(microtime(true) * 1000);
 
@@ -220,86 +296,15 @@ class DownloadReplay extends Command
                 $this->game->end_game_chunk_id = $info['endGameChunkId'];
                 $this->game->save();
 
-                $startKeyframeID = $keyframeID;
-                $startChunkID = $chunkID;
-
-                for($i = 1; $startKeyframeID + $i <= $info['keyFrameId'] || $startChunkID + $i <= $info['chunkId']; $i++)
-                {
-                    $currentKeyframeID = $startKeyframeID + $i;
-                    $currentChunkID = $startChunkID + $i;
-
-                    if($currentKeyframeID <= $info['keyFrameId']) {
-                        $keyframe = new Keyframe();
-                        $keyframe->platform_id = $this->game->platform_id;
-                        $keyframe->game_id = $this->game->game_id;
-                        $keyframe->keyframe_id = $currentKeyframeID;
-                        $keyframe->game()->associate($this->game);
-
-                        $keyframeID = $currentKeyframeID;
-
-                        $startTimeKeyframe = round(microtime(true) * 1000);
-                        if ($this->DownloadKeyframe($keyframe)) {
-                            $this->downloadedKeyframes[] = $currentKeyframeID;
-                            $this->log("Keyframe %d downloaded in %dms", $currentKeyframeID, (round(microtime(true) * 1000) - $startTimeKeyframe));
-                        } else
-                            $this->log("Keyframe %d download failed", $currentKeyframeID);
-                    }
-
-                    if($currentChunkID <= $info['chunkId']){
-                        $chunk = new Chunk();
-                        $chunk->platform_id = $this->game->platform_id;
-                        $chunk->game_id = $this->game->game_id;
-                        $chunk->chunk_id = $currentChunkID;
-                        $chunk->game()->associate($this->game);
-
-                        if($currentChunkID == $info['chunkId']) {
-                            $chunk->keyframe_id = $info['keyFrameId'];
-                            $chunk->next_chunk_id = $info['nextChunkId'];
-                            $chunk->duration = $info['duration'];
-                        } else if ($currentChunkID < $info['startGameChunkId'] || $info['startGameChunkId'] <= 0) {
-                            $chunk->keyframe_id = 0;
-                            $chunk->next_chunk_id = 0;
-                            $chunk->duration = 0;
-                        } else {
-                            $chunkKeyframeID = floor(($currentChunkID - $info['startGameChunkId']) / 2) + 1;
-                            $chunk->keyframe_id = $chunkKeyframeID;
-                            $chunk->next_chunk_id = $info['startGameChunkId'] + ($chunkKeyframeID - 1) * 2;
-                            $chunk->duration = 30000;
-                        }
-
-                        $chunkID = $currentChunkID;
-
-                        if($chunk->keyframe_id > 0) {
-                            if (!in_array($chunk->keyframe_id, $this->downloadedKeyframes)) {
-                                $this->log("Chunk %d skipped because keyframe is not available", $currentChunkID);
-                                continue;
-                            }
-
-                            if ($chunk->chunk_id >= $this->game->start_game_chunk_id &&
-                                $chunk->chunk_id != $chunk->next_chunk_id &&
-                                !in_array($chunk->next_chunk_id, $this->downloadedChunks)
-                            ) {
-                                $this->log("Chunk %d skipped because next chunk is not available", $currentChunkID);
-                                continue;
-                            }
-                        }
-
-                        $startTimeChunk = round(microtime(true) * 1000);
-                        if($this->DownloadChunk($chunk)) {
-                            $this->downloadedChunks[] = $currentChunkID;
-                            $this->log("Chunk %d downloaded in %dms", $currentChunkID, (round(microtime(true) * 1000) - $startTimeChunk));
-                        } else
-                            $this->log("Chunk %d download failed", $currentChunkID);
-                    }
-                }
-
-                if($info['endGameChunkId'] > 0)
-                    $endChunk = $info['endGameChunkId'];
-
-                if($startKeyframeID == $info['keyFrameId'] && $startChunkID == $info['chunkId'] && $info['nextAvailableChunk'] == 0 && $info['availableSince'] > 600000) {
+                if($this->lastKeyframeId == $info['keyFrameId'] && $this->lastChunkId == $info['chunkId'] && $info['nextAvailableChunk'] == 0 && $info['availableSince'] > 600000) {
                     $this->log("Timeout! No new chunks or keyframes for 10 minutes");
                     break;
                 }
+
+                $this->tabs++;
+                $this->DownloadKeyframes($info);
+                $this->DownloadChunks($info);
+                $this->tabs--;
 
                 $executionTime = round(microtime(true) * 1000) - $startTime;
 
@@ -319,12 +324,7 @@ class DownloadReplay extends Command
         }
 
         $this->RemoveInGameStatus();
-
-        if($endGameStats = $this->GetEndOfGameStats()){
-            $this->game->end_stats = $endGameStats;
-            $this->game->save();
-            return true;
-        }
+        GameUtil::DownloadEndGame($this->game, false);
 
         return $downloaded;
     }
@@ -335,8 +335,6 @@ class DownloadReplay extends Command
             return;
 
         $region = LeagueHelper::getRegionByPlatformId($this->game->platform_id);
-
-        $updateSummoner = strtolower($this->argument('updateSummoner'));
 
         foreach($this->game->start_stats['participants'] as $participantId => $participant)
         {
@@ -352,23 +350,17 @@ class DownloadReplay extends Command
                 $summoner->summoner_id = $participant['summonerId'];
             }
 
-            if($updateSummoner == 'y') {
-                $summoner->internal_summoner_name = \LeagueHelper::getInternalName($participant['summonerName']);
-                $summoner->summoner_name = $participant['summonerName'];
-                $summoner->profile_icon_id = $participant['profileIconId'];
-                $summoner->in_game_id = $this->game->id;
-                $summoner->touch();
-            } else {
-                $summoner->save();
-            }
+            $summoner->internal_summoner_name = \LeagueHelper::getInternalName($participant['summonerName']);
+            $summoner->summoner_name = $participant['summonerName'];
+            $summoner->profile_icon_id = $participant['profileIconId'];
+            $summoner->in_game_id = $this->game->id;
+            $summoner->touch();
         }
     }
 
     public function RemoveInGameStatus()
     {
-        $updateSummoner = strtolower($this->argument('updateSummoner'));
-
-        if(is_null($this->game->start_stats) || $updateSummoner != 'y')
+        if(is_null($this->game->start_stats))
             return;
 
         $region = LeagueHelper::getRegionByPlatformId($this->game->platform_id);
@@ -386,111 +378,6 @@ class DownloadReplay extends Command
         }
     }
 
-    public function ProcessEndGame()
-    {
-        if(is_null($this->game->start_stats))
-            return;
-
-        $region = LeagueHelper::getRegionByPlatformId($this->game->platform_id);
-
-        foreach($this->game->start_stats['participants'] as $participantId => $participant)
-        {
-            if($participant['bot'])
-                continue;
-
-            $summoner = Summoner::bySummonerId($region, $participant['summonerId'])->first();
-
-            if(is_null($summoner))
-            {
-                $summoner = new Summoner;
-                $summoner->region = $region;
-                $summoner->summoner_id = $participant['summonerId'];
-                $summoner->internal_summoner_name = \LeagueHelper::getInternalName($participant['summonerName']);
-                $summoner->summoner_name = $participant['summonerName'];
-                $summoner->profile_icon_id = $participant['profileIconId'];
-                $summoner->save();
-            }
-
-            $summonerGame = SummonerGame::whereRegion($region)->whereSummonerId($summoner->summoner_id)->whereGameId($this->game->game_id)->first();
-
-            if(is_null($summonerGame)) {
-                $summonerGame = new SummonerGame;
-                $summonerGame->region = $region;
-                $summonerGame->game_id = $this->game->game_id;
-                $summonerGame->summoner_id = $summoner->summoner_id;
-            }
-
-            $summonerGame->champion_id = $participant['championId'];
-            $summonerGame->spell1 = $participant['spell1Id'];
-            $summonerGame->spell2 = $participant['spell2Id'];
-            $summonerGame->map_id = $this->game->start_stats['mapId'];
-            $summonerGame->runes = $participant['runes'];
-            $summonerGame->masteries = $participant['masteries'];
-
-            if(!is_null($this->game->end_stats))
-            {
-                $endParticipant = $this->game->end_stats['participants'][$participantId];
-                $summonerGame->queue_type = $this->game->end_stats['queueType'];
-                $summonerGame->match_time = round($this->game->end_stats['matchCreation'] / 1000);
-                $summonerGame->match_duration = $this->game->end_stats['matchDuration'];
-                $summonerGame->stats = $endParticipant['stats'];
-                $summonerGame->win = $endParticipant['stats']['winner'];
-            }
-            else
-            {
-                $summonerGame->queue_type = config('constants.queueIdToType.' . (isset($this->game->start_stats['gameQueueConfigId']) ? $this->game->start_stats['gameQueueConfigId'] : 0));
-                $summonerGame->match_time = round($this->game->start_stats['gameStartTime'] / 1000);
-
-                if($this->game->end_game_chunk_id > 0 && !$this->endGameStatsFailed)
-                {
-                    $summonerGame->stats = false;
-                }
-            }
-
-            $summoner->games()->save($summonerGame);
-        }
-
-        if($this->game->end_stats){
-            $currentVersion = config('clientversion', '0.0.0.0');
-            $replayVersion = $this->game->end_stats['matchVersion'];
-
-            $this->SetReleaseVersion($replayVersion);
-
-            if(version_compare($replayVersion, $currentVersion) > 0)
-                \File::put(config_path('clientversion.php'), '<?php return \'' . $replayVersion . '\';');
-        }
-
-        if(is_null($this->game->end_stats) && $this->game->end_game_chunk_id > 0 && !$this->endGameStatsFailed) {
-            $this->game->end_stats = false;
-            $this->game->save();
-        }
-    }
-
-    public function SetReleaseVersion($clientV)
-    {
-        if(ClientVersion::whereClientVersion($clientV)->count() > 0)
-            return;
-
-        $region = LeagueHelper::getRegionByPlatformId($this->game->platform_id);
-
-        if(!($releaseId = LeagueHelper::getReleaseIdByRegion($region)))
-            return;
-
-        $releaseListingUrl = 'http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_' . $releaseId;
-
-        try
-        {
-            $res = $this->client->get($releaseListingUrl);
-            $releaseListing = $res->getBody();
-            $releaseVersion = trim(strtok($releaseListing, "\n"));
-
-            $clientVersion = new ClientVersion;
-            $clientVersion->client_version = $clientV;
-            $clientVersion->release_version = $releaseVersion;
-            $clientVersion->save();
-        } catch(\Exception $e){}
-    }
-
     /**
      * Execute the console command.
      *
@@ -503,7 +390,6 @@ class DownloadReplay extends Command
         $platformId = $this->argument('platformId');
         $gameId = $this->argument('gameId');
         $encryptionKey = $this->argument('encryptionKey');
-        $updateSummoner = strtolower($this->argument('updateSummoner'));
 
         $handler = HandlerStack::create();
         $middleware = Middleware::retry(function($retries, $request, $response, $e){
@@ -513,8 +399,6 @@ class DownloadReplay extends Command
             if(!is_null($response))
                 return false;
 
-            $this->log('Request Failed: %s', $request->getUri());
-
             //Do not retry 404 errors
             if($e instanceof ClientException && $e->getResponse()->getStatusCode() == 404)
                 return false;
@@ -523,7 +407,7 @@ class DownloadReplay extends Command
             if($retries >= 5)
                 return false;
 
-            $this->log('Request Retried!');
+            $this->log('Request Retried: %s', $request->getUri());
 
             return true;
         }, function($retries){
@@ -557,11 +441,9 @@ class DownloadReplay extends Command
             $this->log("Game %s-%d downloaded successfully!", $this->game->platform_id, $this->game->game_id);
             $this->game->status = 'downloaded';
             $this->game->save();
-            $this->ProcessEndGame();
 
             File::delete($logFile);
-
-        } else if($updateSummoner == 'y') {
+        } else {
             $this->log("Game %s-%d download failed!", $this->game->platform_id, $this->game->game_id);
             $this->game->status = 'failed';
             $this->game->save();
@@ -571,7 +453,7 @@ class DownloadReplay extends Command
     public function log($string)
     {
         $args = func_get_args();
-        $string = array_shift($args);
+        $string = str_repeat("\t", $this->tabs) . array_shift($args);
 
         try {
             $this->logger->info(vsprintf($string, $args));
