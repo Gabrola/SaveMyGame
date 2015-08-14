@@ -44,7 +44,8 @@ class CleanMatches extends Command
         $this->output->progressStart(Game::count());
         $this->output->progressAdvance($skip);
 
-        $games = DB::table('games')->skip($skip)->select(['id', 'status', 'end_startup_chunk_id'])->get();
+        $games = DB::table('games')->select(['id', 'status', 'end_startup_chunk_id'])->get();
+        $games = array_slice($games, $skip);
 
         $count = 0;
         $gameIds = [];
