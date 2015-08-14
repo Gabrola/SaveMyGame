@@ -13,7 +13,7 @@ class CleanMatches extends Command
      *
      * @var string
      */
-    protected $signature = 'replay:clean';
+    protected $signature = 'replay:clean {skip=0}';
 
     /**
      * The console command description.
@@ -39,24 +39,37 @@ class CleanMatches extends Command
      */
     public function handle()
     {
+        $skip = $this->argument('skip');
+
         $this->output->progressStart(Game::count());
+        $this->output->progressAdvance($skip);
 
-        DB::table('games')->chunk(100, function($games){
-            foreach($games as $game) {
-                $this->output->progressAdvance();
+        $games = DB::table('games')->skip($skip)->select(['id', 'status', 'end_startup_chunk_id'])->get();
 
-                if($game->status != 'downloaded')
-                    continue;
+        $count = 0;
+        $gameIds = [];
 
-                $countChunks = DB::table('chunks')->where('db_game_id', $game->id)->whereBetween('chunk_id', [1, $game->end_startup_chunk_id])->count();
+        foreach($games as $game) {
+            $this->output->progressAdvance();
 
-                if($game->end_startup_chunk_id != $countChunks) {
-                    DB::table('chunks')->where('db_game_id', $game->id)->delete();
-                    DB::table('keyframes')->where('db_game_id', $game->id)->delete();
-                    DB::table('games')->where('id', $game->id)->update(['status' => 'deleted']);
+            if($game->status != 'downloaded')
+                continue;
+
+            $countChunks = DB::table('chunks')->where('db_game_id', $game->id)->whereBetween('chunk_id', [1, $game->end_startup_chunk_id])->count();
+
+            if($game->end_startup_chunk_id != $countChunks) {
+                $count++;
+                $gameIds[] = $game->id;
+
+                if($count % 200 == 0){
+                    DB::table('chunks')->whereIn('db_game_id', $gameIds)->delete();
+                    DB::table('keyframes')->whereIn('db_game_id', $gameIds)->delete();
+                    DB::table('games')->whereIn('id', $gameIds)->update(['status' => 'deleted']);
+
+                    $gameIds = [];
                 }
             }
-        });
+        }
 
         $this->output->progressFinish();
     }
