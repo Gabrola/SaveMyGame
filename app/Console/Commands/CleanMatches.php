@@ -41,7 +41,7 @@ class CleanMatches extends Command
     {
         $this->output->progressStart(Game::count());
 
-        DB::table('games')->chunk(100, function($games) use(&$completedCount){
+        DB::table('games')->chunk(100, function($games){
             foreach($games as $game) {
                 $this->output->progressAdvance();
 
