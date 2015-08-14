@@ -573,6 +573,11 @@ class DownloadReplay extends Command
         $args = func_get_args();
         $string = array_shift($args);
 
-        $this->logger->info(vsprintf($string, $args));
+        try {
+            $this->logger->info(vsprintf($string, $args));
+        }
+        catch(\Exception $e) {
+            \Log::error($e);
+        }
     }
 }
