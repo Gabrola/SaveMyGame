@@ -45,7 +45,15 @@ class CleanMatches extends Command
 
         $this->output->progressStart(DB::table('chunks')->count());
 
-        DB::table('chunks')->chunk(200, function($chunks) {
+        $chunkCount = 1000;
+        $lastId = $chunkCount;
+
+        while(true) {
+            $chunks = DB::table('chunks')->whereBetween('id', [$lastId - $chunkCount + 1, $lastId])->get();
+
+            if(count($chunks) == 0)
+                break;
+
             DB::beginTransaction();
 
             foreach($chunks as $chunk) {
@@ -71,8 +79,9 @@ class CleanMatches extends Command
 
             DB::commit();
 
-            $this->output->progressAdvance(200);
-        });
+            $this->output->progressAdvance($chunkCount);
+            $lastId += $chunkCount;
+        }
 
         $this->output->progressFinish();
 
@@ -80,7 +89,14 @@ class CleanMatches extends Command
 
         $this->output->progressStart(DB::table('keyframes')->count());
 
-        DB::table('keyframes')->select(['id', 'keyframe_data'])->chunk(200, function($keyframes) {
+        $lastId = $chunkCount;
+
+        while(true) {
+            $keyframes = DB::table('keyframes')->whereBetween('id', [$lastId - $chunkCount + 1, $lastId])->get();
+
+            if(count($keyframes) == 0)
+                break;
+
             DB::beginTransaction();
 
             foreach($keyframes as $keyframe) {
@@ -103,8 +119,9 @@ class CleanMatches extends Command
 
             DB::commit();
 
-            $this->output->progressAdvance(200);
-        });
+            $this->output->progressAdvance($chunkCount);
+            $lastId += $chunkCount;
+        }
 
         $this->output->progressFinish();
 
