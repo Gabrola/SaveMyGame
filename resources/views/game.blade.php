@@ -119,7 +119,7 @@
                 </div>
                 <div class="col l6">
                     <div class="row">
-                        <div class="col s12">
+                        <div class="col s12 right-align">
                             <h4>
                                 @if(isset($game->end_stats['teams'][1]['winner']))
                                     {{ $game->end_stats['teams'][1]['winner'] ? 'Victory' : 'Defeat' }}
@@ -218,7 +218,7 @@
         </div>
     @endif
 
-    @if($game->status != 'deleted')
+    @if($game->status == 'downloadeddownloaded')
         <div class="divider"></div>
 
         <div class="section center">
@@ -274,7 +274,7 @@
         </div>
     @else
         <div class="card-panel red">
-            <span class="white-text">This game's replay has been deleted because it has been recorded on an older patch and is more than 7 days old.</span>
+            <span class="white-text">This game's replay is corrupted or has been deleted because it has been recorded on an older patch and is more than 7 days old.</span>
         </div>
     @endif
 @endsection

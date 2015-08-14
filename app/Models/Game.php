@@ -82,4 +82,12 @@ class Game extends \Eloquent
     {
         return $query->where('platform_id', $platformID)->where('game_id', $gameID);
     }
+
+    public function deleteReplay()
+    {
+        $this->chunks()->getQuery()->delete();
+        $this->keyframes()->getQuery()->delete();
+        $this->status = 'deleted';
+        $this->save();
+    }
 }

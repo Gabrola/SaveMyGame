@@ -135,36 +135,41 @@ class SummonerController extends Controller
             $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
         }
 
-        $useAlt = false;
+        $viewData = [
+            'game'              => $game
+        ];
 
-        /** @var \App\Models\Chunk $firstChunk */
-        $firstChunk = Chunk::byGame(LeagueHelper::getPlatformIdByRegion($region), $gameId)->startGame($game->start_game_chunk_id)->firstOrFail();
+        if($game->status == 'downloaded') {
+            $useAlt = false;
 
-        $domain = env('APP_DOMAIN', 'localhost');
-        $commandPart = 'replay';
+            /** @var \App\Models\Chunk $firstChunk */
+            $firstChunk = Chunk::byGame(LeagueHelper::getPlatformIdByRegion($region), $gameId)->startGame($game->start_game_chunk_id)->firstOrFail();
 
-        if($firstChunk->chunk_id != $game->start_game_chunk_id) {
-            $useAlt = true;
-            $domain = mt_rand() . '.alt.' . $domain;
-            $commandPart = 'spectator';
+            $domain = env('APP_DOMAIN', 'localhost');
+            $commandPart = 'replay';
+
+            if ($firstChunk->chunk_id != $game->start_game_chunk_id) {
+                $useAlt = true;
+                $domain = mt_rand() . '.alt.' . $domain;
+                $commandPart = 'spectator';
+            }
+
+            $command = sprintf('%s %s:80 %s %s %s', $commandPart, $domain, $game->encryption_key, $game->game_id, $game->platform_id);
+            $binaryData = pack('VVVVA*', 16, 1, 0, strlen($command), $command);
+            $binaryArray = implode(',', unpack('C*', $binaryData));
+            $hexString = preg_replace_callback("/../", function ($matched) {
+                return '\x' . $matched[0];
+            }, bin2hex($binaryData));
+
+            $windowsCommand = sprintf(config('constants.windowsCommand'), $binaryArray, strlen($binaryData));
+            $macCommand = sprintf(config('constants.macCommand'), $hexString);
+
+            $viewData['windowsCommand'] = $windowsCommand;
+            $viewData['macCommand'] = $macCommand;
+            $viewData['useAlt'] = $useAlt;
         }
 
-        $command = sprintf('%s %s:80 %s %s %s', $commandPart, $domain, $game->encryption_key, $game->game_id, $game->platform_id);
-        $binaryData = pack('VVVVA*', 16, 1, 0, strlen($command), $command);
-        $binaryArray = implode(',', unpack('C*', $binaryData));
-        $hexString = preg_replace_callback("/../", function($matched) {
-            return '\x' . $matched[0];
-        }, bin2hex($binaryData));
-
-        $windowsCommand = sprintf(config('constants.windowsCommand'), $binaryArray, strlen($binaryData));
-        $macCommand = sprintf(config('constants.macCommand'), $hexString);
-
-        return view('game', [
-            'game'              => $game,
-            'windowsCommand'    => $windowsCommand,
-            'macCommand'        => $macCommand,
-            'useAlt'            => $useAlt
-        ]);
+        return view('game', $viewData);
     }
 
     public function postRecord(Request $request)

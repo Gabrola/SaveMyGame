@@ -306,6 +306,17 @@ class DownloadReplay extends Command
                 $this->DownloadChunks($info);
                 $this->tabs--;
 
+                if($this->game->end_startup_chunk_id > 0 && $this->lastChunkId > $this->game->end_startup_chunk_id)
+                {
+                    $startupChunks = range(1, $this->game->end_startup_chunk_id);
+
+                    if(array_intersect($this->downloadedChunks, $startupChunks) != $startupChunks) {
+                        $this->log("Startup chunks not downloaded. Aborting replay download!");
+                        $this->RemoveInGameStatus();
+                        return false;
+                    }
+                }
+
                 $executionTime = round(microtime(true) * 1000) - $startTime;
 
                 $sleepTime = min($info['nextAvailableChunk'] - $executionTime + 500, 30000);

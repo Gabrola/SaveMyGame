@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\DownloadReplay::class,
         \App\Console\Commands\CheckSummoners::class,
         \App\Console\Commands\UpdateStatic::class,
+        \App\Console\Commands\CleanMatches::class,
         \App\Console\Commands\Test::class,
     ];
 
@@ -100,13 +101,7 @@ class Kernel extends ConsoleKernel
                 foreach($games as $game)
                 {
                     if (!$game->end_stats || LeagueHelper::comparePatch(config('clientversion', '0.0.0.0'), $game->end_stats['matchVersion']))
-                    {
-                        Chunk::byGame($game->platform_id, $game->game_id)->delete();
-                        Keyframe::byGame($game->platform_id, $game->game_id)->delete();
-
-                        $game->status = 'deleted';
-                        $game->save();
-                    }
+                        $game->deleteReplay();
                 }
             })->daily();
         }
