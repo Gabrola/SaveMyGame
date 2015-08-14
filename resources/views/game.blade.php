@@ -218,7 +218,7 @@
         </div>
     @endif
 
-    @if($game->status == 'downloadeddownloaded')
+    @if($game->status == 'downloaded')
         <div class="divider"></div>
 
         <div class="section center">
