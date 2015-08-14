@@ -39,8 +39,11 @@ class CleanMatches extends Command
      */
     public function handle()
     {
-        DB::table('games')->chunk(100, function($games){
+        $this->output->progressStart(Game::count());
+
+        DB::table('games')->chunk(100, function($games) use(&$completedCount){
             foreach($games as $game) {
+                $this->output->progressAdvance();
 
                 if($game->status != 'downloaded')
                     continue;
@@ -54,5 +57,7 @@ class CleanMatches extends Command
                 }
             }
         });
+
+        $this->output->progressFinish();
     }
 }
