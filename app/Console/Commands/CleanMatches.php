@@ -45,7 +45,7 @@ class CleanMatches extends Command
 
         $this->output->progressStart(DB::table('chunks')->count());
 
-        $chunkCount = 250;
+        $chunkCount = 1000;
         $lastId = $chunkCount;
 
         while(true) {
@@ -75,11 +75,12 @@ class CleanMatches extends Command
                 DB::table('chunks_tmp')->where('id', $chunkInsertionId)->update([
                     'chunk_data_id' => $id
                 ]);
+
+                $this->output->progressAdvance();
             }
 
             DB::commit();
 
-            $this->output->progressAdvance($chunkCount);
             $lastId += $chunkCount;
         }
 
@@ -115,11 +116,12 @@ class CleanMatches extends Command
                 DB::table('keyframes_tmp')->where('id', $keyframeInsertionId)->update([
                     'keyframe_data_id' => $id
                 ]);
+
+                $this->output->progressAdvance();
             }
 
             DB::commit();
 
-            $this->output->progressAdvance($chunkCount);
             $lastId += $chunkCount;
         }
 
