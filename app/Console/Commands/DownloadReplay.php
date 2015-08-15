@@ -196,9 +196,12 @@ class DownloadReplay extends Command
         {
             $this->lastKeyframeId++;
 
-            $requestUrl = 'https://' . LeagueHelper::getApiByPlatformId($this->game->platform_id) . '/api/lol/' .
-                strtolower(LeagueHelper::getRegionByPlatformId($this->game->platform_id)) . '/v2.2/match/' .
-                $this->game->game_id . '?api_key=' . env('RIOT_API_KEY');
+            try {
+                $keyframe = new Keyframe();
+                $keyframe->platform_id = $this->game->platform_id;
+                $keyframe->game_id = $this->game->game_id;
+                $keyframe->keyframe_id = $this->lastKeyframeId;
+                $keyframe->game()->associate($this->game);
 
                 $startTimeKeyframe = round(microtime(true) * 1000);
 
