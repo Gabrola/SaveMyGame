@@ -33,7 +33,7 @@ class GameUtil
         try {
             $requestUrl = 'https://' . LeagueHelper::getApiByPlatformId($game->platform_id) . '/api/lol/' .
                 strtolower(LeagueHelper::getRegionByPlatformId($game->platform_id)) . '/v2.2/match/' .
-                $game->game_id . '?api_key=' . env('RIOT_API_KEY');
+                $game->game_id . '?includeTimeline=true&api_key=' . env('RIOT_API_KEY');
 
             $res = $client->get($requestUrl);
 
