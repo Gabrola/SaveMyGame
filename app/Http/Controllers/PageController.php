@@ -3,10 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClientVersion;
-use App\Models\Game;
-use App\Models\MonitoredUser;
-use GuzzleHttp\Client;
-use GuzzleHttp\Pool;
 use GuzzleHttp\Promise;
 use Illuminate\Http\Request;
 
