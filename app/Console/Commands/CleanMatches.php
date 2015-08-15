@@ -38,7 +38,7 @@ class CleanMatches extends Command
      */
     public function handle()
     {
-        DB::statement('SET unique_checks=0')->getValue();
+        DB::statement('SET unique_checks=0');
         DB::statement('SET foreign_key_checks=0');
 
         DB::statement('DELETE FROM chunks_tmp');
