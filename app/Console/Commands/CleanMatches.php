@@ -41,6 +41,14 @@ class CleanMatches extends Command
         DB::raw('SET unique_checks=0');
         DB::raw('SET foreign_key_checks=0');
 
+        DB::raw('DELETE FROM chunks_tmp');
+        DB::raw('ALTER TABLE chunks_tmp AUTO_INCREMENT = 1;');
+        DB::raw('ALTER TABLE chunk_data AUTO_INCREMENT = 1;');
+
+        DB::raw('DELETE FROM keyframes_tmp');
+        DB::raw('ALTER TABLE keyframes_tmp AUTO_INCREMENT = 1;');
+        DB::raw('ALTER TABLE keyframes_data AUTO_INCREMENT = 1;');
+
         $this->comment('Migrating chunks');
 
         $this->output->progressStart(DB::table('chunks')->count());
