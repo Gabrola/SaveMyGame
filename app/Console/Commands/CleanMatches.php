@@ -38,16 +38,16 @@ class CleanMatches extends Command
      */
     public function handle()
     {
-        DB::raw('SET unique_checks=0');
-        DB::raw('SET foreign_key_checks=0');
+        DB::statement('SET unique_checks=0')->getValue();
+        DB::statement('SET foreign_key_checks=0');
 
-        DB::raw('DELETE FROM chunks_tmp');
-        DB::raw('ALTER TABLE chunks_tmp AUTO_INCREMENT = 1;');
-        DB::raw('ALTER TABLE chunk_data AUTO_INCREMENT = 1;');
+        DB::statement('DELETE FROM chunks_tmp');
+        DB::statement('ALTER TABLE chunks_tmp AUTO_INCREMENT = 1;');
+        DB::statement('ALTER TABLE chunk_data AUTO_INCREMENT = 1;');
 
-        DB::raw('DELETE FROM keyframes_tmp');
-        DB::raw('ALTER TABLE keyframes_tmp AUTO_INCREMENT = 1;');
-        DB::raw('ALTER TABLE keyframes_data AUTO_INCREMENT = 1;');
+        DB::statement('DELETE FROM keyframes_tmp');
+        DB::statement('ALTER TABLE keyframes_tmp AUTO_INCREMENT = 1;');
+        DB::statement('ALTER TABLE keyframes_data AUTO_INCREMENT = 1;');
 
         $this->comment('Migrating chunks');
 
@@ -135,7 +135,7 @@ class CleanMatches extends Command
 
         $this->output->progressFinish();
 
-        DB::raw('SET unique_checks=1');
-        DB::raw('SET foreign_key_checks=1');
+        DB::statement('SET unique_checks=1');
+        DB::statement('SET foreign_key_checks=1');
     }
 }
