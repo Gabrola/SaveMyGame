@@ -38,21 +38,29 @@ class CleanMatches extends Command
      */
     public function handle()
     {
+        DB::statement('DELETE FROM chunks_tmp');
+        DB::statement('ALTER TABLE chunks_tmp AUTO_INCREMENT = 1;');
+        DB::statement('ALTER TABLE chunk_data AUTO_INCREMENT = 1;');
+
+        DB::statement('DELETE FROM keyframes_tmp');
+        DB::statement('ALTER TABLE keyframes_tmp AUTO_INCREMENT = 1;');
+        DB::statement('ALTER TABLE keyframes_data AUTO_INCREMENT = 1;');
+
         DB::statement('SET unique_checks=0');
         DB::statement('SET foreign_key_checks=0');
 
         $this->comment('Migrating chunks');
 
-        $this->output->progressStart(DB::table('chunks')->count());
+        $chunksNumTotal = DB::table('chunks')->count();
+        $this->output->progressStart();
 
-        $chunkCount = 1000;
+        $chunkCount = 100;
         $lastId = $chunkCount;
 
-        while(true) {
-            $chunks = DB::table('chunks')->whereBetween('id', [$lastId - $chunkCount + 1, $lastId])->get();
+        $totalDone = 0;
 
-            if(count($chunks) == 0)
-                break;
+        while($totalDone < $chunksNumTotal) {
+            $chunks = DB::table('chunks')->whereBetween('id', [$lastId - $chunkCount + 1, $lastId])->get();
 
             DB::beginTransaction();
 
@@ -77,6 +85,7 @@ class CleanMatches extends Command
                 ]);
 
                 $this->output->progressAdvance();
+                $totalDone++;
             }
 
             DB::commit();
@@ -88,15 +97,14 @@ class CleanMatches extends Command
 
         $this->comment('Migrating keyframes');
 
-        $this->output->progressStart(DB::table('keyframes')->count());
+        $keyframesNumTotal = DB::table('keyframes')->count();
+        $this->output->progressStart();
 
+        $totalDone = 0;
         $lastId = $chunkCount;
 
-        while(true) {
+        while($totalDone < $keyframesNumTotal) {
             $keyframes = DB::table('keyframes')->whereBetween('id', [$lastId - $chunkCount + 1, $lastId])->get();
-
-            if(count($keyframes) == 0)
-                break;
 
             DB::beginTransaction();
 
@@ -118,6 +126,7 @@ class CleanMatches extends Command
                 ]);
 
                 $this->output->progressAdvance();
+                $totalDone++;
             }
 
             DB::commit();
