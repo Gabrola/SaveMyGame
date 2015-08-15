@@ -52,7 +52,7 @@ class CleanMatches extends Command
         $this->comment('Migrating chunks');
 
         $chunksNumTotal = DB::table('chunks')->count();
-        $this->output->progressStart();
+        $this->output->progressStart($chunksNumTotal);
 
         $chunkCount = 100;
         $lastId = $chunkCount;
@@ -98,7 +98,7 @@ class CleanMatches extends Command
         $this->comment('Migrating keyframes');
 
         $keyframesNumTotal = DB::table('keyframes')->count();
-        $this->output->progressStart();
+        $this->output->progressStart($keyframesNumTotal);
 
         $totalDone = 0;
         $lastId = $chunkCount;
