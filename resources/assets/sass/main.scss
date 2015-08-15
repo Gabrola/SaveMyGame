@@ -68,3 +68,39 @@ ul.error-list {
   display: flex;
   justify-content: center;
 }
+
+footer.page-footer {
+  margin-top: 0;
+}
+
+main.page-404 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+h1.h404
+{
+  font-size: 10rem;
+  animation: rainbow-shadow 2s infinite;
+  animation-direction: alternate;
+  animation-timing-function: linear;
+}
+
+@keyframes rainbow-shadow {
+  0% {
+    text-shadow: 1px 1px 0 #ee4035, 2px 2px 0 #ee4035, 3px 3px 0 #ee4035, 4px 4px 0 #ee4035, 5px 5px 0 #ee4035, 6px 6px 0 #ee4035;
+  }
+  25% {
+    text-shadow: 1px 1px 0 #f37736, 2px 2px 0 #f37736, 3px 3px 0 #f37736, 4px 4px 0 #f37736, 5px 5px 0 #f37736, 6px 6px 0 #f37736;
+  }
+  50% {
+    text-shadow: 1px 1px 0 #fdf498, 2px 2px 0 #fdf498, 3px 3px 0 #fdf498, 4px 4px 0 #fdf498, 5px 5px 0 #fdf498, 6px 6px 0 #fdf498;
+  }
+  75% {
+    text-shadow: 1px 1px 0 #7bc043, 2px 2px 0 #7bc043, 3px 3px 0 #7bc043, 4px 4px 0 #7bc043, 5px 5px 0 #7bc043, 6px 6px 0 #7bc043;
+  }
+  100% {
+    text-shadow: 1px 1px 0 #0392cf, 2px 2px 0 #0392cf, 3px 3px 0 #0392cf, 4px 4px 0 #0392cf, 5px 5px 0 #0392cf, 6px 6px 0 #0392cf;
+  }
+}

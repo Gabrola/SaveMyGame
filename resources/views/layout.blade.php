@@ -1,14 +1,13 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>@yield('title') - SaveMyGame - Automated League of Legends Replay Recorder</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>@yield('title') - SaveMyGame</title>
-
-    <!-- CSS  -->
+    <meta content="index, follow" name="robots" />
+    <meta name="description" content="SaveMyGame is a service that will automatically record all of your League of Legends game replays without needing you to download or install any 3rd party applications">
+    <meta name="keywords" content="lol, league of legends, replay, lolreplay"/>
     <link href="{{ elixir('css/app.css') }}" type="text/css" rel="stylesheet" media="screen,projection"/>
-
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
@@ -44,8 +43,8 @@
         <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="mdi-navigation-menu"></i></a>
     </div>
 </nav>
-<main class="page-{{ Route::currentRouteName() }}">
-    <div class="section no-pad-bot" style="position: relative">
+<main class="page-{{ isset($pageName) ? $pageName : Route::currentRouteName() }}">
+    <div class="section" style="position: relative">
         <div class="container">
             @if(Session::has('message'))
                 <div class="row">
@@ -60,9 +59,9 @@
                     <div class="col s12">
                         <div class="card-panel red white-text">
                             <ul class="error-list">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
                             </ul>
                         </div>
                     </div>
@@ -78,7 +77,7 @@
         <div class="row">
             <div class="col s12 center">
                 <small class="white-text">SaveMyGame isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.<br>
-                Copyright &copy; {{ date('Y') }} SaveMyGame </small>
+                    Copyright &copy; {{ date('Y') }} SaveMyGame </small>
             </div>
         </div>
     </div>
@@ -95,7 +94,6 @@
 
     ga('create', 'UA-66134065-1', 'auto');
     ga('send', 'pageview');
-
 </script>
 </body>
 </html>

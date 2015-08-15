@@ -27,6 +27,9 @@ namespace App\Models;
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Chunk startGame($startGameId)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Chunk byGame($platformID, $gameID)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Chunk lastChunk()
+ * @property integer $chunk_data_id
+ * @property-read \App\Models\ChunkData $chunkData
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\Chunk whereChunkDataId($value)
  */
 class Chunk extends \Eloquent
 {
@@ -56,6 +59,14 @@ class Chunk extends \Eloquent
     public function game()
     {
         return $this->belongsTo('App\Models\Game', 'db_game_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function chunkData()
+    {
+        return $this->belongsTo('App\Models\ChunkData');
     }
 
     /**

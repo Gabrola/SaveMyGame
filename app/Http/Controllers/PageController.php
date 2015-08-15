@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\ClientVersion;
 use App\Models\Game;
+use App\Models\MonitoredUser;
+use GuzzleHttp\Client;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Promise;
 use Illuminate\Http\Request;
 
 class PageController extends Controller
@@ -85,8 +89,6 @@ class PageController extends Controller
 
     public function test()
     {
-        $game = Game::byGame('EUW1', 2242959087)->firstOrFail();
-
-        return $game->end_stats;
+        abort(404);
     }
 }

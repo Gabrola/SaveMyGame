@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\GameUtil;
 use App\Models\Chunk;
 use App\Models\Game;
 use App\Models\MonitoredUser;
@@ -53,12 +54,7 @@ class SummonerController extends Controller
                 /** @var \App\Models\Game $game */
                 $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $summonerGame->game_id)->first();
 
-                \Artisan::call('replay:download', [
-                    'platformId'    => \LeagueHelper::getPlatformIdByRegion($summonerGame->region),
-                    'gameId'        => $summonerGame->game_id,
-                    'encryptionKey' => $game->encryption_key,
-                    'updateSummoner'=> 'n'
-                ]);
+                GameUtil::DownloadEndGame($game, true);
 
                 $summonerGame = SummonerGame::find($summonerGame->id);
 
@@ -133,86 +129,87 @@ class SummonerController extends Controller
 
         if(is_null($game->end_stats))
         {
-            \Artisan::call('replay:download', [
-                'platformId'    => $game->platform_id,
-                'gameId'        => $game->game_id,
-                'encryptionKey' => $game->encryption_key,
-                'updateSummoner'=> 'n'
-            ]);
+            GameUtil::DownloadEndGame($game, true);
 
             /** @var \App\Models\Game $game */
             $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
         }
 
-        $useAlt = false;
+        $viewData = [
+            'game'              => $game
+        ];
 
-        /** @var \App\Models\Chunk $firstChunk */
-        $firstChunk = Chunk::byGame(LeagueHelper::getPlatformIdByRegion($region), $gameId)->startGame($game->start_game_chunk_id)->firstOrFail();
+        if($game->status == 'downloaded') {
+            $useAlt = false;
 
-        $domain = env('APP_DOMAIN', 'localhost');
-        $commandPart = 'replay';
+            /** @var \App\Models\Chunk $firstChunk */
+            $firstChunk = Chunk::byGame(LeagueHelper::getPlatformIdByRegion($region), $gameId)->startGame($game->start_game_chunk_id)->firstOrFail();
 
-        if($firstChunk->chunk_id != $game->start_game_chunk_id) {
-            $useAlt = true;
-            $domain = mt_rand() . '.alt.' . $domain;
-            $commandPart = 'spectator';
-        }
+            $domain = env('APP_DOMAIN', 'localhost');
+            $commandPart = 'replay';
 
-        $command = sprintf('%s %s:80 %s %s %s', $commandPart, $domain, $game->encryption_key, $game->game_id, $game->platform_id);
-        $binaryData = pack('VVVVA*', 16, 1, 0, strlen($command), $command);
-        $binaryArray = implode(',', unpack('C*', $binaryData));
-        $hexString = preg_replace_callback("/../", function($matched) {
-            return '\x' . $matched[0];
-        }, bin2hex($binaryData));
-
-        $windowsCommand = sprintf(config('constants.windowsCommand'), $binaryArray, strlen($binaryData));
-        $macCommand = sprintf(config('constants.macCommand'), $hexString);
-        $events = [];
-
-        if($game->status != 'deleted' && $game->end_stats && isset($game->end_stats['timeline']))
-        {
-            $killCount = [];
-            $lastKill = [];
-
-            foreach($game->end_stats['participants'] as $participant)
-            {
-                $killCount[$participant['participantId']] = 0;
-                $lastKill[$participant['participantId']] = -100000;
+            if ($firstChunk->chunk_id != $game->start_game_chunk_id) {
+                $useAlt = true;
+                $domain = mt_rand() . '.alt.' . $domain;
+                $commandPart = 'spectator';
             }
 
-            foreach($game->end_stats['timeline']['frames'] as $frame)
-            {
-                if(isset($frame['events'])) {
-                    foreach($frame['events'] as $event)
-                    {
-                        if($event['eventType'] == 'CHAMPION_KILL')
-                        {
-                            $killerId = $event['killerId'];
-                            $lastKillTime = $lastKill[$killerId];
-                            $thisKillTime = $event['timestamp'];
+            $command = sprintf('%s %s:80 %s %s %s', $commandPart, $domain, $game->encryption_key, $game->game_id, $game->platform_id);
+            $binaryData = pack('VVVVA*', 16, 1, 0, strlen($command), $command);
+            $binaryArray = implode(',', unpack('C*', $binaryData));
+            $hexString = preg_replace_callback("/../", function ($matched) {
+                return '\x' . $matched[0];
+            }, bin2hex($binaryData));
 
-                            if($thisKillTime - $lastKillTime <= 10000){
-                                $event['multiKill'] = ++$killCount[$killerId];
-                            } else {
-                                $event['multiKill'] = $killCount[$killerId] = 1;
+            $windowsCommand = sprintf(config('constants.windowsCommand'), $binaryArray, strlen($binaryData));
+            $macCommand = sprintf(config('constants.macCommand'), $hexString);
+
+            $events = [];
+
+            if($game->end_stats && isset($game->end_stats['timeline']))
+            {
+                $killCount = [];
+                $lastKill = [];
+
+                foreach($game->end_stats['participants'] as $participant)
+                {
+                    $killCount[$participant['participantId']] = 0;
+                    $lastKill[$participant['participantId']] = -100000;
+                }
+
+                foreach($game->end_stats['timeline']['frames'] as $frame)
+                {
+                    if(isset($frame['events'])) {
+                        foreach($frame['events'] as $event)
+                        {
+                            if($event['eventType'] == 'CHAMPION_KILL')
+                            {
+                                $killerId = $event['killerId'];
+                                $lastKillTime = $lastKill[$killerId];
+                                $thisKillTime = $event['timestamp'];
+
+                                if($thisKillTime - $lastKillTime <= 10000){
+                                    $event['multiKill'] = ++$killCount[$killerId];
+                                } else {
+                                    $event['multiKill'] = $killCount[$killerId] = 1;
+                                }
+
+                                $lastKill[$killerId] = $thisKillTime;
                             }
 
-                            $lastKill[$killerId] = $thisKillTime;
+                            $events[] = $event;
                         }
-
-                        $events[] = $event;
                     }
                 }
             }
+            
+            $viewData['windowsCommand'] = $windowsCommand;
+            $viewData['macCommand'] = $macCommand;
+            $viewData['useAlt'] = $useAlt;
+            $viewData['events'] = $events;
         }
 
-        return view('game', [
-            'game'              => $game,
-            'windowsCommand'    => $windowsCommand,
-            'macCommand'        => $macCommand,
-            'useAlt'            => $useAlt,
-            'events'            => $events
-        ]);
+        return view('game', $viewData);
     }
 
     public function postRecord(Request $request)

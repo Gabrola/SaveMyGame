@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\DownloadReplay::class,
         \App\Console\Commands\CheckSummoners::class,
         \App\Console\Commands\UpdateStatic::class,
+        \App\Console\Commands\CleanMatches::class,
         \App\Console\Commands\Test::class,
     ];
 
@@ -37,15 +38,15 @@ class Kernel extends ConsoleKernel
     {
         $schedule->call(function(){
             \Artisan::call('replay:check', ['batch' => 0]);
-        })->cron('0/3 * * * *')->name('check_summoners_0')->withoutOverlapping();
+        })->cron('0/3 * * * *');
 
         $schedule->call(function(){
             \Artisan::call('replay:check', ['batch' => 1]);
-        })->cron('1/3 * * * *')->name('check_summoners_1')->withoutOverlapping();
+        })->cron('1/3 * * * *');
 
         $schedule->call(function(){
             \Artisan::call('replay:check', ['batch' => 2]);
-        })->cron('2/3 * * * *')->name('check_summoners_2')->withoutOverlapping();
+        })->cron('2/3 * * * *');
 
         if(\App::environment() == 'local') {
             $schedule->call(function () {
@@ -94,19 +95,13 @@ class Kernel extends ConsoleKernel
         {
             $schedule->call(function () {
                 $sevenDaysAgo = Carbon::now()->subDays(7)->toDateTimeString();
-                $games = Game::where('created_at', '<', $sevenDaysAgo)->all();
+                $games = Game::where('created_at', '<', $sevenDaysAgo)->get();
 
                 /** @var \App\Models\Game $game */
                 foreach($games as $game)
                 {
                     if (!$game->end_stats || LeagueHelper::comparePatch(config('clientversion', '0.0.0.0'), $game->end_stats['matchVersion']))
-                    {
-                        Chunk::byGame($game->platform_id, $game->game_id)->delete();
-                        Keyframe::byGame($game->platform_id, $game->game_id)->delete();
-
-                        $game->status = 'deleted';
-                        $game->save();
-                    }
+                        $game->deleteReplay();
                 }
             })->daily();
         }

@@ -166,7 +166,7 @@ class SpectatorController extends Controller
         /** @var \App\Models\Chunk $chunk */
         $chunk = \App\Models\Chunk::byGame($region, $gameId)->whereChunkId($num)->firstOrFail();
 
-        return \Response::make($chunk->chunk_data, '200', array(
+        return \Response::make($chunk->chunkData->chunk_data, '200', array(
             'Content-Type' => 'application/octet-stream'
         ));
     }
@@ -176,7 +176,7 @@ class SpectatorController extends Controller
         /** @var \App\Models\Keyframe $keyframe */
         $keyframe = \App\Models\Keyframe::byGame($region, $gameId)->whereKeyframeId($num)->firstOrFail();
 
-        return \Response::make($keyframe->keyframe_data, '200', array(
+        return \Response::make($keyframe->keyframeData->keyframe_data, '200', array(
             'Content-Type' => 'application/octet-stream'
         ));
     }
