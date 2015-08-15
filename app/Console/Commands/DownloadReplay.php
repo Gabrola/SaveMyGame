@@ -281,6 +281,8 @@ class DownloadReplay extends Command
         $downloaded = false;
 
         $this->ProcessStartGame();
+        DB::commit();
+        DB::beginTransaction();
 
         if($this->GetMetaData())
         {
