@@ -38,7 +38,7 @@ class CleanMatches extends Command
      */
     public function handle()
     {
-        DB::statement('DELETE FROM chunks_tmp');
+        /*DB::statement('DELETE FROM chunks_tmp');
         DB::statement('ALTER TABLE chunks_tmp AUTO_INCREMENT = 1;');
         DB::statement('ALTER TABLE chunk_data AUTO_INCREMENT = 1;');
 
@@ -137,6 +137,6 @@ class CleanMatches extends Command
         $this->output->progressFinish();
 
         DB::statement('SET unique_checks=1');
-        DB::statement('SET foreign_key_checks=1');
+        DB::statement('SET foreign_key_checks=1');*/
     }
 }
