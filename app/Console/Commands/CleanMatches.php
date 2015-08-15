@@ -44,7 +44,7 @@ class CleanMatches extends Command
 
         DB::statement('DELETE FROM keyframes_tmp');
         DB::statement('ALTER TABLE keyframes_tmp AUTO_INCREMENT = 1;');
-        DB::statement('ALTER TABLE keyframes_data AUTO_INCREMENT = 1;');
+        DB::statement('ALTER TABLE keyframe_data AUTO_INCREMENT = 1;');
 
         DB::statement('SET unique_checks=0');
         DB::statement('SET foreign_key_checks=0');
