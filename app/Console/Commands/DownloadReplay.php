@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\GameUtil;
 use App\Models\ChunkData;
-use App\Models\ClientVersion;
+use DB;
 use App\Models\KeyframeData;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\HandlerStack;
@@ -460,17 +460,19 @@ class DownloadReplay extends Command
         $this->game->status = 'downloading';
         $this->game->save();
 
-        if($this->StartDownload()) {
-            $this->log("Game %s-%d downloaded successfully!", $this->game->platform_id, $this->game->game_id);
-            $this->game->status = 'downloaded';
-            $this->game->save();
+        DB::transaction(function() use ($logFile) {
+            if($this->StartDownload()) {
+                $this->log("Game %s-%d downloaded successfully!", $this->game->platform_id, $this->game->game_id);
+                $this->game->status = 'downloaded';
+                $this->game->save();
 
-            File::delete($logFile);
-        } else {
-            $this->log("Game %s-%d download failed!", $this->game->platform_id, $this->game->game_id);
-            $this->game->status = 'failed';
-            $this->game->save();
-        }
+                File::delete($logFile);
+            } else {
+                $this->log("Game %s-%d download failed!", $this->game->platform_id, $this->game->game_id);
+                $this->game->status = 'failed';
+                $this->game->save();
+            }
+        });
     }
 
     public function log($string)
