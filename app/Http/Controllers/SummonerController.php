@@ -140,18 +140,17 @@ class SummonerController extends Controller
         ];
 
         if($game->status == 'downloaded') {
-            $useAlt = false;
-
             /** @var \App\Models\Chunk $firstChunk */
             $firstChunk = Chunk::byGame(LeagueHelper::getPlatformIdByRegion($region), $gameId)->startGame($game->start_game_chunk_id)->firstOrFail();
 
             $domain = env('APP_DOMAIN', 'localhost');
             $commandPart = 'replay';
+            $batchLink = route('replay', [ LeagueHelper::getRegionByPlatformId($game->platform_id), $game->game_id ]);
 
             if ($firstChunk->chunk_id != $game->start_game_chunk_id) {
-                $useAlt = true;
                 $domain = mt_rand() . '.alt.' . $domain;
                 $commandPart = 'spectator';
+                $batchLink = route('replayAlt', [ LeagueHelper::getRegionByPlatformId($game->platform_id), $game->game_id ]);
             }
 
             $command = sprintf('%s %s:80 %s %s %s', $commandPart, $domain, $game->encryption_key, $game->game_id, $game->platform_id);
@@ -177,24 +176,31 @@ class SummonerController extends Controller
                     $lastKill[$participant['participantId']] = -100000;
                 }
 
+                $i = 1;
+
                 foreach($game->end_stats['timeline']['frames'] as $frame)
                 {
                     if(isset($frame['events'])) {
                         foreach($frame['events'] as $event)
                         {
+                            $event['id'] = $i++;
+
                             if($event['eventType'] == 'CHAMPION_KILL')
                             {
                                 $killerId = $event['killerId'];
-                                $lastKillTime = $lastKill[$killerId];
-                                $thisKillTime = $event['timestamp'];
 
-                                if($thisKillTime - $lastKillTime <= 10000){
-                                    $event['multiKill'] = ++$killCount[$killerId];
-                                } else {
-                                    $event['multiKill'] = $killCount[$killerId] = 1;
+                                if($killerId > 0) {
+                                    $lastKillTime = $lastKill[$killerId];
+                                    $thisKillTime = $event['timestamp'];
+
+                                    if ($thisKillTime - $lastKillTime <= 10000) {
+                                        $event['multiKill'] = ++$killCount[$killerId];
+                                    } else {
+                                        $event['multiKill'] = $killCount[$killerId] = 1;
+                                    }
+
+                                    $lastKill[$killerId] = $thisKillTime;
                                 }
-
-                                $lastKill[$killerId] = $thisKillTime;
                             }
 
                             $events[] = $event;
@@ -202,14 +208,53 @@ class SummonerController extends Controller
                     }
                 }
             }
-            
+
+            $viewData['batchLink'] = $batchLink;
             $viewData['windowsCommand'] = $windowsCommand;
             $viewData['macCommand'] = $macCommand;
-            $viewData['useAlt'] = $useAlt;
             $viewData['events'] = $events;
         }
 
         return view('game', $viewData);
+    }
+
+    public function getGameEvents(Request $request, $region, $gameId, $timestamp1, $timestamp2)
+    {
+        if(!\LeagueHelper::regionExists($region))
+            abort(404);
+
+        /** @var \App\Models\Game $game */
+        $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
+
+        if(is_null($game) || $game->status != 'downloaded')
+            abort(404);
+
+        $startChunk = floor(($timestamp1 - 15000) / 30000);
+        $endChunk = floor(($timestamp2 + 15000) / 30000);
+
+        $partial = LeagueHelper::partialIntFromChunks($startChunk, $endChunk);
+
+        $domain = mt_rand() . '.' . $partial . '.partial.' . env('APP_DOMAIN', 'localhost');
+        $commandPart = 'spectator';
+        $batchLink = route('replayPartial', [ LeagueHelper::getRegionByPlatformId($game->platform_id), $game->game_id, $partial ]);
+
+        $command = sprintf('%s %s:80 %s %s %s', $commandPart, $domain, $game->encryption_key, $game->game_id, $game->platform_id);
+        $binaryData = pack('VVVVA*', 16, 1, 0, strlen($command), $command);
+        $binaryArray = implode(',', unpack('C*', $binaryData));
+        $hexString = preg_replace_callback("/../", function ($matched) {
+            return '\x' . $matched[0];
+        }, bin2hex($binaryData));
+
+        $windowsCommand = sprintf(config('constants.windowsCommand'), $binaryArray, strlen($binaryData));
+        $macCommand = sprintf(config('constants.macCommand'), $hexString);
+
+        return view('_replay_modal', [
+            'windowsCommand'    => $windowsCommand,
+            'macCommand'        => $macCommand,
+            'batchLink'         => $batchLink,
+            'windowsCommandId'  => 'windowsCommandPartial',
+            'macCommandId'      => 'macCommandPartial'
+        ]);
     }
 
     public function postRecord(Request $request)

@@ -107,4 +107,23 @@
 .game-row {
   display: flex;
   align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.team- {
+  &100 {
+    box-shadow: 0 0 3px 2px #039be5;
+
+    &.hide-shadow {
+      box-shadow: none;
+    }
+  }
+
+  &200 {
+    box-shadow: 0 0 3px 2px #9c27b0;
+
+    &.hide-shadow {
+      box-shadow: none;
+    }
+  }
 }

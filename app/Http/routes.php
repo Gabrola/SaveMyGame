@@ -17,10 +17,14 @@ Route::get('summoner/{region}/{summonerName}', 'SummonerController@getIndex');
 Route::get('summoner/id/{region}/{summonerId}', 'SummonerController@getById');
 Route::post('summoner/record', 'SummonerController@postRecord');
 Route::get('game/{region}/{gameId}', 'SummonerController@getGame');
+Route::get('game/{region}/{gameId}/events/{timestamp1}/{timestamp2}', 'SummonerController@getGameEvents')
+    ->where(['timestamp1' => '[0-9]+', 'timestamp2' => '[0-9]+']);
 Route::get('faq', 'PageController@faq');
 Route::get('versions', 'PageController@versions');
 Route::get('replay/{region}-{matchId}.bat', ['uses' => 'PageController@replay', 'as' => 'replay'] );
 Route::get('replayAlt/{region}-{matchId}.bat', ['uses' => 'PageController@replayAlt', 'as' => 'replayAlt'] );
+Route::get('replayPartial/{region}-{matchId}-{partial}.bat', ['uses' => 'PageController@replayPartial', 'as' => 'replayPartial'] )
+    ->where(['partial' => '[0-9]+']);
 Route::get('gabrolatest', 'PageController@test');
 
 Route::group(['prefix' => 'observer-mode/rest/consumer'], function () {

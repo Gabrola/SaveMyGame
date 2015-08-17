@@ -257,4 +257,26 @@ class LeagueHelper
     {
         return str_replace(' ', '', mb_strtolower($summonerName));
     }
+
+    /**
+     * @param int $chunkStart
+     * @param int $chunkEnd
+     * @return int
+     */
+    public function partialIntFromChunks($chunkStart, $chunkEnd)
+    {
+        return (((int)$chunkStart << 16) | (int)$chunkEnd) ^ 0x00AF00EB;
+    }
+
+    /**
+     * @param int $partialInt
+     * @return array
+     */
+    public function chunksFromPartialInt($partialInt)
+    {
+        $partialInt = (int)$partialInt;
+        $partialInt ^= 0x00AF00EB;
+
+        return [($partialInt >> 16) & 0xFFFF, $partialInt & 0xFFFF];
+    }
 }

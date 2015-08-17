@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Chunk;
 use Cache;
+use LeagueHelper;
 use Request;
 
 class SpectatorController extends Controller
@@ -93,10 +94,10 @@ class SpectatorController extends Controller
                     );
                 }
             }
-        } else if(str_contains($requestHost, '.chunks.') && substr_count($requestHost, '.') == 4) {
+        } else if(str_contains($requestHost, '.partial.') && substr_count($requestHost, '.') == 4) {
             $domainParts = explode('.', $requestHost);
             $randomPart = $domainParts[0];
-            $chunks = explode('-', $domainParts[1]);
+            $chunks = LeagueHelper::chunksFromPartialInt($domainParts[1]);
 
             if(count($chunks) != 2)
                 abort(400);
@@ -108,7 +109,7 @@ class SpectatorController extends Controller
 
             $cacheKey = $randomPart . '_' . Request::getClientIp() . '_' . $game->platform_id . $game->game_id;
 
-            if(Cache::get($cacheKey, 1) < $game->end_startup_chunk_id) {
+            if(Cache::get($cacheKey, 1) < $game->end_startup_chunk_id + 2) {
                 if (Cache::has($cacheKey))
                     Cache::increment($cacheKey);
                 else
@@ -123,7 +124,7 @@ class SpectatorController extends Controller
                         'nextChunkId' => $firstChunk->next_chunk_id,
                         'endStartupChunkId' => $game->end_startup_chunk_id,
                         'startGameChunkId' => $game->start_game_chunk_id,
-                        'endGameChunkId' => $firstChunk->chunk_id,
+                        'endGameChunkId' => $lastChunk->chunk_id,
                         'duration' => $firstChunk->duration
                     ]
                 );

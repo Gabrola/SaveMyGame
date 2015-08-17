@@ -40,7 +40,7 @@ class PageController extends Controller
         if(is_null($game))
             abort(404);
 
-        $batFile = sprintf(config('constants.batfile'), env('APP_DOMAIN', 'localhost'), $game->encryption_key, $game->game_id, $game->platform_id);
+        $batFile = sprintf(config('constants.batfile'), 'replay', env('APP_DOMAIN', 'localhost'), $game->encryption_key, $game->game_id, $game->platform_id);
 
         return response()->make($batFile, '200', array(
             'Content-Type' => 'application/x-bat',
@@ -59,11 +59,30 @@ class PageController extends Controller
         if(is_null($game))
             abort(404);
 
-        $batFile = sprintf(config('constants.batfileAlt'), env('APP_DOMAIN', 'localhost'), $game->encryption_key, $game->game_id, $game->platform_id);
+        $batFile = sprintf(config('constants.batfile'), 'spectator', '%RANDOM%%RANDOM%.alt.' . env('APP_DOMAIN', 'localhost'), $game->encryption_key, $game->game_id, $game->platform_id);
 
         return response()->make($batFile, '200', array(
             'Content-Type' => 'application/x-bat',
             'Content-Disposition' => 'attachment; filename="REPLAY_' . $game->platform_id . $game->game_id . '.bat"'
+        ));
+    }
+
+    public function replayPartial($region, $matchId, $partial)
+    {
+        if(!$platformId = \LeagueHelper::getPlatformIdByRegion($region))
+            abort(404);
+
+        /** @var \App\Models\Game $game */
+        $game = \App\Models\Game::byGame($platformId, $matchId)->first();
+
+        if(is_null($game))
+            abort(404);
+
+        $batFile = sprintf(config('constants.batfile'), 'spectator', '%RANDOM%%RANDOM%.' . $partial . '.partial.' . env('APP_DOMAIN', 'localhost'), $game->encryption_key, $game->game_id, $game->platform_id);
+
+        return response()->make($batFile, '200', array(
+            'Content-Type' => 'application/x-bat',
+            'Content-Disposition' => 'attachment; filename="REPLAY_' . $game->platform_id . $game->game_id . '_' . $partial . '.bat"'
         ));
     }
 
