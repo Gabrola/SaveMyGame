@@ -197,6 +197,7 @@ return [
 
         'LeagueHelper'  => App\Facades\LeagueHelper::class,
         'Recaptcha'     => Greggilbert\Recaptcha\Facades\Recaptcha::class,
+        'Carbon'        => Carbon\Carbon::class
     ],
 
 ];

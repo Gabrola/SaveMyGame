@@ -7,7 +7,7 @@
     <meta content="index, follow" name="robots" />
     <meta name="description" content="SaveMyGame is a service that will automatically record all of your League of Legends game replays without needing you to download or install any 3rd party applications">
     <meta name="keywords" content="lol, league of legends, replay, lolreplay"/>
-    <link href="{{ elixir('css/app.css') }}" type="text/css" rel="stylesheet" media="screen,projection"/>
+    <link href="{{ elixir('css/all.css') }}" type="text/css" rel="stylesheet" media="screen,projection"/>
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
@@ -44,7 +44,7 @@
     </div>
 </nav>
 <main class="page-{{ isset($pageName) ? $pageName : Route::currentRouteName() }}">
-    <div class="section" style="position: relative">
+    <div class="section">
         <div class="container">
             @if(Session::has('message'))
                 <div class="row">

@@ -8,14 +8,14 @@
             <h4 class="center">
                 {{ config('constants.queues.' . $game->end_stats['queueType'], $game->end_stats['queueType']) }}
             </h4>
-            <h5 class="center">Lasted {{ round($game->end_stats['matchDuration'] / 60) }} minutes on {{ date('d F, Y H:i:s', $game->end_stats['matchCreation'] / 1000) }}</h5>
+            <h5 class="center">Lasted {{ round($game->end_stats['matchDuration'] / 60) }} minutes on {{ Carbon::createFromTimestamp($game->end_stats['matchCreation'] / 1000)->toDayDateTimeString() }}</h5>
         </div>
     @else
         <div class="section">
             <h4 class="center">
                 {{ config('constants.queueIds.' . (isset($game->start_stats['gameQueueConfigId']) ? $game->start_stats['gameQueueConfigId'] : 0)) }}
             </h4>
-            <h5 class="center">On {{ date('d F, Y H:i:s', $game->start_stats['gameStartTime'] / 1000) }}</h5>
+            <h5 class="center">On {{ Carbon::createFromTimestamp($game->start_stats['gameStartTime'] / 1000)->toDayDateTimeString() }}</h5>
         </div>
     @endif
 
@@ -24,7 +24,7 @@
 
         <div class="section">
             <div class="row game-row">
-                <div class="col l6">
+                <div class="col">
                     <div class="row">
                         <div class="col s12">
                             <h4>
@@ -117,7 +117,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="col l6">
+                <div class="col">
                     <div class="row">
                         <div class="col s12 right-align">
                             <h4>
@@ -236,42 +236,105 @@
 
         <!-- Modal Structure -->
         <div id="alternative-modal" class="modal">
-            <div class="modal-content">
-                <h4>Watch Replay</h4>
-                <ul class="collapsible" data-collapsible="accordion">
-                    <li>
-                        <div class="collapsible-header">Windows Command</div>
-                        <div class="collapsible-body modal-collapse-body">
-                            <p>Open a command prompt, paste this into it and press enter. Make sure your League of Legends client is running.</p>
-                            <div style="display: flex">
-                                <textarea id="windowsCommand" rows="1" readonly class="command-area" onclick="this.focus();this.select()">{{ $windowsCommand }}</textarea>
-                                <i class="mdi-content-content-copy copy-button" data-copy-element="windowsCommand" data-zclip-path="{{ asset('build/js/ZeroClipboard.swf') }}"></i>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="collapsible-header">Windows Batch File</div>
-                        <div class="collapsible-body modal-collapse-body">
-                            <a class="btn waves-effect waves-light red" href="{{ route('replay' . ($useAlt ? 'Alt' : ''), [ LeagueHelper::getRegionByPlatformId($game->platform_id), $game->game_id ]) }}"><i class="mdi-file-file-download left"></i> Download</a>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="collapsible-header">Mac Command</div>
-                        <div class="collapsible-body modal-collapse-body">
-                            <p>Open a terminal window, paste this into it and press enter. Make sure your League of Legends client is running.</p>
-                            <div style="display: flex">
-                                <textarea id="macCommand" rows="1" readonly class="command-area" onclick="this.focus();this.select()">{{ $macCommand }}</textarea>
-                                <i class="mdi-content-content-copy copy-button" data-copy-element="macCommand" data-zclip-path="{{ asset('build/js/ZeroClipboard.swf') }}"></i>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-
-            </div>
-            <div class="modal-footer">
-                <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat ">Close</a>
-            </div>
+            @include('_replay_modal', ['windowsCommandId' => 'windowsCommand', 'macCommandId' => 'macCommand'])
         </div>
+
+        @if(!empty($game->events))
+            <div class="divider"></div>
+
+            <div class="section events-section">
+                <h4 class="center">Watch Partial Replay</h4>
+
+                <h5 class="center">Filter By Killers</h5>
+                <div class="champions-filter">
+                    @foreach($game->end_stats['participants'] as $participant)
+                        <span class="lol-champion-{{ $participant['championId']  }} img-roundshadow filter-champion team-{{ $participant['teamId'] }} hide-shadow" data-player-id="{{ $participant['participantId'] }}" title="{{ config('static.champions.' . $participant['championId']) }}"></span>
+                    @endforeach
+                </div>
+
+                <div class="center-align-children">
+                    <div>
+                        <table class="event-table">
+                            <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Event Type</th>
+                                <th>Event Information</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody class="event-tbody">
+                            @foreach($game->events as $event)
+                                @if($event['eventType'] == 'CHAMPION_KILL' && $event['killerId'] > 0)
+                                    {{--*/ $killerParticipant = $game->end_stats['participants'][$event['killerId'] - 1]; /*--}}
+                                    {{--*/ $killedParticipant = $game->end_stats['participants'][$event['victimId'] - 1]; /*--}}
+                                    <tr id="row-event-{{ $event['id'] }}" data-type="kill" data-killer="{{ $event['killerId'] }}" data-event-id="{{ $event['id'] }}" data-timestamp="{{ $event['timestamp'] }}">
+                                        <td>{{ gmdate("i:s", floor($event['timestamp'] / 1000)) }}</td>
+                                        <td>
+                                            @if($event['multiKill'] == 1)
+                                                <span>Champion Kill</span>
+                                            @elseif($event['multiKill'] == 2)
+                                                <span class="bold blue-text">Double Kill</span>
+                                            @elseif($event['multiKill'] == 3)
+                                                <span class="bold blue-text">Triple Kill</span>
+                                            @elseif($event['multiKill'] == 4)
+                                                <span class="extra-bold red-text">Quadra Kill</span>
+                                            @elseif($event['multiKill'] == 5)
+                                                <span class="extra-bold red-text">Penta Kill</span>
+                                            @elseif($event['multiKill'] > 5)
+                                                <span class="extra-bold red-text">Legendary Kill</span>
+                                            @endif
+                                        </td>
+                                        <td class="killer-td">
+                                            <span class="lol-champion-{{ $killerParticipant['championId']  }} img-roundshadow team-{{ $killerParticipant['teamId'] }}" title="{{ config('static.champions.' . $killerParticipant['championId']) }}"></span>
+                                            <span class="margin-20-sides">killed</span>
+                                            <span class="lol-champion-{{ $killedParticipant['championId']  }} img-roundshadow team-{{ $killedParticipant['teamId'] }}" title="{{ config('static.champions.' . $killedParticipant['championId']) }}"></span>
+                                        </td>
+                                        <td class="check-td">
+                                            <input type="checkbox" id="check-event-{{ $event['id'] }}" data-event-id="{{ $event['id'] }}" class="event-checkbox" />
+                                            <label for="check-event-{{ $event['id'] }}"></label>
+                                        </td>
+                                    </tr>
+                                @elseif($event['eventType'] == 'ELITE_MONSTER_KILL')
+                                    {{--*/ $killerParticipant = $game->end_stats['participants'][$event['killerId'] - 1]; /*--}}
+                                    <tr id="row-event-{{ $event['id'] }}" data-type="monster" data-killer="{{ $event['killerId'] }}" data-event-id="{{ $event['id'] }}" data-timestamp="{{ $event['timestamp'] }}">
+                                        <td>{{ gmdate("i:s", floor($event['timestamp'] / 1000)) }}</td>
+                                        <td>
+                                            @if($event['monsterType'] == 'BARON_NASHOR')
+                                                <span class="bold purple-text">Baron Kill</span>
+                                            @elseif($event['monsterType'] == 'DRAGON')
+                                                <span class="bold brown-text">Dragon Kill</span>
+                                            @elseif($event['monsterType'] == 'VILEMAW')
+                                                <span class="bold brown-text">Vilemaw Kill</span>
+                                            @endif
+                                        </td>
+                                        <td class="center-align-children">
+                                            <span class="lol-champion-{{ $killerParticipant['championId']  }} img-roundshadow team-{{ $killerParticipant['teamId']  }}" title="{{ config('static.champions.' . $killerParticipant['championId']) }}"></span>
+                                        </td>
+                                        <td class="check-td">
+                                            <input type="checkbox" id="check-event-{{ $event['id'] }}" data-event-id="{{ $event['id'] }}" class="event-checkbox" />
+                                            <label for="check-event-{{ $event['id'] }}"></label>
+                                        </td>
+                                    </tr>
+                                @endif
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <p class="center">
+                    Time Leeway: <strong>15 seconds</strong> <i class="mdi-action-help" title="i.e. make sure that there are at least 15 seconds of time before and after the selected play"></i>
+                    <br>Replay Interval: <span class="replay-begin-time blue-text">00:00</span> (-15 seconds) to <span class="replay-end-time blue-text">00:00</span> (+15 seconds)
+                </p>
+                <p class="center">
+                    <a class="btn waves-effect waves-light red" style="display: none" href="#" id="watch-interval-btn"><i class="mdi-av-videocam left"></i> Watch Partial Replay</a>
+                </p>
+            </div>
+
+            <div id="partial-modal" class="modal"></div>
+        @endif
     @else
         <div class="card-panel red">
             <span class="white-text">This game's replay is corrupted or has been deleted because it has been recorded on an older patch and is more than 7 days old.</span>
