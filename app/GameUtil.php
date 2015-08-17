@@ -118,6 +118,55 @@ class GameUtil
             $summoner->games()->save($summonerGame);
         }
 
+        $events = false;
+
+        if($game->end_stats && isset($game->end_stats['timeline']))
+        {
+            $events = [];
+            $killCount = [];
+            $lastKill = [];
+
+            foreach($game->end_stats['participants'] as $participant)
+            {
+                $killCount[$participant['participantId']] = 0;
+                $lastKill[$participant['participantId']] = -100000;
+            }
+
+            $i = 1;
+
+            foreach($game->end_stats['timeline']['frames'] as $frame)
+            {
+                if(isset($frame['events'])) {
+                    foreach($frame['events'] as $event)
+                    {
+                        $event['id'] = $i++;
+
+                        if($event['eventType'] == 'CHAMPION_KILL')
+                        {
+                            $killerId = $event['killerId'];
+
+                            if($killerId > 0) {
+                                $lastKillTime = $lastKill[$killerId];
+                                $thisKillTime = $event['timestamp'];
+
+                                if ($thisKillTime - $lastKillTime <= 10000) {
+                                    $event['multiKill'] = ++$killCount[$killerId];
+                                } else {
+                                    $event['multiKill'] = $killCount[$killerId] = 1;
+                                }
+
+                                $lastKill[$killerId] = $thisKillTime;
+                            }
+                        }
+
+                        $events[] = $event;
+                    }
+                }
+            }
+        }
+
+        $game->events = $events;
+
         if($game->end_stats && !$retryDownload){
             $currentVersion = config('clientversion', '0.0.0.0');
             $replayVersion = $game->end_stats['matchVersion'];
@@ -130,8 +179,9 @@ class GameUtil
 
         if(is_null($game->end_stats) && $retryDownload) {
             $game->end_stats = false;
-            $game->save();
         }
+
+        $game->save();
     }
 
     /**

@@ -8,14 +8,14 @@
             <h4 class="center">
                 {{ config('constants.queues.' . $game->end_stats['queueType'], $game->end_stats['queueType']) }}
             </h4>
-            <h5 class="center">Lasted {{ round($game->end_stats['matchDuration'] / 60) }} minutes on {{ date('d F, Y H:i:s', $game->end_stats['matchCreation'] / 1000) }}</h5>
+            <h5 class="center">Lasted {{ round($game->end_stats['matchDuration'] / 60) }} minutes on {{ Carbon::createFromTimestamp($game->end_stats['matchCreation'] / 1000)->toDayDateTimeString() }}</h5>
         </div>
     @else
         <div class="section">
             <h4 class="center">
                 {{ config('constants.queueIds.' . (isset($game->start_stats['gameQueueConfigId']) ? $game->start_stats['gameQueueConfigId'] : 0)) }}
             </h4>
-            <h5 class="center">On {{ date('d F, Y H:i:s', $game->start_stats['gameStartTime'] / 1000) }}</h5>
+            <h5 class="center">On {{ Carbon::createFromTimestamp($game->start_stats['gameStartTime'] / 1000)->toDayDateTimeString() }}</h5>
         </div>
     @endif
 
@@ -239,46 +239,20 @@
             @include('_replay_modal', ['windowsCommandId' => 'windowsCommand', 'macCommandId' => 'macCommand'])
         </div>
 
-        @if(!empty($events))
+        @if(!empty($game->events))
             <div class="divider"></div>
 
-            <div class="section">
-                <h4 class="center">Partial Replay</h4>
+            <div class="section events-section">
+                <h4 class="center">Watch Partial Replay</h4>
 
-                <style scoped="scoped">
-                    .event-table {
-                        width: 500px;
-                    }
-
-                    .slimScrollDiv, .jqstb-scroll {
-                        display: inline-block;
-                    }
-
-                    table.event-table td:not(:last-child) {
-                        padding-right: 20px;
-                    }
-
-                    .check-td {
-                        padding-top: 22px;
-                    }
-
-                    .champions-filter {
-                        display: flex; justify-content: center;
-                        flex-wrap: wrap;
-                    }
-
-                    .champions-filter > *{ margin: 2px 10px; }
-                </style>
-
-
-                <h5 class="center">Filter By Kills</h5>
+                <h5 class="center">Filter By Killers</h5>
                 <div class="champions-filter">
                     @foreach($game->end_stats['participants'] as $participant)
                         <span class="lol-champion-{{ $participant['championId']  }} img-roundshadow filter-champion team-{{ $participant['teamId'] }} hide-shadow" data-player-id="{{ $participant['participantId'] }}" title="{{ config('static.champions.' . $participant['championId']) }}"></span>
                     @endforeach
                 </div>
 
-                <div style="display: flex; justify-content: center;">
+                <div class="center-align-children">
                     <div>
                         <table class="event-table">
                             <thead>
@@ -290,7 +264,7 @@
                             </tr>
                             </thead>
                             <tbody class="event-tbody">
-                            @foreach($events as $event)
+                            @foreach($game->events as $event)
                                 @if($event['eventType'] == 'CHAMPION_KILL' && $event['killerId'] > 0)
                                     {{--*/ $killerParticipant = $game->end_stats['participants'][$event['killerId'] - 1]; /*--}}
                                     {{--*/ $killedParticipant = $game->end_stats['participants'][$event['victimId'] - 1]; /*--}}
@@ -311,9 +285,9 @@
                                                 <span class="extra-bold red-text">Legendary Kill</span>
                                             @endif
                                         </td>
-                                        <td style="display: flex; align-items: center">
+                                        <td class="killer-td">
                                             <span class="lol-champion-{{ $killerParticipant['championId']  }} img-roundshadow team-{{ $killerParticipant['teamId'] }}" title="{{ config('static.champions.' . $killerParticipant['championId']) }}"></span>
-                                            <span style="margin: 0 20px">killed</span>
+                                            <span class="margin-20-sides">killed</span>
                                             <span class="lol-champion-{{ $killedParticipant['championId']  }} img-roundshadow team-{{ $killedParticipant['teamId'] }}" title="{{ config('static.champions.' . $killedParticipant['championId']) }}"></span>
                                         </td>
                                         <td class="check-td">
@@ -323,7 +297,7 @@
                                     </tr>
                                 @elseif($event['eventType'] == 'ELITE_MONSTER_KILL')
                                     {{--*/ $killerParticipant = $game->end_stats['participants'][$event['killerId'] - 1]; /*--}}
-                                    <tr id="row-event-{{ $event['id'] }}" data-type="monster" data-killer="{{ $event['killerId'] }}" data-event-id="{{ $event['id'] }}">
+                                    <tr id="row-event-{{ $event['id'] }}" data-type="monster" data-killer="{{ $event['killerId'] }}" data-event-id="{{ $event['id'] }}" data-timestamp="{{ $event['timestamp'] }}">
                                         <td>{{ gmdate("i:s", floor($event['timestamp'] / 1000)) }}</td>
                                         <td>
                                             @if($event['monsterType'] == 'BARON_NASHOR')
@@ -334,7 +308,7 @@
                                                 <span class="bold brown-text">Vilemaw Kill</span>
                                             @endif
                                         </td>
-                                        <td style="display: flex; align-items: center">
+                                        <td class="center-align-children">
                                             <span class="lol-champion-{{ $killerParticipant['championId']  }} img-roundshadow team-{{ $killerParticipant['teamId']  }}" title="{{ config('static.champions.' . $killerParticipant['championId']) }}"></span>
                                         </td>
                                         <td class="check-td">
@@ -351,7 +325,7 @@
 
 
                 <p class="center">
-                    Time Leeway: <strong>15 seconds</strong> <i class="mdi-action-help" title="i.e. make sure that there is at least 10 seconds of time before and after the selected play"></i>
+                    Time Leeway: <strong>15 seconds</strong> <i class="mdi-action-help" title="i.e. make sure that there are at least 15 seconds of time before and after the selected play"></i>
                     <br>Replay Interval: <span class="replay-begin-time blue-text">00:00</span> (-15 seconds) to <span class="replay-end-time blue-text">00:00</span> (+15 seconds)
                 </p>
                 <p class="center">

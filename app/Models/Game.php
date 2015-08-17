@@ -34,6 +34,8 @@ namespace App\Models;
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereCreatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereUpdatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game byGame($platformID, $gameID)
+ * @property array $events
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereEvents($value)
  */
 class Game extends \Eloquent
 {
@@ -50,6 +52,7 @@ class Game extends \Eloquent
     protected $casts = [
         'start_stats' => 'array',
         'end_stats' => 'array',
+        'events' => 'array',
         'game_id' => 'integer',
         'end_startup_chunk_id' => 'integer',
         'start_game_chunk_id' => 'integer',

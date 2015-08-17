@@ -12,6 +12,7 @@ class ChangeEndStatsInGamesToMediumText extends Migration
      */
     public function up()
     {
+        DB::statement('ALTER TABLE `games` ADD `events` MEDIUMTEXT NOT NULL AFTER `end_stats`');
         DB::statement('ALTER TABLE `games` CHANGE `end_stats` `end_stats` MEDIUMTEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL');
     }
 
@@ -22,6 +23,7 @@ class ChangeEndStatsInGamesToMediumText extends Migration
      */
     public function down()
     {
+        DB::statement('ALTER TABLE `games` DROP `events`;');
         DB::statement('ALTER TABLE `games` CHANGE `end_stats` `end_stats` TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL');
     }
 }

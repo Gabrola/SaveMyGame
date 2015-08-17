@@ -127,7 +127,7 @@ class SummonerController extends Controller
         if(is_null($game) || $game->status == 'downloading')
             return redirect()->route('index')->withErrors('Game not found.');
 
-        if(is_null($game->end_stats))
+        if(is_null($game->end_stats) || ($game->end_stats && is_null($game->events)))
         {
             GameUtil::DownloadEndGame($game, true);
 
@@ -163,56 +163,9 @@ class SummonerController extends Controller
             $windowsCommand = sprintf(config('constants.windowsCommand'), $binaryArray, strlen($binaryData));
             $macCommand = sprintf(config('constants.macCommand'), $hexString);
 
-            $events = [];
-
-            if($game->end_stats && isset($game->end_stats['timeline']))
-            {
-                $killCount = [];
-                $lastKill = [];
-
-                foreach($game->end_stats['participants'] as $participant)
-                {
-                    $killCount[$participant['participantId']] = 0;
-                    $lastKill[$participant['participantId']] = -100000;
-                }
-
-                $i = 1;
-
-                foreach($game->end_stats['timeline']['frames'] as $frame)
-                {
-                    if(isset($frame['events'])) {
-                        foreach($frame['events'] as $event)
-                        {
-                            $event['id'] = $i++;
-
-                            if($event['eventType'] == 'CHAMPION_KILL')
-                            {
-                                $killerId = $event['killerId'];
-
-                                if($killerId > 0) {
-                                    $lastKillTime = $lastKill[$killerId];
-                                    $thisKillTime = $event['timestamp'];
-
-                                    if ($thisKillTime - $lastKillTime <= 10000) {
-                                        $event['multiKill'] = ++$killCount[$killerId];
-                                    } else {
-                                        $event['multiKill'] = $killCount[$killerId] = 1;
-                                    }
-
-                                    $lastKill[$killerId] = $thisKillTime;
-                                }
-                            }
-
-                            $events[] = $event;
-                        }
-                    }
-                }
-            }
-
             $viewData['batchLink'] = $batchLink;
             $viewData['windowsCommand'] = $windowsCommand;
             $viewData['macCommand'] = $macCommand;
-            $viewData['events'] = $events;
         }
 
         return view('game', $viewData);

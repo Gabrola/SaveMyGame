@@ -108,6 +108,10 @@
   display: flex;
   align-items: flex-end;
   flex-wrap: wrap;
+
+  > .col {
+    flex-grow: 1;
+  }
 }
 
 .team- {
@@ -126,4 +130,35 @@
       box-shadow: none;
     }
   }
+}
+
+.killer-td {
+  display: flex;
+  align-items: center;
+}
+
+.event-table {
+  width: 500px;
+}
+
+.events-section .slimScrollDiv, .events-section .jqstb-scroll {
+  display: inline-block;
+}
+
+table.event-table td:not(:last-child) {
+  padding-right: 20px;
+}
+
+.check-td {
+  padding-top: 22px;
+}
+
+.champions-filter {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.champions-filter > *{
+  margin: 2px 10px;
 }

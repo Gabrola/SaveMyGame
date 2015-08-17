@@ -5,7 +5,7 @@
         </div>
         @if(!is_null($game->stats) && $game->stats)
             <div class="match_info_part">
-                <div style="width: 200px;">{{ config('constants.queues.' . $game->queue_type, $game->queue_type) }}<br/><span>{{ date('Y-m-d H:i:s', $game->match_time) }}</span></div>
+                <div style="width: 200px;">{{ config('constants.queues.' . $game->queue_type, $game->queue_type) }}<br/><span title="{{ Carbon::createFromTimestamp($game->match_time)->toDayDateTimeString() }}">{{ Carbon::createFromTimestamp($game->match_time)->diffForHumans() }}</span></div>
             </div>
             <div class="match_info_part">
                 <div style="width: 100px; font-size: 15px;">
