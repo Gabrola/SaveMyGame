@@ -46,8 +46,6 @@
         <div class="container">
             <div class="content">
                 <div class="title">Be right back.</div>
-                <div class="caption">We are performing an upgrade which is estimated to take a couple of hours. Unfortunately, any replays during this time have not been recorded. However, expect an
-                an improvement in stability and performance, and much less lost replays or corrupt ones after the upgrade.</div>
             </div>
         </div>
     </body>
