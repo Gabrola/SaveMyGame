@@ -46,6 +46,11 @@
 <main class="page-{{ isset($pageName) ? $pageName : Route::currentRouteName() }}">
     <div class="section">
         <div class="container">
+            <div class="row">
+                <div class="col s12">
+                    <div class="card-panel teal white-text">Check out our new partial replays! You can now choose the moments that you want to be replayed.</div>
+                </div>
+            </div>
             @if(Session::has('message'))
                 <div class="row">
                     <div class="col s12">
