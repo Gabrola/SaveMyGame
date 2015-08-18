@@ -263,11 +263,21 @@ class DownloadReplay extends Command
                     }
                 }
 
-                $startTimeChunk = round(microtime(true) * 1000);
-                if ($this->DownloadChunk($chunk))
-                    $this->log("Chunk %d downloaded in %dms", $this->lastChunkId, (round(microtime(true) * 1000) - $startTimeChunk));
-                else
-                    $this->log("Chunk %d download failed", $this->lastChunkId);
+                for($i = 1; $i <= 5; $i++) {
+                    $startTimeChunk = round(microtime(true) * 1000);
+
+                    if ($this->DownloadChunk($chunk)) {
+                        $this->log("Chunk %d downloaded in %dms", $this->lastChunkId, (round(microtime(true) * 1000) - $startTimeChunk));
+                        break;
+                    } else {
+                        $this->log("Chunk %d download failed. Attempt #%d", $this->lastChunkId, $i);
+
+                        if($this->game->end_startup_chunk_id == 0 || $this->lastChunkId <= $this->game->end_startup_chunk_id) {
+                            $this->log("Startup chunk download failed. Sleeping for 10 seconds and trying again.");
+                            sleep(10);
+                        }
+                    }
+                }
             }
             catch(Exception $e) {
                 $this->log("DownloadChunks(%d) Error: %s", $this->lastChunkId, (string)$e);
@@ -428,19 +438,13 @@ class DownloadReplay extends Command
             if(!is_null($response))
                 return false;
 
-            //Do not retry 404 errors
-            if($e instanceof ClientException && $e->getResponse()->getStatusCode() == 404)
-                return false;
-
             //Do not retry after 5 retries
             if($retries >= 5)
                 return false;
 
-            $this->log('Request Retried: %s', $request->getUri());
-
             return true;
         }, function($retries){
-            return $retries * 250;
+            return $retries * 500;
         });
 
         $this->client = new \GuzzleHttp\Client([

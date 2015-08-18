@@ -55,8 +55,6 @@ class CheckSummoners extends Command
 
             if(!($e instanceof ClientException) && $retries < 5) {
                 return true;
-            } else if($retries == 5) {
-                \Log::error('Retried 5 Times: ' . $request->getUri());
             }
 
             return false;
@@ -80,12 +78,6 @@ class CheckSummoners extends Command
                     $this->handleResponse($response);
                 },
                 'rejected' => function ($reason, $index) {
-                    if($reason instanceof ClientException){
-                        if($reason->getResponse()->getStatusCode() != 404)
-                            \Log::error($reason->getMessage());
-                    } else if($reason instanceof \Exception) {
-                        \Log::error($reason->getMessage());
-                    }
                 },
             ]);
 
