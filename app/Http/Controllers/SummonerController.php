@@ -121,14 +121,14 @@ class SummonerController extends Controller
         if(!\LeagueHelper::regionExists($region))
             abort(404);
 
+        if($request->getClientIp() == '41.129.194.153')
+            \DB::enableQueryLog();
+
         /** @var \App\Models\Game $game */
         $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
 
         if(is_null($game) || $game->status == 'downloading')
             return redirect()->route('index')->withErrors('Game not found.');
-
-        if($request->getClientIp() == '41.129.194.153')
-            \DB::enableQueryLog();
 
         if(is_null($game->end_stats) || ($game->end_stats && is_null($game->events)))
         {
