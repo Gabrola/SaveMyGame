@@ -356,12 +356,14 @@ class DownloadReplay extends Command
 
     public function ProcessStartGame()
     {
-        if(is_null($this->game->start_stats))
+        $gameStartStats = $this->game->start_stats;
+
+        if(is_null($gameStartStats))
             return;
 
         $region = LeagueHelper::getRegionByPlatformId($this->game->platform_id);
 
-        foreach($this->game->start_stats['participants'] as $participantId => $participant)
+        foreach($gameStartStats['participants'] as $participantId => $participant)
         {
             if($participant['bot'])
                 continue;
@@ -385,12 +387,14 @@ class DownloadReplay extends Command
 
     public function RemoveInGameStatus()
     {
-        if(is_null($this->game->start_stats))
+        $gameStartStats = $this->game->start_stats;
+
+        if(is_null($gameStartStats))
             return;
 
         $region = LeagueHelper::getRegionByPlatformId($this->game->platform_id);
 
-        foreach($this->game->start_stats['participants'] as $participantId => $participant)
+        foreach($gameStartStats['participants'] as $participantId => $participant)
         {
             if($participant['bot'])
                 continue;

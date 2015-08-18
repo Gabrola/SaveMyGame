@@ -54,12 +54,15 @@ class GameUtil
      */
     private static function ProcessEndGame($game, $retryDownload)
     {
-        if(is_null($game->start_stats))
+        $gameStartStats = $game->start_stats;
+        $gameEndStats = $game->end_stats;
+
+        if(is_null($gameStartStats))
             return;
 
         $region = LeagueHelper::getRegionByPlatformId($game->platform_id);
 
-        foreach($game->start_stats['participants'] as $participantId => $participant)
+        foreach($gameStartStats['participants'] as $participantId => $participant)
         {
             if($participant['bot'])
                 continue;
@@ -89,27 +92,27 @@ class GameUtil
             $summonerGame->champion_id = $participant['championId'];
             $summonerGame->spell1 = $participant['spell1Id'];
             $summonerGame->spell2 = $participant['spell2Id'];
-            $summonerGame->map_id = $game->start_stats['mapId'];
+            $summonerGame->map_id = $gameStartStats['mapId'];
             $summonerGame->runes = $participant['runes'];
             $summonerGame->masteries = $participant['masteries'];
 
-            if(!is_null($game->end_stats))
+            if(!is_null($gameEndStats))
             {
-                if(isset($game->end_stats['participants'][$participantId]))
+                if(isset($gameEndStats['participants'][$participantId]))
                 {
-                    $endParticipant = $game->end_stats['participants'][$participantId];
+                    $endParticipant = $gameEndStats['participants'][$participantId];
                     $summonerGame->stats = $endParticipant['stats'];
                     $summonerGame->win = $endParticipant['stats']['winner'];
                 }
 
-                $summonerGame->queue_type = $game->end_stats['queueType'];
-                $summonerGame->match_time = round($game->end_stats['matchCreation'] / 1000);
-                $summonerGame->match_duration = $game->end_stats['matchDuration'];
+                $summonerGame->queue_type = $gameEndStats['queueType'];
+                $summonerGame->match_time = round($gameEndStats['matchCreation'] / 1000);
+                $summonerGame->match_duration = $gameEndStats['matchDuration'];
             }
             else
             {
-                $summonerGame->queue_type = config('constants.queueIdToType.' . (isset($game->start_stats['gameQueueConfigId']) ? $game->start_stats['gameQueueConfigId'] : 0));
-                $summonerGame->match_time = round($game->start_stats['gameStartTime'] / 1000);
+                $summonerGame->queue_type = config('constants.queueIdToType.' . (isset($gameStartStats['gameQueueConfigId']) ? $gameStartStats['gameQueueConfigId'] : 0));
+                $summonerGame->match_time = round($gameStartStats['gameStartTime'] / 1000);
 
                 if($retryDownload)
                     $summonerGame->stats = false;
@@ -120,13 +123,13 @@ class GameUtil
 
         $events = false;
 
-        if($game->end_stats && isset($game->end_stats['timeline']))
+        if($gameEndStats && isset($gameEndStats['timeline']))
         {
             $events = [];
             $killCount = [];
             $lastKill = [];
 
-            foreach($game->end_stats['participants'] as $participant)
+            foreach($gameEndStats['participants'] as $participant)
             {
                 $killCount[$participant['participantId']] = 0;
                 $lastKill[$participant['participantId']] = -100000;
@@ -134,7 +137,7 @@ class GameUtil
 
             $i = 1;
 
-            foreach($game->end_stats['timeline']['frames'] as $frame)
+            foreach($gameEndStats['timeline']['frames'] as $frame)
             {
                 if(isset($frame['events'])) {
                     foreach($frame['events'] as $event)
@@ -167,9 +170,9 @@ class GameUtil
 
         $game->events = $events;
 
-        if($game->end_stats && !$retryDownload){
+        if($gameEndStats && !$retryDownload){
             $currentVersion = config('clientversion', '0.0.0.0');
-            $replayVersion = $game->end_stats['matchVersion'];
+            $replayVersion = $gameEndStats['matchVersion'];
 
             self::SetReleaseVersion($replayVersion, $game);
 
@@ -177,7 +180,7 @@ class GameUtil
                 \File::put(config_path('clientversion.php'), '<?php return \'' . $replayVersion . '\';');
         }
 
-        if(is_null($game->end_stats) && $retryDownload) {
+        if(is_null($gameEndStats) && $retryDownload) {
             $game->end_stats = false;
         }
 

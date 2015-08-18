@@ -1,7 +1,8 @@
-<h4 class="center-align">{{ config('constants.queueIds.' . (isset($game->start_stats['gameQueueConfigId']) ? $game->start_stats['gameQueueConfigId'] : 0)) }}</h4>
+{{--*/ $gameStartStats = $game->start_stats; /*--}}
+<h4 class="center-align">{{ config('constants.queueIds.' . (isset($gameStartStats['gameQueueConfigId']) ? $gameStartStats['gameQueueConfigId'] : 0)) }}</h4>
 <div class="row center-align-children">
     <div class="col">
-        @foreach($game->start_stats['participants'] as $parIndex => $participant)
+        @foreach($gameStartStats['participants'] as $parIndex => $participant)
             @if($participant['teamId'] == 100)
                 <div class="game-entry left-entry">
                     <div class="game-champion">
@@ -21,7 +22,7 @@
         @endforeach
     </div>
     <div class="col">
-        @foreach($game->start_stats['participants'] as $parIndex => $participant)
+        @foreach($gameStartStats['participants'] as $parIndex => $participant)
             @if($participant['teamId'] == 200)
                 <div class="game-entry right-entry">
                     <div class="game-items valign-wrapper">

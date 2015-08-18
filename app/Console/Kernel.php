@@ -100,7 +100,8 @@ class Kernel extends ConsoleKernel
                 /** @var \App\Models\Game $game */
                 foreach($games as $game)
                 {
-                    if (!$game->end_stats || LeagueHelper::comparePatch(config('clientversion', '0.0.0.0'), $game->end_stats['matchVersion']))
+                    $gameEndStats = $game->end_stats;
+                    if (!$gameEndStats || LeagueHelper::comparePatch(config('clientversion', '0.0.0.0'), $gameEndStats['matchVersion']))
                         $game->deleteReplay();
                 }
             })->daily();

@@ -121,14 +121,13 @@ class SummonerController extends Controller
         if(!\LeagueHelper::regionExists($region))
             abort(404);
 
-        $startTime = microtime(true);
-
         /** @var \App\Models\Game $game */
-        $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
-        $gameEndStats = $game->end_stats;
+        $game = Game::byGame(LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
 
         if(is_null($game) || $game->status == 'downloading')
             return redirect()->route('index')->withErrors('Game not found.');
+
+        $gameEndStats = $game->end_stats;
 
         if(is_null($gameEndStats) || ($gameEndStats && is_null($game->events)))
         {
