@@ -124,6 +124,8 @@ class SummonerController extends Controller
         if($request->getClientIp() == '41.129.194.153')
             \DB::enableQueryLog();
 
+        $startTime = microtime(true);
+
         /** @var \App\Models\Game $game */
         $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
 
@@ -171,8 +173,10 @@ class SummonerController extends Controller
             $viewData['macCommand'] = $macCommand;
         }
 
-        if($request->getClientIp() == '41.129.194.153')
+        if($request->getClientIp() == '41.129.194.153') {
             $viewData['queryLog'] = \DB::getQueryLog();
+            $viewData['queryLog'][] = (microtime(true) - $startTime) * 1000;
+        }
 
         return view('game', $viewData);
     }
