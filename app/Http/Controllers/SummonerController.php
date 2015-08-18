@@ -121,27 +121,30 @@ class SummonerController extends Controller
         if(!\LeagueHelper::regionExists($region))
             abort(404);
 
-        if($request->getClientIp() == '41.129.194.153')
-            \DB::enableQueryLog();
-
         $startTime = microtime(true);
 
         /** @var \App\Models\Game $game */
         $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
+        $gameEndStats = $game->end_stats;
 
         if(is_null($game) || $game->status == 'downloading')
             return redirect()->route('index')->withErrors('Game not found.');
 
-        if(is_null($game->end_stats) || ($game->end_stats && is_null($game->events)))
+        if(is_null($gameEndStats) || ($gameEndStats && is_null($game->events)))
         {
             GameUtil::DownloadEndGame($game, true);
 
             /** @var \App\Models\Game $game */
             $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $gameId)->first();
+            $gameEndStats = $game->end_stats;
         }
 
+        $gameStartStats = $game->start_stats;
+
         $viewData = [
-            'game'              => $game
+            'game'              => $game,
+            'gameStartStats'    => $gameStartStats,
+            'gameEndStats'      => $gameEndStats,
         ];
 
         if($game->status == 'downloaded') {
@@ -171,12 +174,6 @@ class SummonerController extends Controller
             $viewData['batchLink'] = $batchLink;
             $viewData['windowsCommand'] = $windowsCommand;
             $viewData['macCommand'] = $macCommand;
-        }
-
-        if($request->getClientIp() == '41.129.194.153') {
-            $viewData['queryLog'] = \DB::getQueryLog();
-            $viewData['queryLog'][] = (microtime(true) - $startTime) * 1000;
-            $viewData['startViewTime'] = microtime(true);
         }
 
         return view('game', $viewData);
