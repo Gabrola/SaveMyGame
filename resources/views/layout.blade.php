@@ -81,10 +81,10 @@
                     Copyright &copy; {{ date('Y') }} SaveMyGame
                 </small>
                 @if(isset($startViewTime))
-                    <small><br>Time: {{ (microtime(true) - $startViewTime) * 1000 }}ms</small>
+                    <small class="white-text"><br>Time: {{ (microtime(true) - $startViewTime) * 1000 }}ms</small>
                 @endif
                 @if(isset($queryLog))
-                    <pre>{{ json_encode($queryLog, JSON_PRETTY_PRINT) }}</pre>
+                    <pre class="white-text left-align">{{ json_encode($queryLog, JSON_PRETTY_PRINT) }}</pre>
                 @endif
             </div>
         </div>
