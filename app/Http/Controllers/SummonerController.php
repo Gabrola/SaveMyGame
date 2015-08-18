@@ -127,6 +127,9 @@ class SummonerController extends Controller
         if(is_null($game) || $game->status == 'downloading')
             return redirect()->route('index')->withErrors('Game not found.');
 
+        if($request->getClientIp() == '41.129.194.153')
+            \DB::enableQueryLog();
+
         if(is_null($game->end_stats) || ($game->end_stats && is_null($game->events)))
         {
             GameUtil::DownloadEndGame($game, true);
@@ -167,6 +170,9 @@ class SummonerController extends Controller
             $viewData['windowsCommand'] = $windowsCommand;
             $viewData['macCommand'] = $macCommand;
         }
+
+        if($request->getClientIp() == '41.129.194.153')
+            $viewData['queryLog'] = \DB::getQueryLog();
 
         return view('game', $viewData);
     }
