@@ -80,6 +80,9 @@
                     SaveMyGame isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.<br>
                     Copyright &copy; {{ date('Y') }} SaveMyGame
                 </small>
+                @if(isset($startViewTime))
+                    <small><br>Time: {{ (microtime(true) - $startViewTime) * 1000 }}ms</small>
+                @endif
                 @if(isset($queryLog))
                     <pre>{{ json_encode($queryLog, JSON_PRETTY_PRINT) }}</pre>
                 @endif

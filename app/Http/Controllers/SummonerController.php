@@ -176,6 +176,7 @@ class SummonerController extends Controller
         if($request->getClientIp() == '41.129.194.153') {
             $viewData['queryLog'] = \DB::getQueryLog();
             $viewData['queryLog'][] = (microtime(true) - $startTime) * 1000;
+            $viewData['startViewTime'] = microtime(true);
         }
 
         return view('game', $viewData);
