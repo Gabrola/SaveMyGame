@@ -2,10 +2,9 @@
 
 namespace App\Console;
 
-use App\Models\Chunk;
 use App\Models\Game;
-use App\Models\Keyframe;
 use App\Models\MonitoredUser;
+use Artisan;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Console\Scheduling\Schedule;
@@ -36,21 +35,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->call(function(){
-            \Artisan::call('replay:check', ['batch' => 0]);
-        })->cron('0/3 * * * *');
-
-        $schedule->call(function(){
-            \Artisan::call('replay:check', ['batch' => 1]);
-        })->cron('1/3 * * * *');
-
-        $schedule->call(function(){
-            \Artisan::call('replay:check', ['batch' => 2]);
-        })->cron('2/3 * * * *');
-
-        $schedule->call(function () {
-            \Artisan::call('replay:static');
-        })->daily();
+        $schedule->command('replay:check 0')->cron('0/3 * * * *');
+        $schedule->command('replay:check 1')->cron('1/3 * * * *');
+        $schedule->command('replay:check 2')->cron('2/3 * * * *');
+        $schedule->command('replay:static')->cron('0 */6 * * *');
 
         $schedule->call(function(){
             $hourAgo = Carbon::now()->subHour()->toDateTimeString();
