@@ -84,7 +84,8 @@ class DownloadReplay extends Command
     {
         try {
             $res = $this->client->get(
-                sprintf('getGameMetaData/%s/%d/0/token', $this->game->platform_id, $this->game->game_id)
+                sprintf('getGameMetaData/%s/%d/0/token', $this->game->platform_id, $this->game->game_id),
+                ['connect_timeout' => 60]
             );
 
             if($res->getStatusCode() == 200) {
@@ -111,7 +112,8 @@ class DownloadReplay extends Command
     {
         try {
             $res = $this->client->get(
-                sprintf('getLastChunkInfo/%s/%d/%d/token', $this->game->platform_id, $this->game->game_id, $requestNum)
+                sprintf('getLastChunkInfo/%s/%d/%d/token', $this->game->platform_id, $this->game->game_id, $requestNum),
+                ['connect_timeout' => 60]
             );
 
             if($res->getStatusCode() == 200) {
@@ -132,7 +134,8 @@ class DownloadReplay extends Command
     {
         try {
             $res = $this->client->get(
-                sprintf('getGameDataChunk/%s/%d/%d/token', $this->game->platform_id, $this->game->game_id, $chunk->chunk_id)
+                sprintf('getGameDataChunk/%s/%d/%d/token', $this->game->platform_id, $this->game->game_id, $chunk->chunk_id),
+                ['connect_timeout' => 60]
             );
 
             if($res->getStatusCode() == 200) {
@@ -163,7 +166,8 @@ class DownloadReplay extends Command
     {
         try {
             $res = $this->client->get(
-                sprintf('getKeyFrame/%s/%d/%d/token', $this->game->platform_id, $this->game->game_id, $keyframe->keyframe_id)
+                sprintf('getKeyFrame/%s/%d/%d/token', $this->game->platform_id, $this->game->game_id, $keyframe->keyframe_id),
+                ['connect_timeout' => 60]
             );
 
             if($res->getStatusCode() == 200) {
