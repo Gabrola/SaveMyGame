@@ -1,8 +1,7 @@
 /vendor
 /node_modules
 /.idea
-/public/js
-/public/css
+/public/build
 /config/clientversion.php
 .env
 _ide_helper.php

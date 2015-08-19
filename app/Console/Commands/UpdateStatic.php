@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
+use Symfony\Component\Process\Process;
 
 class UpdateStatic extends Command
 {
@@ -148,5 +149,12 @@ class UpdateStatic extends Command
             \File::put(config_path('static.php'), '<?php return ' . var_export($static, true) . ';');
         }
         catch(\Exception $e){}
+
+        $process = new Process('gulp --production', base_path());
+        $process->run();
+
+        while ($process->isRunning()) {
+            $this->comment($process->getIncrementalOutput());
+        }
     }
 }

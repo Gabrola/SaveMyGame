@@ -1,4 +1,6 @@
+var gulp = require('gulp');
 var elixir = require('laravel-elixir');
+var del = require('del');
 
 /*
  |--------------------------------------------------------------------------
@@ -10,6 +12,13 @@ var elixir = require('laravel-elixir');
  | file for our application, as well as publishing vendor resources.
  |
  */
+
+elixir.extend("remove", function(path) {
+    gulp.task("remove", function() {
+        del(path);
+    });
+    return this.queueTask("remove");
+});
 
 elixir(function(mix) {
     mix.sass('app.scss');
@@ -36,4 +45,6 @@ elixir(function(mix) {
 
     mix.copy('resources/assets/bower/materialize/font', 'public/build/font');
     mix.copy('resources/assets/bower/zeroclipboard/dist/ZeroClipboard.swf', 'public/build/js/ZeroClipboard.swf');
+
+    mix.remove([ 'public/css', 'public/js' ]);
 });

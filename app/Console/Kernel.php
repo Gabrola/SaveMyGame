@@ -48,11 +48,9 @@ class Kernel extends ConsoleKernel
             \Artisan::call('replay:check', ['batch' => 2]);
         })->cron('2/3 * * * *');
 
-        if(\App::environment() == 'local') {
-            $schedule->call(function () {
-                \Artisan::call('replay:static');
-            })->daily();
-        }
+        $schedule->call(function () {
+            \Artisan::call('replay:static');
+        })->daily();
 
         $schedule->call(function(){
             $hourAgo = Carbon::now()->subHour()->toDateTimeString();
