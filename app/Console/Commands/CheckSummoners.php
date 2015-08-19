@@ -99,28 +99,29 @@ class CheckSummoners extends Command
     protected function handleResponse($response)
     {
         if ($response->getStatusCode() == 200) {
-            $jsonString = $response->getBody();
-            $json = json_decode($jsonString);
+            $json = json_decode($response->getBody(), true);
 
             if($json === NULL)
                 return;
 
-            if (Game::byGame($json->platformId, $json->gameId)->count() > 0)
+            if (Game::byGame($json['platformId'], $json['gameId'])->count() > 0)
                 return;
 
             try {
-                $game = new Game();
-                $game->platform_id = $json->platformId;
-                $game->game_id = $json->gameId;
-                $game->encryption_key = $json->observers->encryptionKey;
-                $game->start_stats = json_decode($jsonString, true);
-                $game->status = 'not_downloaded';
-                $game->save();
+                \DB::transaction(function() use($json){
+                    $game = new Game();
+                    $game->platform_id = $json['platformId'];
+                    $game->game_id = $json['gameId'];
+                    $game->encryption_key = $json['observers']['encryptionKey'];
+                    $game->start_stats = $json;
+                    $game->status = 'not_downloaded';
+                    $game->save();
 
-                $command = $this->getCommand($json->platformId, $json->gameId, $json->observers->encryptionKey);
+                    $command = $this->getCommand($json['platformId'], $json['gameId'], $json['observers']['encryptionKey']);
 
-                $process = new Process($command, base_path());
-                $process->run();
+                    $process = new Process($command, base_path());
+                    $process->run();
+                });
             } catch (\Exception $e) {
                 \Log::error($e->getMessage());
             }
