@@ -176,8 +176,12 @@ class GameUtil
 
             self::SetReleaseVersion($replayVersion, $game);
 
-            if(version_compare($replayVersion, $currentVersion) > 0)
+            if(version_compare($replayVersion, $currentVersion) > 0) {
                 \File::put(config_path('clientversion.php'), '<?php return \'' . $replayVersion . '\';');
+
+                if(\App::environment() == 'production')
+                    \Artisan::call('config:cache');
+            }
         }
 
         if(is_null($gameEndStats) && $retryDownload) {
