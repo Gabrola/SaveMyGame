@@ -12,3 +12,8 @@ php artisan config:cache
 gulp --production
 php artisan up
 @endtask
+
+@task('quick-deploy', ['on' => 'production'])
+cd /var/www/savemyga.me
+git pull origin master
+@endtask
