@@ -6,7 +6,6 @@ use App\GameUtil;
 use App\Models\ChunkData;
 use DB;
 use App\Models\KeyframeData;
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use LeagueHelper;

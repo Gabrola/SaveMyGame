@@ -77,13 +77,13 @@ class Kernel extends ConsoleKernel
             }
         })->everyMinute();
 
-        if(app()->environment() == 'production')
+        /*if(app()->environment() == 'production')
         {
             $schedule->call(function () {
                 $sevenDaysAgo = Carbon::now()->subDays(7)->toDateTimeString();
                 $games = Game::where('created_at', '<', $sevenDaysAgo)->get();
 
-                /** @var \App\Models\Game $game */
+                /** @var \App\Models\Game $game
                 foreach($games as $game)
                 {
                     $gameEndStats = $game->end_stats;
@@ -91,6 +91,6 @@ class Kernel extends ConsoleKernel
                         $game->deleteReplay();
                 }
             })->daily();
-        }
+        }*/
     }
 }
