@@ -108,21 +108,24 @@ class CheckSummoners extends Command
                 return;
 
             try {
-                \DB::transaction(function() use($json){
-                    $game = new Game();
-                    $game->platform_id = $json['platformId'];
-                    $game->game_id = $json['gameId'];
-                    $game->encryption_key = $json['observers']['encryptionKey'];
-                    $game->start_stats = $json;
-                    $game->status = 'not_downloaded';
-                    $game->save();
+                $game = new Game();
+                $game->platform_id = $json['platformId'];
+                $game->game_id = $json['gameId'];
+                $game->encryption_key = $json['observers']['encryptionKey'];
+                $game->start_stats = $json;
+                $game->status = 'not_downloaded';
+                $game->save();
 
-                    $command = $this->getCommand($json['platformId'], $json['gameId'], $json['observers']['encryptionKey']);
+                $command = $this->getCommand($json['platformId'], $json['gameId'], $json['observers']['encryptionKey']);
 
-                    $process = new Process($command, base_path());
-                    $process->run();
-                });
+                $process = new Process($command, base_path());
+                $process->run();
             } catch (\Exception $e) {
+                $game = Game::byGame($json['platformId'], $json['gameId'])->first();
+
+                if($game)
+                    $game->delete();
+
                 \Log::error($e->getMessage());
             }
         }
