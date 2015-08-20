@@ -279,6 +279,8 @@ class DownloadReplay extends Command
                         if($this->game->end_startup_chunk_id == 0 || $this->lastChunkId <= $this->game->end_startup_chunk_id) {
                             $this->log("Startup chunk download failed. Sleeping for 10 seconds and trying again.");
                             sleep(10);
+                        } else {
+                            break;
                         }
                     }
                 }
