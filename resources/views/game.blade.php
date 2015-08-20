@@ -229,7 +229,7 @@
         @if($gameEndStats)
             @if(LeagueHelper::comparePatch(config('clientversion'), $gameEndStats['matchVersion']))
                 <div class="card-panel red">
-                    <span class="white-text">This match was recorded on an older patch. This replay will probably no longer work.</span>
+                    <span class="white-text">This match was recorded on an older patch (patch {{ LeagueHelper::getPatchFromVersion($gameEndStats['matchVersion']) }}). This replay will probably no longer work.</span>
                 </div>
             @endif
         @endif
