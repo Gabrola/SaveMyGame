@@ -58,11 +58,29 @@ class CleanMatches extends Command
                 foreach ($chunks as $chunk) {
                     @File::put(LeagueHelper::getChunkFilePath($chunk->platform_id, $chunk->game_id, $chunk->chunk_id),
                         $chunk->chunkData->chunk_data);
+
+                    $this->output->progressAdvance();
                 }
             });
 
             $this->output->progressFinish();
         } else {
+            $count = Keyframe::where('id', '>=', $keyframeStart)->count();
+
+            $this->comment('Migrating keyframe data');
+            $this->output->progressStart($count);
+
+            Keyframe::where('id', '>=', $keyframeStart)->chunk(10000, function ($keyframes) {
+                /** @var Keyframe $keyframe */
+                foreach ($keyframes as $keyframe) {
+                    @File::put(LeagueHelper::getKeyframeFilePath($keyframe->platform_id, $keyframe->game_id, $keyframe->keyframe_id),
+                        $keyframe->keyframeData->keyframe_data);
+
+                    $this->output->progressAdvance();
+                }
+            });
+
+            $this->output->progressFinish();
         }
     }
 }
