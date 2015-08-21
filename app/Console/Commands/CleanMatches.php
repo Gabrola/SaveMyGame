@@ -56,12 +56,13 @@ class CleanMatches extends Command
             Chunk::where('id', '>=', $chunkStart)->chunk(10000, function ($chunks) {
                 /** @var Chunk $chunk */
                 foreach ($chunks as $chunk) {
-                    File::put(LeagueHelper::getChunkFilePath($chunk->platform_id, $chunk->game_id, $chunk->chunk_id),
+                    @File::put(LeagueHelper::getChunkFilePath($chunk->platform_id, $chunk->game_id, $chunk->chunk_id),
                         $chunk->chunkData->chunk_data);
                 }
             });
 
             $this->output->progressFinish();
+        } else {
         }
     }
 }
