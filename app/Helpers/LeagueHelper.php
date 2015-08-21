@@ -160,7 +160,7 @@ class LeagueHelper
         return storage_path(
             'replays' . DIRECTORY_SEPARATOR .
             $platformId . DIRECTORY_SEPARATOR .
-            implode(DIRECTORY_SEPARATOR, str_split($gameID, 4))
+            implode(DIRECTORY_SEPARATOR, str_split($gameID, 3))
         );
     }
 

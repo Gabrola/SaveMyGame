@@ -2,7 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Chunk;
+use App\Models\Keyframe;
 use DB;
+use File;
+use LeagueHelper;
 use Illuminate\Console\Command;
 
 class CleanMatches extends Command
@@ -38,105 +42,39 @@ class CleanMatches extends Command
      */
     public function handle()
     {
-        /*DB::statement('DELETE FROM chunks_tmp');
-        DB::statement('ALTER TABLE chunks_tmp AUTO_INCREMENT = 1;');
-        DB::statement('ALTER TABLE chunk_data AUTO_INCREMENT = 1;');
+        $count = DB::table('games')->where('id', '>', 59000)->count();
 
-        DB::statement('DELETE FROM keyframes_tmp');
-        DB::statement('ALTER TABLE keyframes_tmp AUTO_INCREMENT = 1;');
-        DB::statement('ALTER TABLE keyframe_data AUTO_INCREMENT = 1;');
+        $this->output->progressStart($count);
 
-        DB::statement('SET unique_checks=0');
-        DB::statement('SET foreign_key_checks=0');
+        DB::table('games')->where('id', '>', 59000)->chunk(500, function($games){
+            foreach($games as $game) {
+                $replayDirectory = LeagueHelper::getReplayDirectory($game->platform_id, $game->game_id);
 
-        $this->comment('Migrating chunks');
+                File::makeDirectory($replayDirectory, 0755, true, true);
 
-        $chunksNumTotal = DB::table('chunks')->count();
-        $this->output->progressStart($chunksNumTotal);
+                File::put($replayDirectory . DIRECTORY_SEPARATOR . 'endStats',
+                    gzencode($game->end_stats));
 
-        $chunkCount = 100;
-        $lastId = $chunkCount;
+                File::put($replayDirectory . DIRECTORY_SEPARATOR . 'events',
+                    gzencode($game->events));
 
-        $totalDone = 0;
+                $chunks = Chunk::whereDbGameId($game->id)->get();
+                $keyframes = Keyframe::whereDbGameId($game->id)->get();
 
-        while($totalDone < $chunksNumTotal) {
-            $chunks = DB::table('chunks')->whereBetween('id', [$lastId - $chunkCount + 1, $lastId])->get();
+                /** @var Chunk $chunk */
+                foreach($chunks as $chunk)
+                    File::put($replayDirectory . DIRECTORY_SEPARATOR . 'c' . $chunk->chunk_id,
+                        $chunk->chunkData->chunk_data);
 
-            DB::beginTransaction();
-
-            foreach($chunks as $chunk) {
-                $chunkInsertionId = DB::table('chunks_tmp')->insertGetId([
-                    'db_game_id'    =>  $chunk->db_game_id,
-                    'platform_id'   =>  $chunk->platform_id,
-                    'game_id'       =>  $chunk->game_id,
-                    'chunk_id'      =>  $chunk->chunk_id,
-                    'keyframe_id'   =>  $chunk->keyframe_id,
-                    'next_chunk_id' =>  $chunk->next_chunk_id,
-                    'duration'      =>  $chunk->duration
-                ]);
-
-                $id = DB::table('chunk_data')->insertGetId([
-                    'chunk_id'      => $chunkInsertionId,
-                    'chunk_data'    => $chunk->chunk_data
-                ]);
-
-                DB::table('chunks_tmp')->where('id', $chunkInsertionId)->update([
-                    'chunk_data_id' => $id
-                ]);
+                /** @var Keyframe $keyframe */
+                foreach($keyframes as $keyframe)
+                    File::put($replayDirectory . DIRECTORY_SEPARATOR . 'k' . $keyframe->keyframe_id,
+                        $keyframe->keyframeData->keyframe_data);
 
                 $this->output->progressAdvance();
-                $totalDone++;
             }
-
-            DB::commit();
-
-            $lastId += $chunkCount;
-        }
+        });
 
         $this->output->progressFinish();
-
-        $this->comment('Migrating keyframes');
-
-        $keyframesNumTotal = DB::table('keyframes')->count();
-        $this->output->progressStart($keyframesNumTotal);
-
-        $totalDone = 0;
-        $lastId = $chunkCount;
-
-        while($totalDone < $keyframesNumTotal) {
-            $keyframes = DB::table('keyframes')->whereBetween('id', [$lastId - $chunkCount + 1, $lastId])->get();
-
-            DB::beginTransaction();
-
-            foreach($keyframes as $keyframe) {
-                $keyframeInsertionId = DB::table('keyframes_tmp')->insertGetId([
-                    'db_game_id'    =>  $keyframe->db_game_id,
-                    'platform_id'   =>  $keyframe->platform_id,
-                    'game_id'       =>  $keyframe->game_id,
-                    'keyframe_id'   =>  $keyframe->keyframe_id,
-                ]);
-
-                $id = DB::table('keyframe_data')->insertGetId([
-                    'keyframe_id'      => $keyframeInsertionId,
-                    'keyframe_data'    => $keyframe->keyframe_data
-                ]);
-
-                DB::table('keyframes_tmp')->where('id', $keyframeInsertionId)->update([
-                    'keyframe_data_id' => $id
-                ]);
-
-                $this->output->progressAdvance();
-                $totalDone++;
-            }
-
-            DB::commit();
-
-            $lastId += $chunkCount;
-        }
-
-        $this->output->progressFinish();
-
-        DB::statement('SET unique_checks=1');
-        DB::statement('SET foreign_key_checks=1');*/
     }
 }
