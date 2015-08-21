@@ -53,7 +53,7 @@ class CleanMatches extends Command
             $this->comment('Migrating chunk data');
             $this->output->progressStart($count);
 
-            Chunk::where('id', '>=', $chunkStart)->with('chunkData')->chunk(10000, function ($chunks) {
+            Chunk::where('id', '>=', $chunkStart)->with('chunkData')->chunk(1000, function ($chunks) {
                 /** @var Chunk $chunk */
                 foreach ($chunks as $chunk) {
                     @File::put(LeagueHelper::getChunkFilePath($chunk->platform_id, $chunk->game_id, $chunk->chunk_id),
@@ -70,7 +70,7 @@ class CleanMatches extends Command
             $this->comment('Migrating keyframe data');
             $this->output->progressStart($count);
 
-            Keyframe::where('id', '>=', $keyframeStart)->with('keyframeData')->chunk(10000, function ($keyframes) {
+            Keyframe::where('id', '>=', $keyframeStart)->with('keyframeData')->chunk(1000, function ($keyframes) {
                 /** @var Keyframe $keyframe */
                 foreach ($keyframes as $keyframe) {
                     @File::put(LeagueHelper::getKeyframeFilePath($keyframe->platform_id, $keyframe->game_id, $keyframe->keyframe_id),
