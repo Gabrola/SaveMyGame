@@ -70,7 +70,7 @@ class CleanMatches extends Command
             $this->comment('Migrating keyframe data');
             $this->output->progressStart($count);
 
-            Keyframe::where('id', '>=', $keyframeStart)->chunk(10000, function ($keyframes) {
+            Keyframe::where('id', '>=', $keyframeStart)->with('keyframeData')->chunk(10000, function ($keyframes) {
                 /** @var Keyframe $keyframe */
                 foreach ($keyframes as $keyframe) {
                     @File::put(LeagueHelper::getKeyframeFilePath($keyframe->platform_id, $keyframe->game_id, $keyframe->keyframe_id),
