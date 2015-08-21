@@ -295,7 +295,7 @@
                                             <label for="check-event-{{ $event['id'] }}"></label>
                                         </td>
                                     </tr>
-                                @elseif($event['eventType'] == 'ELITE_MONSTER_KILL')
+                                @elseif($event['eventType'] == 'ELITE_MONSTER_KILL' && $event['killerId'] > 0)
                                     {{--*/ $killerParticipant = $gameEndStats['participants'][$event['killerId'] - 1]; /*--}}
                                     <tr id="row-event-{{ $event['id'] }}" data-type="monster" data-killer="{{ $event['killerId'] }}" data-event-id="{{ $event['id'] }}" data-timestamp="{{ $event['timestamp'] }}">
                                         <td>{{ gmdate("i:s", floor($event['timestamp'] / 1000)) }}</td>
