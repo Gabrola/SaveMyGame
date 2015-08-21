@@ -77,6 +77,11 @@ class DownloadReplay extends Command
     protected $logger;
 
     /**
+     * @var string
+     */
+    protected $replayDirectory;
+
+    /**
      * @return bool
      */
     private function GetMetaData()
@@ -148,6 +153,8 @@ class DownloadReplay extends Command
 
                 $this->downloadedChunks[] = $chunk->chunk_id;
 
+                File::put($this->replayDirectory . DIRECTORY_SEPARATOR . 'c' . $chunk->chunk_id, $chunkData->chunk_data);
+
                 return true;
             }
         }
@@ -179,6 +186,8 @@ class DownloadReplay extends Command
                 $keyframeData->keyframe()->save($keyframe);
 
                 $this->downloadedKeyframes[] = $keyframe->keyframe_id;
+
+                File::put($this->replayDirectory . DIRECTORY_SEPARATOR . 'k' . $keyframe->keyframe_id, $keyframeData->keyframe_data);
 
                 return true;
             }
@@ -474,6 +483,10 @@ class DownloadReplay extends Command
         $this->game->encryption_key = $encryptionKey;
         $this->game->status = 'downloading';
         $this->game->save();
+
+        $this->replayDirectory = LeagueHelper::getReplayDirectory($this->game->platform_id, $this->game->game_id);
+
+        File::makeDirectory($this->replayDirectory, 0755, true);
 
         DB::transaction(function() use ($logFile) {
             if($this->StartDownload()) {

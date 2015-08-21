@@ -5,6 +5,7 @@ use App\Models\ClientVersion;
 use App\Models\Game;
 use App\Models\Summoner;
 use App\Models\SummonerGame;
+use File;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -38,10 +39,14 @@ class GameUtil
             $res = $client->get($requestUrl);
 
             if($res->getStatusCode() == 200) {
-                $endStats = json_decode($res->getBody(), true);
+                $jsonString = $res->getBody();
+                $endStats = json_decode($jsonString, true);
 
                 $game->end_stats = $endStats;
                 $game->save();
+
+                File::put(LeagueHelper::getEndStatsFilePath($game->platform_id, $game->game_id),
+                    gzencode($jsonString));
             }
         }
         catch(\Exception $e){}
@@ -177,7 +182,7 @@ class GameUtil
             self::SetReleaseVersion($replayVersion, $game);
 
             if(version_compare($replayVersion, $currentVersion) > 0) {
-                \File::put(config_path('clientversion.php'), '<?php return \'' . $replayVersion . '\';');
+                File::put(config_path('clientversion.php'), '<?php return \'' . $replayVersion . '\';');
 
                 if(\App::environment() == 'production')
                     \Artisan::call('config:cache');
@@ -189,6 +194,9 @@ class GameUtil
         }
 
         $game->save();
+
+        File::put(LeagueHelper::getEventsFilePath($game->platform_id, $game->game_id),
+            gzencode(json_decode($events)));
     }
 
     /**

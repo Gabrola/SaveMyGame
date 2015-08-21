@@ -151,6 +151,62 @@ class LeagueHelper
     }
 
     /**
+     * @param string $platformId
+     * @param string $gameID
+     * @return string
+     */
+    public function getReplayDirectory($platformId, $gameID)
+    {
+        return storage_path(
+            'replays' . DIRECTORY_SEPARATOR .
+            $platformId . DIRECTORY_SEPARATOR .
+            implode(DIRECTORY_SEPARATOR, str_split($gameID, 4))
+        );
+    }
+
+    /**
+     * @param string $platformID
+     * @param string $gameID
+     * @param string $chunkID
+     * @return string
+     */
+    public function getChunkFilePath($platformID, $gameID, $chunkID)
+    {
+        return $this->getReplayDirectory($platformID, $gameID) . DIRECTORY_SEPARATOR . 'c' . $chunkID;
+    }
+
+    /**
+     * @param string $platformID
+     * @param string $gameID
+     * @param string $keyframeID
+     * @return string
+     */
+    public function getKeyframeFilePath($platformID, $gameID, $keyframeID)
+    {
+        return $this->getReplayDirectory($platformID, $gameID) . DIRECTORY_SEPARATOR . 'k' . $keyframeID;
+    }
+
+    /**
+     * @param string $platformID
+     * @param string $gameID
+     * @return string
+     */
+    public function getEndStatsFilePath($platformID, $gameID)
+    {
+        return $this->getReplayDirectory($platformID, $gameID) . DIRECTORY_SEPARATOR . 'endStats';
+    }
+
+    /**
+     * @param string $platformID
+     * @param string $gameID
+     * @return string
+     */
+    public function getEventsFilePath($platformID, $gameID)
+    {
+        return $this->getReplayDirectory($platformID, $gameID) . DIRECTORY_SEPARATOR . 'events';
+    }
+
+    /**
      * @param string $region
      * @return string
      */
