@@ -58,19 +58,6 @@ class CleanMatches extends Command
                 File::put($replayDirectory . DIRECTORY_SEPARATOR . 'events',
                     gzencode($game->events));
 
-                $chunks = Chunk::whereDbGameId($game->id)->get();
-                $keyframes = Keyframe::whereDbGameId($game->id)->get();
-
-                /** @var Chunk $chunk */
-                foreach($chunks as $chunk)
-                    File::put($replayDirectory . DIRECTORY_SEPARATOR . 'c' . $chunk->chunk_id,
-                        $chunk->chunkData->chunk_data);
-
-                /** @var Keyframe $keyframe */
-                foreach($keyframes as $keyframe)
-                    File::put($replayDirectory . DIRECTORY_SEPARATOR . 'k' . $keyframe->keyframe_id,
-                        $keyframe->keyframeData->keyframe_data);
-
                 $this->output->progressAdvance();
             }
         });
