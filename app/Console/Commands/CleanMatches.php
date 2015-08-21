@@ -53,7 +53,7 @@ class CleanMatches extends Command
             $this->comment('Migrating chunk data');
             $this->output->progressStart($count);
 
-            Chunk::where('id', '>=', $chunkStart)->chunk(10000, function ($chunks) {
+            Chunk::where('id', '>=', $chunkStart)->with('chunkData')->chunk(10000, function ($chunks) {
                 /** @var Chunk $chunk */
                 foreach ($chunks as $chunk) {
                     @File::put(LeagueHelper::getChunkFilePath($chunk->platform_id, $chunk->game_id, $chunk->chunk_id),
