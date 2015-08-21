@@ -16,7 +16,7 @@ class CleanMatches extends Command
      *
      * @var string
      */
-    protected $signature = 'replay:migrate';
+    protected $signature = 'replay:migrate {type=chunks}';
 
     /**
      * The console command description.
@@ -42,26 +42,26 @@ class CleanMatches extends Command
      */
     public function handle()
     {
-        $count = DB::table('games')->where('id', '>', 59000)->count();
+        $type = $this->argument('type');
 
-        $this->output->progressStart($count);
+        $chunkStart = 3864744;
+        $keyframeStart = 1802822;
 
-        DB::table('games')->where('id', '>', 59000)->chunk(10000, function($games){
-            foreach($games as $game) {
-                $replayDirectory = LeagueHelper::getReplayDirectory($game->platform_id, $game->game_id);
+        if($type == 'chunks') {
+            $count = Chunk::where('id', '>=', $chunkStart)->count();
 
-                File::makeDirectory($replayDirectory, 0755, true, true);
+            $this->comment('Migrating chunk data');
+            $this->output->progressStart($count);
 
-                File::put($replayDirectory . DIRECTORY_SEPARATOR . 'endStats',
-                    gzencode($game->end_stats));
+            Chunk::where('id', '>=', $chunkStart)->chunk(10000, function ($chunks) {
+                /** @var Chunk $chunk */
+                foreach ($chunks as $chunk) {
+                    File::put(LeagueHelper::getChunkFilePath($chunk->platform_id, $chunk->game_id, $chunk->chunk_id),
+                        $chunk->chunkData->chunk_data);
+                }
+            });
 
-                File::put($replayDirectory . DIRECTORY_SEPARATOR . 'events',
-                    gzencode($game->events));
-
-                $this->output->progressAdvance();
-            }
-        });
-
-        $this->output->progressFinish();
+            $this->output->progressFinish();
+        }
     }
 }
