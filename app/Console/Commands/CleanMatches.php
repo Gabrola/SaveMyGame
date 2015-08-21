@@ -46,7 +46,7 @@ class CleanMatches extends Command
 
         $this->output->progressStart($count);
 
-        DB::table('games')->where('id', '>', 59000)->chunk(500, function($games){
+        DB::table('games')->where('id', '>', 59000)->chunk(10000, function($games){
             foreach($games as $game) {
                 $replayDirectory = LeagueHelper::getReplayDirectory($game->platform_id, $game->game_id);
 
