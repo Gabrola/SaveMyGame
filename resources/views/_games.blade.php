@@ -39,7 +39,7 @@
         @else
             @if($game->queue_type != '')
                 <div class="match_info_part">
-                    <div style="width: 200px;">{{ config('constants.queues.' . $game->queue_type, $game->queue_type) }}<br/><span>{{ date('Y-m-d H:i:s', $game->match_time) }}</span></div>
+                    <div style="width: 200px;">{{ config('constants.queues.' . $game->queue_type, $game->queue_type) }}<br/><span title="{{ Carbon::createFromTimestamp($game->match_time)->toDayDateTimeString() }}">{{ Carbon::createFromTimestamp($game->match_time)->diffForHumans() }}</span></div>
                 </div>
             @endif
             <div class="match_info_part flex-fill">
