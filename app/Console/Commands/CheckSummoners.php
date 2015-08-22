@@ -121,10 +121,6 @@ class CheckSummoners extends Command
                 $process = new Process($command, base_path());
                 $process->run();
             } catch (\Exception $e) {
-                $game = Game::byGame($json['platformId'], $json['gameId'])->first();
-
-                if($game)
-                    $game->delete();
             }
         }
     }
