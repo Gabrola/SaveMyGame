@@ -105,9 +105,7 @@ class PageController extends Controller
 
     public function test()
     {
-        if($summoner = Summoner::bySummonerId('EUNE', 41303699)->first())
-        {
-        }
+        return Summoner::bySummonerId('EUNE', 41303699)->first()->toSql();
         //abort(404);
     }
 }
