@@ -11,22 +11,22 @@ namespace App\Models;
  * @property string $internal_summoner_name
  * @property string $summoner_name
  * @property integer $profile_icon_id
+ * @property integer $in_game_id
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\SummonerGame[] $games
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner whereId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner whereRegion($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner whereSummonerId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner whereInternalSummonerName($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner whereSummonerName($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner whereProfileIconId($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner whereInGameId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner whereCreatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner whereUpdatedAt($value)
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\SummonerGame[] $games
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner bySummonerId($region, $summonerID)
- * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner byInternalName($region, $internalName)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner bySummonerName($region, $summonerName)
- * @property integer $in_game_id
- * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner whereInGameId($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\Summoner byInternalName($region, $internalName)
  */
 class Summoner extends \Eloquent
 {

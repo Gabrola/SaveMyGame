@@ -2,7 +2,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chunk;
+use App\Models\Game;
 use Cache;
+use File;
 use LeagueHelper;
 use Request;
 
@@ -13,13 +15,13 @@ class SpectatorController extends Controller
         return '1.82.86';
     }
 
-    public function getGameMetaData(/*$randomID,*/ $region, $gameId, $num)
+    public function getGameMetaData($region, $gameId, $num)
     {
-        /** @var \App\Models\Game $game */
-        $game = \App\Models\Game::byGame($region, $gameId)->firstOrFail();
-        $lastChunk = \App\Models\Chunk::byGame($region, $gameId)->lastChunk()->firstOrFail();
+        /** @var Game $game */
+        $game = Game::byGame($region, $gameId)->firstOrFail();
+        $lastChunk = Chunk::byGame($region, $gameId)->lastChunk()->firstOrFail();
 
-        return \Response::json(
+        return response()->json(
             [
                 'gameKey' => [
                     'gameId' => $game->game_id,
@@ -53,10 +55,10 @@ class SpectatorController extends Controller
         );
     }
 
-    public function getLastChunkInfo(/*$randomID,*/ $region, $gameId, $num)
+    public function getLastChunkInfo($region, $gameId, $num)
     {
-        /** @var \App\Models\Game $game */
-        $game = \App\Models\Game::byGame($region, $gameId)->firstOrFail();
+        /** @var Game $game */
+        $game = Game::byGame($region, $gameId)->firstOrFail();
 
         $requestHost = Request::getHost();
 
@@ -67,11 +69,11 @@ class SpectatorController extends Controller
             $cacheKey = $randomPart . '_' . Request::getClientIp() . '_' . $game->platform_id . $game->game_id;
 
             if(Cache::get($cacheKey, 1) < $game->end_startup_chunk_id) {
-                /** @var \App\Models\Chunk $firstChunk */
-                $firstChunk = \App\Models\Chunk::byGame($region, $gameId)->startGame($game->start_game_chunk_id)->firstOrFail();
+                /** @var Chunk $firstChunk */
+                $firstChunk = Chunk::byGame($region, $gameId)->startGame($game->start_game_chunk_id)->firstOrFail();
 
                 if($firstChunk->next_chunk_id != $firstChunk->chunk_id)
-                    $firstChunk = \App\Models\Chunk::byGame($region, $gameId)->whereChunkId($firstChunk->chunk_id + 1)->first();
+                    $firstChunk = Chunk::byGame($region, $gameId)->whereChunkId($firstChunk->chunk_id + 1)->first();
 
                 if($firstChunk) {
                     if (Cache::has($cacheKey))
@@ -79,7 +81,7 @@ class SpectatorController extends Controller
                     else
                         Cache::add($cacheKey, 1, 60);
 
-                    return \Response::json(
+                    return response()->json(
                         [
                             'chunkId' => $firstChunk->chunk_id,
                             'availableSince' => 30000,
@@ -102,8 +104,8 @@ class SpectatorController extends Controller
             if(count($chunks) != 2)
                 abort(400);
 
-            /** @var \App\Models\Chunk $firstChunk */
-            /** @var \App\Models\Chunk $lastChunk */
+            /** @var Chunk $firstChunk */
+            /** @var Chunk $lastChunk */
             $firstChunk = Chunk::byGame($region, $gameId)->whereChunkId($chunks[0] + $game->start_game_chunk_id)->firstOrFail();
             $lastChunk = Chunk::byGame($region, $gameId)->whereChunkId($chunks[1] + $game->start_game_chunk_id)->firstOrFail();
 
@@ -115,7 +117,7 @@ class SpectatorController extends Controller
                 else
                     Cache::add($cacheKey, 1, 60);
 
-                return \Response::json(
+                return response()->json(
                     [
                         'chunkId' => $firstChunk->chunk_id,
                         'availableSince' => 30000,
@@ -130,7 +132,7 @@ class SpectatorController extends Controller
                 );
             }
 
-            return \Response::json(
+            return response()->json(
                 [
                     'chunkId' => $lastChunk->chunk_id,
                     'availableSince' => 30000,
@@ -145,9 +147,9 @@ class SpectatorController extends Controller
             );
         }
 
-        $lastChunk = \App\Models\Chunk::byGame($region, $gameId)->lastChunk()->firstOrFail();
+        $lastChunk = Chunk::byGame($region, $gameId)->lastChunk()->firstOrFail();
 
-        return \Response::json(
+        return response()->json(
             [
                 'chunkId' => $lastChunk->chunk_id,
                 'availableSince' => 30000,
@@ -162,35 +164,29 @@ class SpectatorController extends Controller
         );
     }
 
-    public function getGameDataChunk(/*$randomID,*/ $region, $gameId, $num)
+    public function getGameDataChunk($region, $gameId, $num)
     {
-        /** @var \App\Models\Chunk $chunk */
-        $chunk = \App\Models\Chunk::byGame($region, $gameId)->whereChunkId($num)->firstOrFail();
-
-        return \Response::make($chunk->chunkData->chunk_data, '200', array(
+        return response()->make(File::get(LeagueHelper::getChunkFilePath($region, $gameId, $num)), '200', array(
             'Content-Type' => 'application/octet-stream'
         ));
     }
 
-    public function getKeyFrame(/*$randomID,*/ $region, $gameId, $num)
+    public function getKeyFrame($region, $gameId, $num)
     {
-        /** @var \App\Models\Keyframe $keyframe */
-        $keyframe = \App\Models\Keyframe::byGame($region, $gameId)->whereKeyframeId($num)->firstOrFail();
-
-        return \Response::make($keyframe->keyframeData->keyframe_data, '200', array(
+        return response()->make(File::get(LeagueHelper::getKeyframeFilePath($region, $gameId, $num)), '200', array(
             'Content-Type' => 'application/octet-stream'
         ));
     }
 
-    public function endOfGameStats(/*$randomID,*/ $region, $gameId, $num)
+    public function endOfGameStats($region, $gameId, $num)
     {
-        /** @var \App\Models\Game $game */
-        $game = \App\Models\Game::byGame($region, $gameId)->firstOrFail();
+        /** @var Game $game */
+        $game = Game::byGame($region, $gameId)->firstOrFail();
 
         if($game->end_stats == null)
             abort(404);
 
-        return \Response::make(gzdecode($game->end_stats), '200', array(
+        return response()->make(gzdecode($game->end_stats), '200', array(
             'Content-Type' => 'application/octet-stream'
         ));
     }

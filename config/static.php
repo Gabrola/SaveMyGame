@@ -196,6 +196,7 @@
     1075 => 'Doran\'s Blade (Showdown)',
     1074 => 'Doran\'s Shield (Showdown)',
     3844 => 'Murksphere',
+    3748 => 'Titanic Hydra (Melee Only)',
     1076 => 'Doran\'s Ring (Showdown)',
     3841 => 'Swindler\'s Orb',
     3840 => 'Globe of Trust',
@@ -343,6 +344,7 @@
     1052 => 'Amplifying Tome',
     1053 => 'Vampiric Scepter',
     3191 => 'Seeker\'s Armguard',
+    3053 => 'Sterak\'s Gage',
     3050 => 'Zeke\'s Harbinger',
     3190 => 'Locket of the Iron Solari',
     3056 => 'Ohmwrecker',
@@ -436,5 +438,5 @@
     4 => 'Flash',
     17 => 'Garrison',
   ),
-  'version' => '5.15.1',
+  'version' => '5.16.1',
 );

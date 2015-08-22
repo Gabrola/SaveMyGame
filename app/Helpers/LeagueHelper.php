@@ -187,26 +187,6 @@ class LeagueHelper
     }
 
     /**
-     * @param string $platformID
-     * @param string $gameID
-     * @return string
-     */
-    public function getEndStatsFilePath($platformID, $gameID)
-    {
-        return $this->getReplayDirectory($platformID, $gameID) . DIRECTORY_SEPARATOR . 'endStats';
-    }
-
-    /**
-     * @param string $platformID
-     * @param string $gameID
-     * @return string
-     */
-    public function getEventsFilePath($platformID, $gameID)
-    {
-        return $this->getReplayDirectory($platformID, $gameID) . DIRECTORY_SEPARATOR . 'events';
-    }
-
-    /**
      * @param string $region
      * @return string
      */

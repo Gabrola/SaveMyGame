@@ -21,13 +21,10 @@ class CreateChunksTable extends Migration
             $table->smallInteger('keyframe_id')->unsigned();
             $table->smallInteger('next_chunk_id')->unsigned();
             $table->smallInteger('duration')->unsigned();
-            $table->integer('chunk_data_id')->unsigned();
 
             $table->unique(['platform_id', 'game_id', 'chunk_id']);
             $table->index(['db_game_id']);
         });
-
-        DB::statement("ALTER TABLE chunks ADD chunk_data MEDIUMBLOB AFTER duration");
     }
 
     /**

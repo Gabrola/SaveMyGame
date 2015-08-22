@@ -33,6 +33,8 @@ class CreateSummonerGamesTable extends Migration
 
             $table->unique(['region', 'summoner_id', 'game_id']);
         });
+
+        DB::statement('ALTER TABLE summoner_games ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=4');
     }
 
     /**

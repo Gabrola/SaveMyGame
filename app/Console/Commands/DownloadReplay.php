@@ -3,9 +3,7 @@
 namespace App\Console\Commands;
 
 use App\GameUtil;
-use App\Models\ChunkData;
 use DB;
-use App\Models\KeyframeData;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use LeagueHelper;
@@ -145,15 +143,9 @@ class DownloadReplay extends Command
             if($res->getStatusCode() == 200) {
                 $chunk->save();
 
-                $chunkData = new ChunkData();
-                $chunkData->chunk_data = $res->getBody();
-                $chunkData->chunk_id = $chunk->id;
-                $chunkData->save();
-                $chunkData->chunkInfo()->save($chunk);
-
                 $this->downloadedChunks[] = $chunk->chunk_id;
 
-                File::put($this->replayDirectory . DIRECTORY_SEPARATOR . 'c' . $chunk->chunk_id, $chunkData->chunk_data);
+                File::put($this->replayDirectory . DIRECTORY_SEPARATOR . 'c' . $chunk->chunk_id, $res->getBody());
 
                 return true;
             }
@@ -179,15 +171,9 @@ class DownloadReplay extends Command
             if($res->getStatusCode() == 200) {
                 $keyframe->save();
 
-                $keyframeData = new KeyframeData();
-                $keyframeData->keyframe_data = $res->getBody();
-                $keyframeData->keyframe_id = $keyframe->id;
-                $keyframeData->save();
-                $keyframeData->keyframe()->save($keyframe);
-
                 $this->downloadedKeyframes[] = $keyframe->keyframe_id;
 
-                File::put($this->replayDirectory . DIRECTORY_SEPARATOR . 'k' . $keyframe->keyframe_id, $keyframeData->keyframe_data);
+                File::put($this->replayDirectory . DIRECTORY_SEPARATOR . 'k' . $keyframe->keyframe_id, $res->getBody());
 
                 return true;
             }

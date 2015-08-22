@@ -28,6 +28,8 @@ class CreateGamesTable extends Migration
 
             $table->unique(['platform_id', 'game_id']);
         });
+
+        DB::statement('ALTER TABLE games ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=4');
     }
 
     /**

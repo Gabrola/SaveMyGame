@@ -11,37 +11,37 @@ namespace App\Models;
  * @property integer $game_id
  * @property integer $summoner_id
  * @property integer $champion_id
+ * @property boolean $spell1
+ * @property boolean $spell2
  * @property boolean $win
  * @property boolean $map_id
  * @property string $queue_type
  * @property integer $match_time
  * @property integer $match_duration
- * @property array $stats
+ * @property string $runes
+ * @property string $masteries
+ * @property string $stats
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
+ * @property-read \App\Models\Summoner $summoner
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereDbSummonerId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereRegion($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereGameId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereSummonerId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereChampionId($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereSpell1($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereSpell2($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereWin($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereMapId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereQueueType($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereMatchTime($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereMatchDuration($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereRunes($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereMasteries($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereStats($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereCreatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereUpdatedAt($value)
- * @property-read \App\Models\Summoner $summoner
- * @property array $runes
- * @property array $masteries
- * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereRunes($value)
- * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereMasteries($value)
- * @property integer $spell1
- * @property integer $spell2
- * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereSpell1($value)
- * @method static \Illuminate\Database\Query\Builder|\App\Models\SummonerGame whereSpell2($value)
  */
 class SummonerGame extends \Eloquent
 {

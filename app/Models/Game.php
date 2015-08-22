@@ -13,8 +13,9 @@ namespace App\Models;
  * @property integer $start_game_chunk_id
  * @property integer $end_game_chunk_id
  * @property integer $interest_score
- * @property array $start_stats
- * @property array $end_stats
+ * @property string $start_stats
+ * @property string $end_stats
+ * @property string $events
  * @property string $status
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
@@ -30,12 +31,11 @@ namespace App\Models;
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereInterestScore($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereStartStats($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereEndStats($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereEvents($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereStatus($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereCreatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereUpdatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game byGame($platformID, $gameID)
- * @property array $events
- * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereEvents($value)
  */
 class Game extends \Eloquent
 {

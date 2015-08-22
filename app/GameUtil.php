@@ -44,9 +44,6 @@ class GameUtil
 
                 $game->end_stats = $endStats;
                 $game->save();
-
-                File::put(LeagueHelper::getEndStatsFilePath($game->platform_id, $game->game_id),
-                    gzencode($jsonString));
             }
         }
         catch(\Exception $e){}
@@ -194,9 +191,6 @@ class GameUtil
         }
 
         $game->save();
-
-        File::put(LeagueHelper::getEventsFilePath($game->platform_id, $game->game_id),
-            gzencode(json_decode($events)));
     }
 
     /**

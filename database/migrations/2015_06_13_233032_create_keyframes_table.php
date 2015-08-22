@@ -18,7 +18,6 @@ class CreateKeyframesTable extends Migration
             $table->string('platform_id', 5);
             $table->bigInteger('game_id')->unsigned();
             $table->smallInteger('keyframe_id')->unsigned();
-            $table->integer('keyframe_data_id')->unsigned();
 
             $table->unique(['platform_id', 'game_id', 'keyframe_id']);
             $table->index(['db_game_id']);
