@@ -480,13 +480,13 @@ class DownloadReplay extends Command
             $this->log("Game %s-%d downloaded successfully!", $this->game->platform_id, $this->game->game_id);
             $this->game->status = 'downloaded';
             $this->game->save();
-
-            File::delete($logFile);
         } else {
             $this->log("Game %s-%d download failed!", $this->game->platform_id, $this->game->game_id);
             $this->game->status = 'failed';
             $this->game->save();
         }
+
+        File::delete($logFile);
     }
 
     public function log($string)
