@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\GameUtil;
-use DB;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use LeagueHelper;
@@ -291,8 +290,6 @@ class DownloadReplay extends Command
         $downloaded = false;
 
         $this->ProcessStartGame();
-        DB::commit();
-        DB::beginTransaction();
 
         if($this->GetMetaData())
         {
@@ -474,19 +471,17 @@ class DownloadReplay extends Command
 
         File::makeDirectory($this->replayDirectory, 0755, true);
 
-        DB::transaction(function() use ($logFile) {
-            if($this->StartDownload()) {
-                $this->log("Game %s-%d downloaded successfully!", $this->game->platform_id, $this->game->game_id);
-                $this->game->status = 'downloaded';
-                $this->game->save();
+        if($this->StartDownload()) {
+            $this->log("Game %s-%d downloaded successfully!", $this->game->platform_id, $this->game->game_id);
+            $this->game->status = 'downloaded';
+            $this->game->save();
 
-                File::delete($logFile);
-            } else {
-                $this->log("Game %s-%d download failed!", $this->game->platform_id, $this->game->game_id);
-                $this->game->status = 'failed';
-                $this->game->save();
-            }
-        });
+            File::delete($logFile);
+        } else {
+            $this->log("Game %s-%d download failed!", $this->game->platform_id, $this->game->game_id);
+            $this->game->status = 'failed';
+            $this->game->save();
+        }
     }
 
     public function log($string)
