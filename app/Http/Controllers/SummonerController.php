@@ -84,6 +84,8 @@ class SummonerController extends Controller
 
         if($inGameData && $inGameData->status != 'downloading')
             $inGame = false;
+        else if(!$inGameData)
+            $inGame = false;
 
         if($request->ajax()){
             return view('_games', [
