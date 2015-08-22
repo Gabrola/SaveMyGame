@@ -105,7 +105,6 @@ class PageController extends Controller
 
     public function test()
     {
-        return Summoner::bySummonerId('EUNE', 41303699)->toSql();
-        //abort(404);
+        abort(404);
     }
 }
