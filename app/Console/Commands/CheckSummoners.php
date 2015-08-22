@@ -13,6 +13,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
 class CheckSummoners extends Command
@@ -119,8 +120,10 @@ class CheckSummoners extends Command
                 $command = $this->getCommand($json['platformId'], $json['gameId'], $json['observers']['encryptionKey']);
 
                 $process = new Process($command, base_path());
+                $process->setTimeout(null);
                 $process->run();
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
             }
         }
     }
