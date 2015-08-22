@@ -48,21 +48,23 @@ class SummonerController extends Controller
 
         $somethingChanged = false;
 
-        /** @var \App\Models\SummonerGame $summonerGame */
+        /** @var SummonerGame $summonerGame */
         foreach($summonerGames as $summonerGame){
             if(is_null($summonerGame->stats)){
-                /** @var \App\Models\Game $game */
+                /** @var Game $game */
                 $game = Game::byGame(\LeagueHelper::getPlatformIdByRegion($region), $summonerGame->game_id)->first();
 
-                GameUtil::DownloadEndGame($game, true);
+                if($game) {
+                    GameUtil::DownloadEndGame($game, true);
 
-                $summonerGame = SummonerGame::find($summonerGame->id);
+                    $summonerGame = SummonerGame::find($summonerGame->id);
 
-                if(is_null($summonerGame->stats)){
-                    $summonerGame->stats = false;
-                    $summonerGame->save();
-                } else {
-                    $somethingChanged = true;
+                    if (is_null($summonerGame->stats)) {
+                        $summonerGame->stats = false;
+                        $summonerGame->save();
+                    } else {
+                        $somethingChanged = true;
+                    }
                 }
             }
         }

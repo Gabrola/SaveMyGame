@@ -166,16 +166,24 @@ class SpectatorController extends Controller
 
     public function getGameDataChunk($region, $gameId, $num)
     {
-        return response()->make(File::get(LeagueHelper::getChunkFilePath($region, $gameId, $num)), '200', array(
-            'Content-Type' => 'application/octet-stream'
-        ));
+        try {
+            return response()->make(File::get(LeagueHelper::getChunkFilePath($region, $gameId, $num)), '200', array(
+                'Content-Type' => 'application/octet-stream'
+            ));
+        } catch(\Illuminate\Contracts\Filesystem\FileNotFoundException $e) {
+            abort(404);
+        }
     }
 
     public function getKeyFrame($region, $gameId, $num)
     {
-        return response()->make(File::get(LeagueHelper::getKeyframeFilePath($region, $gameId, $num)), '200', array(
-            'Content-Type' => 'application/octet-stream'
-        ));
+        try {
+            return response()->make(File::get(LeagueHelper::getKeyframeFilePath($region, $gameId, $num)), '200', array(
+                'Content-Type' => 'application/octet-stream'
+            ));
+        } catch(\Illuminate\Contracts\Filesystem\FileNotFoundException $e) {
+            abort(404);
+        }
     }
 
     public function endOfGameStats($region, $gameId, $num)
