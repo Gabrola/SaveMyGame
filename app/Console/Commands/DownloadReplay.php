@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\GameUtil;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use LeagueHelper;
@@ -433,6 +434,10 @@ class DownloadReplay extends Command
 
             //Do not retry if successful request
             if(!is_null($response))
+                return false;
+
+            //Do not retry 404 errors
+            if($e instanceof ClientException && $e->getResponse()->getStatusCode() == 404)
                 return false;
 
             //Do not retry after 5 retries
