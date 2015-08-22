@@ -474,7 +474,7 @@ class DownloadReplay extends Command
 
         $this->replayDirectory = LeagueHelper::getReplayDirectory($this->game->platform_id, $this->game->game_id);
 
-        File::makeDirectory($this->replayDirectory, 0755, true);
+        File::makeDirectory($this->replayDirectory, 0755, true, true);
 
         if($this->StartDownload()) {
             $this->log("Game %s-%d downloaded successfully!", $this->game->platform_id, $this->game->game_id);
