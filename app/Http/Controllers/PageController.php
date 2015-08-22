@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClientVersion;
+use App\Models\Summoner;
 use GuzzleHttp\Promise;
 use Illuminate\Http\Request;
 
@@ -104,6 +105,9 @@ class PageController extends Controller
 
     public function test()
     {
-        abort(404);
+        if($summoner = Summoner::bySummonerId('EUNE', 41303699)->first())
+        {
+        }
+        //abort(404);
     }
 }
