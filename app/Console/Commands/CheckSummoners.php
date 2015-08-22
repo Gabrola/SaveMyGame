@@ -125,8 +125,6 @@ class CheckSummoners extends Command
 
                 if($game)
                     $game->delete();
-
-                \Log::error($e->getMessage());
             }
         }
     }
