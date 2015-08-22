@@ -15,9 +15,11 @@ php artisan up
 
 @task('quick-deploy', ['on' => 'production'])
 cd /var/www/savemyga.me
+php artisan down
 git pull origin master
 composer install --no-dev
 php artisan migrate --force
 php artisan route:cache
 php artisan config:cache
+php artisan up
 @endtask
