@@ -12,7 +12,7 @@
 
     @if($inGame)
         <div class="divider"></div>
-        <div class="section center-align" id="games-container">
+        <div class="section center-align">
             <h3 class="center-align">Current Match <span class="red-text"><i class="mdi-image-lens rec-dot"></i> REC</span></h3>
             @include('_in_game', ['game' => $inGameData])
         </div>
