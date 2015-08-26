@@ -337,7 +337,7 @@
         @endif
     @else
         <div class="card-panel red">
-            <span class="white-text">This game's replay is corrupted or has been deleted because it has been recorded on an older patch and is more than 7 days old.</span>
+            <span class="white-text">This game's replay has been deleted because it has been recorded on an older patch and is more than 7 days old.</span>
         </div>
     @endif
 @endsection
