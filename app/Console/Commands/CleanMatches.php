@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ClientVersion;
 use App\Models\Game;
 use Carbon\Carbon;
+use DB;
 use LeagueHelper;
 use Illuminate\Console\Command;
 
@@ -40,11 +42,17 @@ class CleanMatches extends Command
      */
     public function handle()
     {
+        $versions = DB::table('client_versions')->select(['client_version'])->groupBy('release_version')->orderBy('id', 'desc')->get();
+        $last2Versions = $versions[2];
+        $patchNumber = LeagueHelper::getPatchFromVersion($last2Versions->client_version);
+
+        $lastPatchDate = ClientVersion::where('client_version', 'like', $patchNumber . '%')->orderBy('id', 'desc')->first()->created_at->toDateTimeString();
+
         $sevenDaysAgo = Carbon::now()->subDays(7)->toDateTimeString();
         $count = Game::where('created_at', '<', $sevenDaysAgo)->count('id');
         $bar = $this->output->createProgressBar($count);
         $bar->setRedrawFrequency(100);
-        Game::where('created_at', '<', $sevenDaysAgo)->chunk(1000, function($games) use (&$bar){
+        Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->chunk(1000, function($games) use (&$bar){
             /** @var Game $game */
             foreach($games as $game)
             {
