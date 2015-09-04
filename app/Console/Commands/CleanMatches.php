@@ -49,19 +49,18 @@ class CleanMatches extends Command
         $lastPatchDate = ClientVersion::where('client_version', 'like', $patchNumber . '%')->orderBy('id', 'desc')->first()->created_at->toDateTimeString();
 
         $sevenDaysAgo = Carbon::now()->subDays(7)->toDateTimeString();
-        $count = Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->count('id');
+        $count = Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->where('status', '!=', 'deleted')->count('id');
         $bar = $this->output->createProgressBar($count);
         $bar->setRedrawFrequency(100);
-        Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->chunk(1000, function($games) use (&$bar){
-            /** @var Game $game */
-            foreach($games as $game)
-            {
-                $bar->advance();
-                /*$gameEndStats = $game->end_stats;
-                if (!$gameEndStats || LeagueHelper::comparePatch(config('clientversion', '0.0.0.0'), $gameEndStats['matchVersion']))
-                    $game->deleteReplay();*/
-            }
-        });
+        $games = Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->select(['id'])->get();
+
+        foreach($games as $game)
+        {
+            $bar->advance();
+            /*$gameEndStats = $game->end_stats;
+            if (!$gameEndStats || LeagueHelper::comparePatch(config('clientversion', '0.0.0.0'), $gameEndStats['matchVersion']))
+                $game->deleteReplay();*/
+        }
 
         $bar->finish();
     }
