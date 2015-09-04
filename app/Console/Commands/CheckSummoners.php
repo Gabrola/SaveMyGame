@@ -115,6 +115,7 @@ class CheckSummoners extends Command
                 $game->encryption_key = $json['observers']['encryptionKey'];
                 $game->start_stats = $json;
                 $game->status = 'not_downloaded';
+                $game->patch = LeagueHelper::getPatchFromVersion(config('clientversion', '0.0.0.0'));
                 $game->save();
 
                 $command = $this->getCommand($json['platformId'], $json['gameId'], $json['observers']['encryptionKey']);

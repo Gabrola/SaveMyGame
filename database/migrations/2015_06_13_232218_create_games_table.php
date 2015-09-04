@@ -24,6 +24,7 @@ class CreateGamesTable extends Migration
             $table->text('start_stats');
             $table->text('end_stats');
             $table->enum('status', ['not_downloaded', 'downloading', 'downloaded', 'failed']);
+            $table->string('patch', 10);
             $table->timestamps();
 
             $table->unique(['platform_id', 'game_id']);

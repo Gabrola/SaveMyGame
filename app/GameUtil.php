@@ -176,6 +176,8 @@ class GameUtil
             $currentVersion = config('clientversion', '0.0.0.0');
             $replayVersion = $gameEndStats['matchVersion'];
 
+            $game->patch = LeagueHelper::getPatchFromVersion($replayVersion);
+
             self::SetReleaseVersion($replayVersion, $game);
 
             if(version_compare($replayVersion, $currentVersion) > 0) {
