@@ -49,7 +49,7 @@ class CleanMatches extends Command
         $lastPatchDate = ClientVersion::where('client_version', 'like', $patchNumber . '%')->orderBy('id', 'desc')->first()->created_at->toDateTimeString();
 
         $sevenDaysAgo = Carbon::now()->subDays(7)->toDateTimeString();
-        $count = Game::where('created_at', '<', $sevenDaysAgo)->count('id');
+        $count = Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->count('id');
         $bar = $this->output->createProgressBar($count);
         $bar->setRedrawFrequency(100);
         Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->chunk(1000, function($games) use (&$bar){
