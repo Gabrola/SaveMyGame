@@ -52,14 +52,17 @@ class CleanMatches extends Command
         $count = Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->where('status', '!=', 'deleted')->count('id');
         $bar = $this->output->createProgressBar($count);
         $bar->setRedrawFrequency(100);
-        $games = Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->select(['id'])->get();
+        $games = Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->get();
 
         foreach($games as $game)
         {
+            /*if($game->status != 'deleted') {
+                $gameEndStats = $game->end_stats;
+                if (!$gameEndStats || LeagueHelper::comparePatch(config('clientversion', '0.0.0.0'), $gameEndStats['matchVersion']))
+                    $game->deleteReplay();
+            }*/
+
             $bar->advance();
-            /*$gameEndStats = $game->end_stats;
-            if (!$gameEndStats || LeagueHelper::comparePatch(config('clientversion', '0.0.0.0'), $gameEndStats['matchVersion']))
-                $game->deleteReplay();*/
         }
 
         $bar->finish();
