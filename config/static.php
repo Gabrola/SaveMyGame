@@ -438,5 +438,5 @@
     4 => 'Flash',
     17 => 'Garrison',
   ),
-  'version' => '5.16.1',
+  'version' => '5.17.1',
 );

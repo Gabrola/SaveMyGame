@@ -43,12 +43,13 @@ class CleanMatches extends Command
     public function handle()
     {
         $versions = DB::table('client_versions')->select(['client_version'])->groupBy('release_version')->orderBy('id', 'desc')->get();
-        $last2Versions = $versions[2];
+        $last2Versions = $versions[1];
         $patchNumber = LeagueHelper::getPatchFromVersion($last2Versions->client_version);
 
-        $lastPatchDate = ClientVersion::where('client_version', 'like', $patchNumber . '%')->orderBy('id', 'desc')->first()->created_at->toDateTimeString();
+        $this->info($patchNumber);
 
-        $sevenDaysAgo = Carbon::now()->subDays(7)->toDateTimeString();
+        return;
+
         $count = Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->where('status', '!=', 'deleted')->count('id');
         $bar = $this->output->createProgressBar($count);
         $bar->setRedrawFrequency(100);
