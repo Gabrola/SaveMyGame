@@ -46,14 +46,13 @@ class CleanMatches extends Command
         $last2Versions = $versions[0];
         $patchNumber = LeagueHelper::getPatchFromVersion($last2Versions->client_version);
 
-        $this->info($patchNumber);
+        $query = Game::where('patch', '!=', $patchNumber)->where('status', '!=', 'deleted');
+        $count = $query->count('id');
 
-        return;
-
-        $count = Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->where('status', '!=', 'deleted')->count('id');
         $bar = $this->output->createProgressBar($count);
         $bar->setRedrawFrequency(100);
-        $games = Game::where('created_at', '<', $sevenDaysAgo)->where('created_at', '>', $lastPatchDate)->get();
+
+        $games = $query->select(['id'])->get();
 
         foreach($games as $game)
         {
