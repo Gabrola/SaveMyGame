@@ -56,12 +56,7 @@ class CleanMatches extends Command
 
         foreach($games as $game)
         {
-            /*if($game->status != 'deleted') {
-                $gameEndStats = $game->end_stats;
-                if (!$gameEndStats || LeagueHelper::comparePatch(config('clientversion', '0.0.0.0'), $gameEndStats['matchVersion']))
-                    $game->deleteReplay();
-            }*/
-
+            $game->deleteReplay();
             $bar->advance();
         }
 
