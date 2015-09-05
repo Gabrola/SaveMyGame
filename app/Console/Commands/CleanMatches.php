@@ -59,6 +59,8 @@ class CleanMatches extends Command
             $game->deleteReplay();
         }
 
+        $query->update(['status' => 'deleted']);
+
         $bar->finish();
     }
 }
