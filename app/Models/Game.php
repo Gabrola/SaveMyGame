@@ -88,7 +88,7 @@ class Game extends \Eloquent
 
     public function deleteReplay()
     {
-        system('rm -rf ' . escapeshellarg(\LeagueHelper::getReplayDirectory($this->platform_id, $this->game_id)));
+        \File::deleteDirectory(\LeagueHelper::getReplayDirectory($this->platform_id, $this->game_id));
         $this->status = 'deleted';
         $this->save();
     }

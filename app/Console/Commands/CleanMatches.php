@@ -51,7 +51,7 @@ class CleanMatches extends Command
 
         $bar = $this->output->createProgressBar($count);
 
-        $games = $query->select(['id'])->get();
+        $games = $query->select(['id', 'platform_id', 'game_id'])->get();
 
         foreach($games as $game)
         {
