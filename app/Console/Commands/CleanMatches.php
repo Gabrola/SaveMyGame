@@ -50,14 +50,13 @@ class CleanMatches extends Command
         $count = $query->count('id');
 
         $bar = $this->output->createProgressBar($count);
-        $bar->setRedrawFrequency(100);
 
         $games = $query->select(['id'])->get();
 
         foreach($games as $game)
         {
-            $game->deleteReplay();
             $bar->advance();
+            $game->deleteReplay();
         }
 
         $bar->finish();
