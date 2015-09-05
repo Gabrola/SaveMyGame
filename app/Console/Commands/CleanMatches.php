@@ -43,7 +43,7 @@ class CleanMatches extends Command
     public function handle()
     {
         $versions = DB::table('client_versions')->select(['client_version'])->groupBy('release_version')->orderBy('id', 'desc')->get();
-        $last2Versions = $versions[1];
+        $last2Versions = $versions[0];
         $patchNumber = LeagueHelper::getPatchFromVersion($last2Versions->client_version);
 
         $this->info($patchNumber);
