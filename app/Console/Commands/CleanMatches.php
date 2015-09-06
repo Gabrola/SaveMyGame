@@ -42,25 +42,27 @@ class CleanMatches extends Command
      */
     public function handle()
     {
-        $versions = DB::table('client_versions')->select(['client_version'])->groupBy('release_version')->orderBy('id', 'desc')->get();
-        $last2Versions = $versions[0];
-        $patchNumber = LeagueHelper::getPatchFromVersion($last2Versions->client_version);
+        $previousVersion = DB::table('client_versions')->select(['client_version'])->groupBy('release_version')->orderBy('id', 'desc')->offset(1)->first();
+        $patchNumber = LeagueHelper::getPatchFromVersion($previousVersion->client_version);
 
-        $query = Game::where('patch', '!=', $patchNumber)->where('status', '!=', 'deleted');
+        $this->info($patchNumber);
+
+        return;
+
+        $sevenDaysAgo = Carbon::now()->subDays(7)->toDateTimeString();
+        $query = Game::wherePatch($patchNumber)->where('status', '!=', 'deleted')->where('created_at', '<', $sevenDaysAgo);
         $count = $query->count('id');
 
         $bar = $this->output->createProgressBar($count);
 
         $games = $query->select(['id', 'platform_id', 'game_id'])->get();
 
-        foreach($games as $game)
-        {
+        foreach($games as $game) {
             $bar->advance();
             $game->deleteReplay();
         }
 
         $query->update(['status' => 'deleted']);
-
         $bar->finish();
     }
 }

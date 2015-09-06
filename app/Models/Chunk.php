@@ -5,15 +5,15 @@ namespace App\Models;
 /**
  * App\Models\Chunk
  *
- * @property integer $id 
- * @property integer $db_game_id 
- * @property string $platform_id 
- * @property integer $game_id 
- * @property integer $chunk_id 
- * @property integer $keyframe_id 
- * @property integer $next_chunk_id 
- * @property integer $duration 
- * @property-read \App\Models\Game $game 
+ * @property integer $id
+ * @property integer $db_game_id
+ * @property string $platform_id
+ * @property integer $game_id
+ * @property integer $chunk_id
+ * @property integer $keyframe_id
+ * @property integer $next_chunk_id
+ * @property integer $duration
+ * @property-read \App\Models\Game $game
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Chunk whereId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Chunk whereDbGameId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Chunk wherePlatformId($value)

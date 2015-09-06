@@ -5,22 +5,23 @@ namespace App\Models;
 /**
  * App\Models\Game
  *
- * @property integer $id
- * @property string $platform_id
- * @property integer $game_id
- * @property string $encryption_key
- * @property integer $end_startup_chunk_id
- * @property integer $start_game_chunk_id
- * @property integer $end_game_chunk_id
- * @property integer $interest_score
- * @property string $start_stats
- * @property string $end_stats
- * @property string $events
- * @property string $status
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Chunk[] $chunks
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Keyframe[] $keyframes
+ * @property integer $id 
+ * @property string $platform_id 
+ * @property integer $game_id 
+ * @property string $encryption_key 
+ * @property integer $end_startup_chunk_id 
+ * @property integer $start_game_chunk_id 
+ * @property integer $end_game_chunk_id 
+ * @property integer $interest_score 
+ * @property string $start_stats 
+ * @property string $end_stats 
+ * @property string $events 
+ * @property string $status 
+ * @property string $patch 
+ * @property \Carbon\Carbon $created_at 
+ * @property \Carbon\Carbon $updated_at 
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Chunk[] $chunks 
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Keyframe[] $keyframes 
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game wherePlatformId($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereGameId($value)
@@ -33,6 +34,7 @@ namespace App\Models;
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereEndStats($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereEvents($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereStatus($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\Models\Game wherePatch($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereCreatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game whereUpdatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Game byGame($platformID, $gameID)
