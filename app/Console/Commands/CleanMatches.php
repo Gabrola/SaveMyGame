@@ -45,10 +45,6 @@ class CleanMatches extends Command
         $previousVersion = DB::table('client_versions')->select(['client_version'])->groupBy('release_version')->orderBy('id', 'desc')->offset(1)->first();
         $patchNumber = LeagueHelper::getPatchFromVersion($previousVersion->client_version);
 
-        $this->info($patchNumber);
-
-        return;
-
         $sevenDaysAgo = Carbon::now()->subDays(7)->toDateTimeString();
         $query = Game::wherePatch($patchNumber)->where('status', '!=', 'deleted')->where('created_at', '<', $sevenDaysAgo);
         $count = $query->count('id');
