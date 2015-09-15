@@ -6,6 +6,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use Illuminate\Database\QueryException;
 use LeagueHelper;
 use App\Models\Game;
 use App\Models\MonitoredUser;
@@ -125,7 +126,8 @@ class CheckSummoners extends Command
                 $process->run();
             }
             catch (\Exception $e) {
-                \Log::error($e);
+                if(!($e instanceof QueryException))
+                    \Log::error($e);
             }
         }
     }
