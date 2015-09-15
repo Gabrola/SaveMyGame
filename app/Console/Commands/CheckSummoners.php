@@ -125,6 +125,7 @@ class CheckSummoners extends Command
                 $process->run();
             }
             catch (\Exception $e) {
+                \Log::error($e);
             }
         }
     }
