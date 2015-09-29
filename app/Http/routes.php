@@ -20,6 +20,7 @@ Route::get('game/{region}/{gameId}', 'SummonerController@getGame');
 Route::get('game/{region}/{gameId}/events/{timestamp1}/{timestamp2}', 'SummonerController@getGameEvents')
     ->where(['timestamp1' => '[0-9]+', 'timestamp2' => '[0-9]+']);
 Route::get('faq', 'PageController@faq');
+Route::get('donate', 'PageController@donate');
 Route::get('versions', 'PageController@versions');
 Route::get('replay/{region}-{matchId}.bat', ['uses' => 'PageController@replay', 'as' => 'replay'] );
 Route::get('replayAlt/{region}-{matchId}.bat', ['uses' => 'PageController@replayAlt', 'as' => 'replayAlt'] );

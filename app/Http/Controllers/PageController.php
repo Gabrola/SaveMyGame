@@ -30,6 +30,11 @@ class PageController extends Controller
         return view('faq');
     }
 
+    public function donate()
+    {
+        return view('donate');
+    }
+
     public function replay($region, $matchId)
     {
         if(!$platformId = \LeagueHelper::getPlatformIdByRegion($region))

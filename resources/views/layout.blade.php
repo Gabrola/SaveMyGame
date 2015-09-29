@@ -32,6 +32,7 @@
         <ul class="right hide-on-med-and-down main-nav">
             @section('nav-items')
                 <li><a href="{{ url('faq') }}">FAQ</a></li>
+                <li><a href="{{ url('donate') }}">Donate</a></li>
             @endsection
 
             @yield('nav-items')
