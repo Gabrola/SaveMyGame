@@ -39,6 +39,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('replay:check 1')->cron('1/3 * * * *');
         $schedule->command('replay:check 2')->cron('2/3 * * * *');
         $schedule->command('replay:static')->cron('0 */6 * * *');
+        $schedule->exec('gulp --production')->cron('10 */6 * * *');
 
         $schedule->call(function(){
             $hourAgo = Carbon::now()->subHour()->toDateTimeString();

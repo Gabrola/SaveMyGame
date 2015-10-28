@@ -151,12 +151,5 @@ class UpdateStatic extends Command
         catch(\Exception $e){}
 
         \Artisan::call('config:cache');
-
-        $process = new Process('gulp --production', base_path());
-        $process->run();
-
-        while ($process->isRunning()) {
-            $this->comment($process->getIncrementalOutput());
-        }
     }
 }
