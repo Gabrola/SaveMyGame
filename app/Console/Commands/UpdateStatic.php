@@ -148,7 +148,9 @@ class UpdateStatic extends Command
             \File::put(base_path('resources/assets/sass/sprites-generated.scss'), $css);
             \File::put(config_path('static.php'), '<?php return ' . var_export($static, true) . ';');
         }
-        catch(\Exception $e){}
+        catch(\Exception $e){
+            $this->error($e);
+        }
 
         \Artisan::call('config:cache');
     }
